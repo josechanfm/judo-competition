@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('competition_categories', function (Blueprint $table) {
             $table->id();
-            $table->char('abbr',5);
-            $table->string('title');
+            $table->foreignId('competition_type_id');
+            $table->string('name');
+            $table->string('name_secondary');
+            $table->string('code');
+            $table->json('weights');
+            $table->string('duration');
             $table->timestamps();
         });
     }

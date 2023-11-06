@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Config extends Model
 {
     use HasFactory;
+    protected $fillable=['key','value'];
+
+    static function item($key){
+        $item=Config::where('key',$key)->first();
+        if($item){
+            return json_decode($item->value);
+        }else{
+            return false;
+        }
+    }
 }

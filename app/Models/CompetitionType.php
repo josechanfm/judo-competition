@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CompetitionCategory extends Model
+class competitionType extends Model
 {
     use HasFactory;
-    protected $casts=['weights'=>'json'];
 
+    public function categories(){
+        return $this->hasMany(CompetitionCategory::class);
+    }
 }

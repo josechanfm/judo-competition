@@ -13,9 +13,13 @@ class ConfigSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('competitions')->insert([
-            'key' => '',
-            'value' => '',
+        DB::table('configs')->insert([
+            'key' => 'competition_scale',
+            'value' => '[{"value":"INTL","label":"International"},{"value":"REGION","label":"Region"},{"value":"LOCAL","label":"Local"}]',
+        ]);
+        DB::table('configs')->insert([
+            'key' => 'languages',
+            'value' => '["en","pt","zh_CN","zh_TW"]',
         ]);
     }
 }

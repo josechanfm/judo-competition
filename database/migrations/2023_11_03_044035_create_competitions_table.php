@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('competitions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('competition_category_id');
+            $table->foreignId('competition_type_id');
             $table->date('date_start');
             $table->date('date_end');
             $table->string('country');
-            $table->string('name_en');
-            $table->string('name_fn')->nullable();
+            $table->string('name');
+            $table->string('name_secondary')->nullable();
             $table->string('scale')->nullable();
             $table->json('days')->nullable();
             $table->string('remark')->nullable();
@@ -26,6 +26,10 @@ return new class extends Migration
             $table->unsignedTinyInteger('section_number')->default(1);
             $table->string('token');
             $table->unsignedSmallInteger('status');
+            $table->boolean('is_cancelled');
+            $table->string('language');
+            $table->boolean('is_language_secondary_enabled');
+            $table->string('language_secondary');
             $table->timestamps();
         });
     }

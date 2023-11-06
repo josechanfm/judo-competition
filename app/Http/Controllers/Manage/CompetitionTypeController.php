@@ -5,22 +5,24 @@ namespace App\Http\Controllers\Manage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Competition;
+use App\Models\Config;
+use App\Models\CompetitionCategory;
 use App\Models\CompetitionType;
-use App\Models\Country;
 
-class CompetitionController extends Controller
+class CompetitionTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Inertia::render('Manage/Competitions',[
-            'countries'=>Country::all(),
-            'competitionTypes'=>CompetitionType::all(),
-            'competitions'=>Competition::all()
+        return Inertia::render('Manage/CompetitionTypes',[
+            'competitionTypes'=>CompetitionType::with('categories')->get(),
+            'competitionCategories'=>CompetitionCategory::all(),
+            'languages' => Config::item('languages')
+
         ]);
+
     }
 
     /**
@@ -36,8 +38,7 @@ class CompetitionController extends Controller
      */
     public function store(Request $request)
     {
-        Competition::create($request->all());
-        return response()->json($request->all());
+        //
     }
 
     /**

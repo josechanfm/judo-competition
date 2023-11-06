@@ -14,7 +14,7 @@
                 <a-table :dataSource="competitions" :columns="columns" >
                     <template #bodyCell="{ column, record}">
                         <template v-if="column.dataIndex==='operation'">
-                            {{ record }}
+                            <a-button @click="onEditRecord(record)">Edit</a-button>
                         </template>
                         <template v-else>
                                 {{ record[column.dataIndex] }}
@@ -23,7 +23,6 @@
                 </a-table>
             </div>
         </div>
-        {{ competitionCategories }}
         <a-modal v-model:open="modal.isOpen" width="1000px" :footer="null" title="Basic Modal">
             <a-form 
                     name="ModalForm"
@@ -34,28 +33,36 @@
                     :rules="rules" 
                     :validate-messages="validateMessages"
                 >
-                <a-form-item label="Type" name="category_id">
-                    <a-select v-model:value="modal.data.competion_category_id" show-search
-                    :options="competitionCategories" :fieldNames="{value:'id',label:'title'}"/>
-                </a-form-item>
+                <a-row>
+                    <a-col :span="8">
+                        <a-form-item label="Type" name="competition_type_id">
+                            <a-select v-model:value="modal.data.competition_type_id" show-search
+                            :options="competitionTypes" :fieldNames="{value:'id',label:'name'}"/>
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="8">
+                        <a-form-item label="Country" name="country">
+                            <a-select v-model:value="modal.data.country" show-search
+                            :options="countries" :fieldNames="{value:'code',label:'name'}"/>
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="8">
+                        <a-form-item label="scale" name="scale">
+                            <a-input v-model:value="modal.data.scale" />
+                        </a-form-item>
+                    </a-col>
+                </a-row>
                 <a-form-item label="Title Name (English)" name="name_en">
                     <a-input v-model:value="modal.data.name_en" />
                 </a-form-item>
                 <a-form-item label="Title Name (Foreign)" name="name_fn">
                     <a-input v-model:value="modal.data.name_fn" />
                 </a-form-item>
-                <a-form-item label="Start Date" name="start date">
-                    <a-input v-model:value="modal.data.start_date" />
+                <a-form-item label="Start Date" name="date_start">
+                    <a-date-picker v-model:value="modal.data.date_start" :format="dateFormat" :valueFormat="dateFormat"/>
                 </a-form-item>
-                <a-form-item label="End Date" name="end_date">
-                    <a-input v-model:value="modal.data.end_date" />
-                </a-form-item>
-                <a-form-item label="Country" name="country">
-                    <a-select v-model:value="modal.data.country" show-search
-                    :options="countries" :fieldNames="{value:'code',label:'name'}"/>
-                </a-form-item>
-                <a-form-item label="scale" name="scale">
-                    <a-input v-model:value="modal.data.scale" />
+                <a-form-item label="End Date" name="date_end">
+                    <a-date-picker v-model:value="modal.data.date_end" :format="dateFormat" :valueFormat="dateFormat"/>
                 </a-form-item>
                 <a-form-item label="Days" name="days">
                     <a-input v-model:value="modal.data.days" />
@@ -84,15 +91,15 @@
 </template>
 
 <script>
-    import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { compileTemplate } from '@vue/compiler-sfc';
+import AdminLayout from '@/Layouts/AdminLayout.vue';
     export default {
         components: {
             AdminLayout,
         },
-        props: ["countries","competitionCategories","competitions"],
+        props: ["countries","competitionTypes","competitions"],
         data() {
             return{
+                dateFormat:'YYYY-MM-DD',
                 modal:{
                     isOpen:false,
                     title:'Record Modal',
@@ -100,6 +107,9 @@ import { compileTemplate } from '@vue/compiler-sfc';
                 },
                 columns:[
                     {
+                        title:'Type',
+                        dataIndex:'competition_type_id'
+                    },{
                         title:'Country',
                         dataIndex:'country'
                     },{
@@ -112,6 +122,12 @@ import { compileTemplate } from '@vue/compiler-sfc';
                         title:'Date End',
                         dataIndex:'date_end'
                     },{
+                        title:'Mat Number',
+                        dataIndex:'mat_number'
+                    },{
+                        title:'Section Number',
+                        dataIndex:'section_number'
+                    },{
                         title:'Operation',
                         dataIndex:'operation'
                     },
@@ -119,8 +135,8 @@ import { compileTemplate } from '@vue/compiler-sfc';
                 rules: {
                     country: { required:true },
                     name: { required:true },
-                    start_date: { required:true },
-                    end_date: { required:true },
+                    date_start: { required:true },
+                    date_end: { required:true },
                 },
                 validateMessages: {
                     required: "${label} is required!",
@@ -138,6 +154,7 @@ import { compileTemplate } from '@vue/compiler-sfc';
         },
         methods: {
             createRecord(){
+                this.modal.title="Create"
                 this.modal.isOpen=true
             },
             handleOk(){
@@ -166,6 +183,11 @@ import { compileTemplate } from '@vue/compiler-sfc';
             },
             resetForm(){
                 console.log('form Reset');
+            },
+            onEditRecord(record){
+                this.modal.isOpen=true
+                this.modal.title="Edit"
+                this.modal.data={...record}
             }
         }
     }

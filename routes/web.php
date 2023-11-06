@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('manage/competitions',App\Http\Controllers\Manage\CompetitionController::class)->names('manage.competitions');
+    Route::resource('manage/competition_types',App\Http\Controllers\Manage\CompetitionTypeController::class)->names('manage.competitionTypes');
 });
 
 

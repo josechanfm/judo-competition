@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Competition;
 use App\Models\Program;
+use App\Models\Bout;
 
 class ProgramController extends Controller
 {
@@ -73,5 +74,32 @@ class ProgramController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function gen_bouts(Program $program){
+        $data=[];
+        $inProgramSequence=1;
+        $size=$program->chart_size+$program->chart_size/2-1;
+        for($i=1;$i<=$size;$i++){
+            $data[]=[
+                'program_id'=>$program->id,
+                'in_program_sequence'=>$inProgramSequence++,
+                'sequence'=>$i,
+                'queue'=>$i,
+                'mat'=>$program->mat,
+                'section'=>$program->section,
+                'contest_system'=>$program->contest_system,
+                'round'=>0,
+                'turn'=>0,
+                'white'=>0,
+                'blue'=>0,
+            ];
+        };
+        Bout::upsert(
+            $data,
+            ['program_id','in_program_sequence'],
+            ['sequence','queue','mat','section','contest_system','round','turn','white','blue']
+        );
+        return response()->json($program);
     }
 }

@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('manage/competitions',App\Http\Controllers\Manage\CompetitionController::class)->names('manage.competitions');
     Route::resource('manage/competition/{competition}/programs',App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
     Route::resource('manage/competition/{competition}/athletes',App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
-    
+    Route::get('manage/competition/program/{program}/gen_bouts',[App\Http\Controllers\Manage\ProgramController::class,'gen_bouts'])->name('manage.competition.program.gen_bouts');
 });
 
 

@@ -43,7 +43,11 @@ return new class extends Migration
 
             $table->tinyInteger('status')->default(0);            
             $table->timestamps();
+
+            $table->unique(['program_id', 'in_program_sequence']);
+
         });
+        
     }
 
     /**

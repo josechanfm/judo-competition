@@ -19,7 +19,7 @@ class ConfigSeeder extends Seeder
         ]);
         DB::table('configs')->insert([
             'key' => 'languages',
-            'value' => '["en","pt","zh_CN","zh_TW"]',
+            'value' => '[{"value":"en","label":"English"},{"value":"pt","label":"Portugues"},{"value":"zh_CN","label":"Chinese (Simplify)"},{"value":"zh_TW","label":"Chinese (Traditional)"}]',
         ]);
     }
 }

@@ -32,6 +32,32 @@ class CompetitionSeeder extends Seeder
             'language_secondary'=>'PT',
             'status'=>0
         ]);
+        DB::table('competition_categories')->insert([
+            'competition_id'=>1,
+            'sequence'=>1,
+            'date'=>'2023-04-15',
+            'category'=>'A組',
+            'weight_group'=>'男子55公斤以下',
+            'mat'=>'1',
+            'section'=>'1',
+            'contest_system'=>'em',
+            'duration'=>'00:04:00'
+        ]);
+
+        DB::table('programs')->insert([
+            'competition_id'=>1,
+            'sequence'=>1,
+            'date'=>'2023-04-15',
+            'category_group'=>'A組',
+            'weight_group'=>'男子55公斤以下',
+            'mat'=>'1',
+            'section'=>'1',
+            'contest_system'=>'em',
+            'chart_size'=>'8',
+            'duration'=>'00:04:00',
+            'status'=>0
+        ]);
+
     }
 }
 

@@ -6,21 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Competition;
-use App\Models\GameType;
-use App\Models\Country;
+use App\Models\Program;
 
-class CompetitionController extends Controller
+class ProgramController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Competition $competition)
     {
-        return Inertia::render('Manage/Competitions',[
-            'countries'=>Country::all(),
-            'competitionTypes'=>GameType::all(),
-            'competitions'=>Competition::all()
+        $competition->programs;
+        //$competition->categories;
+        return Inertia::render('Manage/Programs',[
+            'competition'=>$competition
         ]);
+
     }
 
     /**
@@ -36,34 +36,35 @@ class CompetitionController extends Controller
      */
     public function store(Request $request)
     {
-        Competition::create($request->all());
-        return response()->json($request->all());
+        //
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Competition $competition)
+    public function show(Competition $competition, Program $program)
     {
-
+        $program->bouts;
+        $program->athletes;
+        return Inertia::render('Manage/Program',[
+            'program'=>$program
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Competition $competition)
+    public function edit(string $id)
     {
-        return response()->json($competition);
+        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Competition $competition, Request $request)
+    public function update(Request $request, string $id)
     {
-        $competition->update($request->all());
-        return redirect()->back();
-        
+        //
     }
 
     /**

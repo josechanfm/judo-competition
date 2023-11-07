@@ -5,7 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CompetitionCategory extends Model
+class GameType extends Model
 {
     use HasFactory;
+
+    public function categories(){
+        return $this->hasMany(GameCategory::class);
+    }
 }

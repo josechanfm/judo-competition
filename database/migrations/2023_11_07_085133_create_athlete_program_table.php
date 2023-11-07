@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('competition_categories', function (Blueprint $table) {
+        Schema::create('athlete_program', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('competition_type_id');
-            $table->string('name');
-            $table->string('name_secondary');
-            $table->string('code');
-            $table->json('weights');
-            $table->string('duration');
+            $table->foreignId('program_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreignId('athlete_id')->constrained()->restrictOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('competition_categories');
+        Schema::dropIfExists('athlete_program');
     }
 };

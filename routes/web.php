@@ -37,8 +37,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::resource('manage/game_types',App\Http\Controllers\Manage\GameTypeController::class)->names('manage.gameTypes');
     Route::resource('manage/competitions',App\Http\Controllers\Manage\CompetitionController::class)->names('manage.competitions');
-    Route::resource('manage/competition_types',App\Http\Controllers\Manage\CompetitionTypeController::class)->names('manage.competitionTypes');
+    Route::resource('manage/competition/{competition}/programs',App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
+    Route::resource('manage/competition/{competition}/athletes',App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
+    
 });
 
 

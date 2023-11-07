@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('competition_types', function (Blueprint $table) {
+        Schema::create('game_categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('game_type_id');
             $table->string('name');
-            $table->string('name_secondary')->nullable();
-            $table->char('code',5);
-            $table->boolean('winner_plus');
-            $table->string('language')->nullable();
-            $table->boolean('is_language_secondary_enabled');
-            $table->string('language_secondary')->nullable();
+            $table->string('name_secondary');
+            $table->string('code');
+            $table->json('weights');
+            $table->string('duration');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('competition_types');
+        Schema::dropIfExists('game_categories');
     }
 };

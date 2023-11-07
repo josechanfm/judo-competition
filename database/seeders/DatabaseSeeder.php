@@ -22,11 +22,13 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
+            UserSeeder::class,
             ConfigSeeder::class,
             CountrySeeder::class,
-            CompetitionTypeSeeder::class,
-            CompetitionCategorySeeder::class,
+            GameTypeSeeder::class,
+            GameCategorySeeder::class,
             CompetitionSeeder::class,
+            AthleteSeeder::class,
         ]);
 
     }

@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Competition extends Model
 {
     use HasFactory;
-    protected $fillable=['type_id','date_start','date_end','country','name_en','name_fn','scale','days','remark','mat_number','section_number','token','status'];
+    protected $fillable=['competition_type_id','type_id','date_start','date_end','country','name','name_secondary','scale','days','remark','mat_number','section_number','language','is_language_secondary_enabled','language_secondary','token','is_cancelled','status'];
 
+    public function programs(){
+        return $this->hasMany(Program::class);
+    }
+    public function athletes(){
+        return $this->hasMany(Athlete::class);
+    }
 }

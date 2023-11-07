@@ -3,26 +3,22 @@
 namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
+use App\Models\Competition;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Config;
-use App\Models\CompetitionCategory;
-use App\Models\CompetitionType;
 
-class CompetitionTypeController extends Controller
+
+class AthleteController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Competition $competition)
     {
-        return Inertia::render('Manage/CompetitionTypes',[
-            'competitionTypes'=>CompetitionType::with('categories')->get(),
-            'competitionCategories'=>CompetitionCategory::all(),
-            'languages' => Config::item('languages')
-
+        $competition->athletes;
+        return Inertia::render('Manage/Athletes',[
+            'competition'=>$competition
         ]);
-
     }
 
     /**

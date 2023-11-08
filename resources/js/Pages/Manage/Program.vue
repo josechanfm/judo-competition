@@ -6,131 +6,55 @@
             <div class="mx-4 py-4">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
             </div>
-            
         </template>
         <a-button :href="route('manage.competition.program.gen_bouts',program.id)">Create Bouts</a-button>
         <div class="py-12">
-
-
             <div class="bg-white">
-                <table id="tblTournament" >
-                    <tr>
-                        <td class="playerBox" >{{player[0]}}</td>
-                        <td>wind 1</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="playerBox">{{player[1]}}</td>
-                        <td class="topRight win"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="gapHeight"></td>
-                        <td class="right win" align="right">r1</td>
-                        <td class="">final</td>
-                    </tr>
-                    <tr>
-                        <td class="gapHeight"></td>
-                        <td class="right wind" align="right"></td>
-                        <td class="top win"></td>
-                    </tr>
-                    <tr>
-                        <td class="playerBox">{{player[2]}}</td>
-                        <td class="bottomRight">win2</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="playerBox">{{player[3]}}</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-
-                </table>
-
+                <div>
+                    <p>Category: {{ program.category_group }}</p>
+                    <p>Weight: {{ program.weight_group }}</p>
+                    <p>Mat: {{ program.mat }}</p>
+                    <p>Section: {{ program.section }}</p>
+                    <p>System: {{ program.contest_system }}</p>
+                    <p>Size: {{ program.chart_size }}</p>
+                </div>
+                <a-row :gutter="64">
+                    <a-col :span="12">
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                            <a-table :dataSource="program.bouts" :columns="boutColumns" >
+                                <template #bodyCell="{ column, record}">
+                                    <template v-if="column.dataIndex==='operation'">
+                                        <a-button>Edit</a-button>
+                                    </template>
+                                    <template v-else>
+                                            {{ record[column.dataIndex] }}
+                                    </template>
+                                </template>
+                            </a-table>
+                        </div>
+                <hr>
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                            <a-table :dataSource="program.athletes" :columns="athleteColumns" >
+                                <template #bodyCell="{ column, record}">
+                                    <template v-if="column.dataIndex==='operation'">
+                                        <a-button>Edit</a-button>
+                                    </template>
+                                    <template v-else>
+                                            {{ record[column.dataIndex] }}
+                                    </template>
+                                </template>
+                            </a-table>
+                        </div>                        
+                    </a-col>
+                    <a-col :span="12">
+                        <component :is="tournamentTable" :players="playersList" />
+                    </a-col>
+                </a-row>
             </div>
+                
 
-    <hr>
 
-            <div class="bg-white">
-                <table id="tblTournament">
-                    <tr>
-                        <td class="playerBox" rowspan="2">{{player[0]}}</td>
-                        <td>wind 1</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="topRight win"></td>
-                        <td>wind 1/2</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="gapHeight"></td>
-                        <td class="right" align="right">r1</td>
-                        <td class="topRight"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="playerBox" rowspan="2">{{player[1]}}</td>
-                        <td class="bottomRight">win2</td>
-                        <td class="right"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td class="right"></td>
-                        <td>wind final</td>
-                    </tr>
-                    <tr>
-                        <td class="gapHeight"></td>
-                        <td></td>
-                        <td class="right" align="right">r3</td>
-                        <td class="top">r4</td>
-                    </tr>
-                    <tr>
-                        <td class="playerBox" rowspan="2">{{player[2]}}</td>
-                        <td>wind 3</td>
-                        <td class="right"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="topRight win"></td>
-                        <td class="right"></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="gapHeight"></td>
-                        <td class="right win" align="right">r2</td>
-                        <td class="bottomRight">wind 2/4</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="playerBox" rowspan="2">{{player[3]}}</td>
-                        <td class="bottomRight">wind 4</td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </table>
 
-            </div>
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <a-table :dataSource="program.bouts" :columns="columns" >
-                    <template #bodyCell="{ column, record}">
-                        <template v-if="column.dataIndex==='operation'">
-                            <a-button>Edit</a-button>
-                        </template>
-                        <template v-else>
-                                {{ record[column.dataIndex] }}
-                        </template>
-                    </template>
-                </a-table>
-
-            </div>
         </div>
 
         
@@ -139,28 +63,69 @@
 
 <script>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+import Tournament4 from '@/Components/TournamentTable/Elimination4.vue';
+import Tournament8 from '@/Components/TournamentTable/Elimination8.vue';
+import Tournament16 from '@/Components/TournamentTable/Elimination16.vue';
+import Tournament32 from '@/Components/TournamentTable/Elimination32.vue';
+import Tournament64 from '@/Components/TournamentTable/Elimination64.vue';
+
     export default {
         components: {
             AdminLayout,
+            Tournament4,
+            Tournament8,
+            Tournament16,
+            Tournament32,
+            Tournament64,
         },
         props: ["program"],
         data() {
             return{
+                tournamentTable:'Tournament'+this.program.chart_size,
                 dateFormat:'YYYY-MM-DD',
-                player:["Player 1","Player 2","Player 3","Player 4"],
+                playersList:[
+                    {
+                        name:"palyer 1",
+                        win:[1,0]
+                    },{
+                        name:"palyer 2",
+                        win:[0,0]
+                    },{
+                        name:"palyer 3",
+                        win:[1,1]
+                    },{
+                        name:"palyer 4",
+                        win:[0,0]
+                    }
+                ],
                 modal:{
                     isOpen:false,
                     mode:null,
                     title:'Record Modal',
                     data:{}
                 },
-                columns:[
+                boutColumns:[
                     {
                         title:'In program Sequence',
                         dataIndex:'in_program_sequence'
                     },{
                         title:'Sequence',
                         dataIndex:'sequence'
+                    },{
+                        title:'Queue',
+                        dataIndex:'queue'
+                    },{
+                        title:'Operation',
+                        dataIndex:'operation'
+                    },
+                ],
+                athleteColumns:[
+                    {
+                        title:'Name',
+                        dataIndex:'name_zh'
+                    },{
+                        title:'Gender',
+                        dataIndex:'gender'
                     },{
                         title:'Operation',
                         dataIndex:'operation'
@@ -295,5 +260,20 @@ table#tblTournament td{
 .top.win{
     border-top: 3px solid red
 }
-
+span.circle {
+        background: #e3e3e3;
+        border-radius: 50%;
+        -moz-border-radius: 50%;
+        -webkit-border-radius: 50%;
+        color: #6e6e6e;
+        display: inline-block;
+        font-weight: bold;
+        line-height: 30px;
+        width: 30px;
+        margin-right: 5px;
+        text-align: center;
+        position:relative;
+        top:20px;
+        left:20px;
+      }
 </style>

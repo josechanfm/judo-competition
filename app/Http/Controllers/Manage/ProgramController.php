@@ -76,30 +76,41 @@ class ProgramController extends Controller
         //
     }
 
-    public function gen_bouts(Program $program){
+    public function gen_bouts(Competition $competition){
+        $programs=$competition->programs->sortBy('sequence');
         $data=[];
         $inProgramSequence=1;
-        $size=$program->chart_size+$program->chart_size/2-1;
-        for($i=1;$i<=$size;$i++){
-            $data[]=[
-                'program_id'=>$program->id,
-                'in_program_sequence'=>$inProgramSequence++,
-                'sequence'=>$i,
-                'queue'=>$i,
-                'mat'=>$program->mat,
-                'section'=>$program->section,
-                'contest_system'=>$program->contest_system,
-                'round'=>0,
-                'turn'=>0,
-                'white'=>0,
-                'blue'=>0,
-            ];
-        };
+        foreach($programs as $program){
+            $round=(int)log($program->chart_size,2);
+            $roundSize=$program->chart_size;
+            $sequence=1;
+            for($r=1;$r<=$round;$r++){
+                $roundSize=$roundSize/2;
+                for($t=1;$t<=$roundSize;$t++){
+                    $data[]=[
+                        'program_id'=>$program->id,
+                        'in_program_sequence'=>$inProgramSequence++,
+                        'sequence'=>$sequence++,
+                        'queue'=>0,
+                        'mat'=>$program->mat,
+                        'section'=>$program->section,
+                        'contest_system'=>$program->contest_system,
+                        'round'=>$r,
+                        'turn'=>0,
+                        'white'=>0,
+                        'blue'=>0,
+                    ];
+                }
+            }
+        }
+        //dd($data);
         Bout::upsert(
             $data,
             ['program_id','in_program_sequence'],
             ['sequence','queue','mat','section','contest_system','round','turn','white','blue']
         );
+        //$programs=$competition->programs->sortByDesc('chart_size');
+
         return response()->json($program);
     }
 }

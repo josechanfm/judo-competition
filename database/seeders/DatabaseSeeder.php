@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             GameTypeSeeder::class,
             GameCategorySeeder::class,
             CompetitionSeeder::class,
+            ProgramSeeder::class,
             AthleteSeeder::class,
         ]);
 

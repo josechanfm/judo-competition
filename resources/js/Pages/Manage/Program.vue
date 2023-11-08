@@ -115,6 +115,9 @@ import Tournament64 from '@/Components/TournamentTable/Elimination64.vue';
                         title:'Queue',
                         dataIndex:'queue'
                     },{
+                        title:'Round',
+                        dataIndex:'round'
+                    },{
                         title:'Operation',
                         dataIndex:'operation'
                     },

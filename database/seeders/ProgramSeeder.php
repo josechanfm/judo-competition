@@ -28,7 +28,7 @@ class ProgramSeeder extends Seeder
         ]);
         DB::table('programs')->insert([
             'competition_id'=>1,
-            'sequence'=>1,
+            'sequence'=>2,
             'date'=>'2023-04-15',
             'category_group'=>'A組',
             'weight_group'=>'男子60公斤以下',
@@ -41,7 +41,7 @@ class ProgramSeeder extends Seeder
         ]);
         DB::table('programs')->insert([
             'competition_id'=>1,
-            'sequence'=>1,
+            'sequence'=>3,
             'date'=>'2023-04-15',
             'category_group'=>'A組',
             'weight_group'=>'男子65公斤以下',
@@ -54,7 +54,7 @@ class ProgramSeeder extends Seeder
         ]);
         DB::table('programs')->insert([
             'competition_id'=>1,
-            'sequence'=>1,
+            'sequence'=>4,
             'date'=>'2023-04-15',
             'category_group'=>'A組',
             'weight_group'=>'男子72公斤以下',
@@ -67,7 +67,7 @@ class ProgramSeeder extends Seeder
         ]);
         DB::table('programs')->insert([
             'competition_id'=>1,
-            'sequence'=>1,
+            'sequence'=>5,
             'date'=>'2023-04-15',
             'category_group'=>'A組',
             'weight_group'=>'男子78公斤以下',

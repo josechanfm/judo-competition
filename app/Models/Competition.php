@@ -13,6 +13,9 @@ class Competition extends Model
     public function programs(){
         return $this->hasMany(Program::class);
     }
+    public function bouts(){
+        return $this->hasManyThrough(Bout::class,Program::class)->orderBy('round','desc')->orderBy('sequence');
+    }
     public function athletes(){
         return $this->hasMany(Athlete::class);
     }

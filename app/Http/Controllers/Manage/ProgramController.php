@@ -77,31 +77,129 @@ class ProgramController extends Controller
     }
 
     public function gen_bouts(Competition $competition){
-        $programs=$competition->programs->sortBy('sequence');
+        $sections=
+        $bouts=$competition->bouts;
+        $sections=$bouts->groupBy('section');
+        $sectionMats=[];
+        foreach($sections as $id=>$section){
+            $sectionMats[$id]=$section->groupBy('mat');
+        };
+        dd($sectionMats);
+        $i=1;
+        foreach($bouts as $bout){
+            $bout->sequence=$i++;
+            $bout->save();
+            echo json_encode($bout);
+            echo '<br>';
+        }
+        dd($bouts);
+        $programs=$competition->programs->sortBy('sequence')->sortByDesc('chart_size');
+        // foreach($programs as $program){
+        //     echo json_encode($program);
+        //     echo '<br>';
+        // }
+        // dd($programs->pluck('chart_size'));
         $data=[];
-        $inProgramSequence=1;
+        $sequence=1;
         foreach($programs as $program){
-            $round=(int)log($program->chart_size,2);
-            $roundSize=$program->chart_size;
-            $sequence=1;
-            for($r=1;$r<=$round;$r++){
-                $roundSize=$roundSize/2;
+            $round=$program->chart_size;
+            $inProgramSequence=1;
+            while($round > 0){
+                $roundSize=$round/2;
                 for($t=1;$t<=$roundSize;$t++){
                     $data[]=[
                         'program_id'=>$program->id,
-                        'in_program_sequence'=>$inProgramSequence++,
                         'sequence'=>$sequence++,
+                        'in_program_sequence'=>$inProgramSequence++,
                         'queue'=>0,
                         'mat'=>$program->mat,
                         'section'=>$program->section,
                         'contest_system'=>$program->contest_system,
-                        'round'=>$r,
+                        'round'=>$round,
                         'turn'=>0,
                         'white'=>0,
                         'blue'=>0,
                     ];
                 }
+                //repeatcharge round 1
+                if($roundSize==4){
+                    $data[]=[
+                        'program_id'=>$program->id,
+                        'sequence'=>$sequence++,
+                        'in_program_sequence'=>$inProgramSequence++,
+                        'queue'=>0,
+                        'mat'=>$program->mat,
+                        'section'=>$program->section,
+                        'contest_system'=>$program->contest_system,
+                        'round'=>7,
+                        'turn'=>0,
+                        'white'=>0,
+                        'blue'=>0,
+                    ];
+                    $data[]=[
+                        'program_id'=>$program->id,
+                        'sequence'=>$sequence++,
+                        'in_program_sequence'=>$inProgramSequence++,
+                        'queue'=>0,
+                        'mat'=>$program->mat,
+                        'section'=>$program->section,
+                        'contest_system'=>$program->contest_system,
+                        'round'=>7,
+                        'turn'=>0,
+                        'white'=>0,
+                        'blue'=>0,
+                    ];
+                }
+                if($roundSize==2 && $program->chart_size>4){
+                    $data[]=[
+                        'program_id'=>$program->id,
+                        'sequence'=>$sequence++,
+                        'in_program_sequence'=>$inProgramSequence++,
+                        'queue'=>0,
+                        'mat'=>$program->mat,
+                        'section'=>$program->section,
+                        'contest_system'=>$program->contest_system,
+                        'round'=>3,
+                        'turn'=>0,
+                        'white'=>0,
+                        'blue'=>0,
+                    ];
+                    $data[]=[
+                        'program_id'=>$program->id,
+                        'sequence'=>$sequence++,
+                        'in_program_sequence'=>$inProgramSequence++,
+                        'queue'=>0,
+                        'mat'=>$program->mat,
+                        'section'=>$program->section,
+                        'contest_system'=>$program->contest_system,
+                        'round'=>3,
+                        'turn'=>0,
+                        'white'=>0,
+                        'blue'=>0,
+                    ];
+
+                }
+                $round=$round/2;
             }
+
+            // if($program->contest_system=='erm'){
+            //     for($j=1;$j<=4;$j++){
+            //         $data[]=[
+            //             'program_id'=>$program->id,
+            //             'in_program_sequence'=>$inProgramSequence++,
+            //             'sequence'=>$sequence++,
+            //             'queue'=>0,
+            //             'mat'=>$program->mat,
+            //             'section'=>$program->section,
+            //             'contest_system'=>$program->contest_system,
+            //             'round'=>$r,
+            //             'turn'=>0,
+            //             'white'=>0,
+            //             'blue'=>0,
+            //         ];
+            //     }
+            // }
+
         }
         //dd($data);
         Bout::upsert(

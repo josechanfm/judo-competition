@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('bouts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('program_id')->constrained()->cascadeOnDelete();
-            $table->unsignedInteger('in_program_sequence')->nullable();
             $table->unsignedInteger('sequence')->nullable();
+            $table->unsignedInteger('in_program_sequence')->nullable();
             $table->unsignedInteger('queue')->nullable();
 
             // copy from program

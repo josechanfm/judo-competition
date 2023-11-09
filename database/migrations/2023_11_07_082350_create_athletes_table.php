@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
             $table->string('name_zh');
             $table->string('name_pt')->nullable();
+            $table->string('name_display');
             $table->string('gender');
             $table->string('team_id')->nullable();
             $table->double('weight')->nullable();

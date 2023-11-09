@@ -18,6 +18,7 @@ class AthleteFactory extends Factory
     {
         return [
             'name_zh'=> fake()->name(),
+            'name_display'=> fake()->firstName(),
             'gender'=>fake()->randomElement(['M','F'])
         ];
     }

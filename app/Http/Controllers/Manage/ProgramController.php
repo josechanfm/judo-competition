@@ -77,28 +77,8 @@ class ProgramController extends Controller
     }
 
     public function gen_bouts(Competition $competition){
-        $sections=
-        $bouts=$competition->bouts;
-        $sections=$bouts->groupBy('section');
-        $sectionMats=[];
-        foreach($sections as $id=>$section){
-            $sectionMats[$id]=$section->groupBy('mat');
-        };
-        dd($sectionMats);
-        $i=1;
-        foreach($bouts as $bout){
-            $bout->sequence=$i++;
-            $bout->save();
-            echo json_encode($bout);
-            echo '<br>';
-        }
-        dd($bouts);
+        //Create bouts records according to the contest system of each program, the in_program_sequence is given, but the sequence column is temporary
         $programs=$competition->programs->sortBy('sequence')->sortByDesc('chart_size');
-        // foreach($programs as $program){
-        //     echo json_encode($program);
-        //     echo '<br>';
-        // }
-        // dd($programs->pluck('chart_size'));
         $data=[];
         $sequence=1;
         foreach($programs as $program){
@@ -181,25 +161,6 @@ class ProgramController extends Controller
                 }
                 $round=$round/2;
             }
-
-            // if($program->contest_system=='erm'){
-            //     for($j=1;$j<=4;$j++){
-            //         $data[]=[
-            //             'program_id'=>$program->id,
-            //             'in_program_sequence'=>$inProgramSequence++,
-            //             'sequence'=>$sequence++,
-            //             'queue'=>0,
-            //             'mat'=>$program->mat,
-            //             'section'=>$program->section,
-            //             'contest_system'=>$program->contest_system,
-            //             'round'=>$r,
-            //             'turn'=>0,
-            //             'white'=>0,
-            //             'blue'=>0,
-            //         ];
-            //     }
-            // }
-
         }
         //dd($data);
         Bout::upsert(
@@ -207,8 +168,132 @@ class ProgramController extends Controller
             ['program_id','in_program_sequence'],
             ['sequence','queue','mat','section','contest_system','round','turn','white','blue']
         );
-        //$programs=$competition->programs->sortByDesc('chart_size');
+        
+        //rearrage the sequence number based on section and mat id, the bouts are order by chart_size and sequence of programs
+        $matNumber=$competition->mat_number;
+        $sectionNumber=$competition->section_number;
+        for($s=1;$s<=$sectionNumber;$s++){
+            for($m=1;$m<=$matNumber;$m++){
+                $i=1;
+                $bouts=$competition->bouts->where('section',$s)->where('mat',$m)->sortByDesc('round');
+                foreach($bouts as $bout){
+                    $bout->sequence=$i++;
+                    $bout->save();
+                }
+            }
+        }
 
+        //Assign athletes sequencially to bouts list
+        $programs=$competition->programs;
+        foreach($programs as $program){
+            $athletes=$program->athletes;
+            $bouts=$program->bouts;
+            $a=0;
+            for($i=0;$i<$program->chart_size/2;$i++){
+                if(isset($athletes[$a])){
+                    $bouts[$i]->white=$athletes[$a++]->pivot->athlete_id;
+                    $bouts[$i]->save();
+                };
+                if(isset($athletes[$a])){
+                    $bouts[$i]->blue=$athletes[$a++]->pivot->athlete_id;
+                    $bouts[$i]->save();
+                }
+            }
+        };
+
+        //Assign rise from, both whtie_rise_from and blue_rise_from
+        $programs=$competition->programs->where('contest_system','erm')->where('chart_size','>',4);
+        $riseFrom=[
+            '8'=>[
+                '5'=>[-2,-4],
+                '6'=>[-1,-3],
+                '7'=>[1,3],
+                '8'=>[2,4],
+                '9'=>[5,-8],
+                '10'=>[6,-7],
+                '11'=>[7,8]
+            ],
+            '16'=>[
+                '9'=>[1,5],
+                '10'=>[2,6],
+                '11'=>[3,7],
+                '12'=>[4,8],
+                '13'=>[-10,-12],
+                '14'=>[-9,-11],
+                '15'=>[9,11],
+                '16'=>[10,12],
+                '17'=>[13,-16],
+                '18'=>[14,-15],
+                '19'=>[15,16]
+            ],
+            '32'=>[
+                '17'=>[1,9],
+                '18'=>[2,10],
+                '19'=>[3,11],
+                '20'=>[4,12],
+                '21'=>[5,13],
+                '22'=>[6,14],
+                '23'=>[7,15],
+                '24'=>[8,16],
+                '25'=>[17,21],
+                '26'=>[18,22],
+                '27'=>[19,23],
+                '28'=>[20,24],
+                '29'=>[-26,-28],
+                '30'=>[-25,-27],
+                '31'=>[25,27],
+                '32'=>[26,28],
+                '33'=>[29,-32],
+                '34'=>[30,-31],
+                '35'=>[31,32]
+            ],
+            '64'=>[
+                '33'=>[1,17],
+                '34'=>[2,18],
+                '35'=>[3,19],
+                '36'=>[4,20],
+                '37'=>[5,21],
+                '38'=>[6,22],
+                '39'=>[7,23],
+                '40'=>[8,24],
+                '41'=>[9,25],
+                '42'=>[10,26],
+                '43'=>[11,27],
+                '44'=>[12,28],
+                '45'=>[13,29],
+                '46'=>[14,30],
+                '47'=>[15,31],
+                '48'=>[16,32],
+                '49'=>[33,41],
+                '50'=>[34,42],
+                '51'=>[35,43],
+                '52'=>[36,44],
+                '53'=>[37,45],
+                '54'=>[38,46],
+                '55'=>[39,47],
+                '56'=>[40,48],
+                '57'=>[49,53],
+                '58'=>[50,54],
+                '59'=>[51,55],
+                '60'=>[52,56],
+                '61'=>[-58,-60],
+                '62'=>[-57,-59],
+                '63'=>[57,59],
+                '64'=>[58,60],
+                '65'=>[61,-64],
+                '66'=>[62,-63],
+                '67'=>[63,64]
+            ],
+        ];
+        foreach($programs as $program){
+            foreach($riseFrom[$program->chart_size] as $seq=>$rise){
+                Bout::where('program_id',$program->id)->where('in_program_sequence',$seq)->update([
+                    'white_rise_from'=>$rise[0],
+                    'blue_rise_from'=>$rise[1]
+                ]);
+            };
+        };
+        
         return response()->json($program);
     }
 }

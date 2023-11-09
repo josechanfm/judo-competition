@@ -4,10 +4,10 @@
     <table id="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>
-            <td class="playerBox" >{{players[0].name}}</td>
+            <td class="playerBox" >{{bouts[0].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">1</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[0].circle }}</span></td></tr>
                 </table>
             </td>
             <td></td>
@@ -15,10 +15,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">2</td>
-            <td class="playerBox">{{players[1].name}}</td>
+            <td class="playerBox">{{bouts[0].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">3</span>
+                <span class="circle">{{ bouts[2].circle }}</span>
             </td>
             <td rowspan="2"></td>
         </tr>
@@ -38,10 +38,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">5</td>
-            <td class="playerBox">{{players[2].name}}</td>
+            <td class="playerBox">{{bouts[1].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">2</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[1].circle }}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -49,7 +49,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">6</td>
-            <td class="playerBox">{{players[3].name}}</td>
+            <td class="playerBox">{{bouts[1].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <td></td>
@@ -61,15 +61,16 @@
 export default {
     components: {
     },
-    props: ["players"],
+    props: ['bouts'],
     data() {
         return {
             showTableSeq:false,
             showTableGridLine:false,
         }
     },
+    created(){
+    },
     mounted(){
-        
     }
 }
 </script>

@@ -7,6 +7,9 @@
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
             </div>
         </template>
+        Section, Mat sequences
+        <a-switch v-model:checked="masterSequence" @change="rebuildBouts"/>
+        <br>
         <a-button :href="route('manage.competition.program.gen_bouts',program.id)">Create Bouts</a-button>
         <div class="py-12">
             <div class="bg-white">
@@ -23,12 +26,7 @@
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <a-table :dataSource="program.bouts" :columns="boutColumns" >
                                 <template #bodyCell="{ column, record}">
-                                    <template v-if="column.dataIndex==='operation'">
-                                        <a-button>Edit</a-button>
-                                    </template>
-                                    <template v-else>
-                                            {{ record[column.dataIndex] }}
-                                    </template>
+                                    {{ record[column.dataIndex] }}
                                 </template>
                             </a-table>
                         </div>
@@ -47,14 +45,10 @@
                         </div>                        
                     </a-col>
                     <a-col :span="12">
-                        <component :is="tournamentTable" :players="playersList" />
+                        <component :is="tournamentTable" :bouts="bouts"/>
                     </a-col>
                 </a-row>
             </div>
-                
-
-
-
         </div>
 
         
@@ -81,6 +75,8 @@ import Tournament64 from '@/Components/TournamentTable/Elimination64.vue';
         props: ["program"],
         data() {
             return{
+                masterSequence:false,
+                bouts:[],
                 tournamentTable:'Tournament'+this.program.chart_size,
                 dateFormat:'YYYY-MM-DD',
                 playersList:[
@@ -118,8 +114,17 @@ import Tournament64 from '@/Components/TournamentTable/Elimination64.vue';
                         title:'Round',
                         dataIndex:'round'
                     },{
-                        title:'Operation',
-                        dataIndex:'operation'
+                        title:'White',
+                        dataIndex:'white'
+                    },{
+                        title:'Blue',
+                        dataIndex:'blue'
+                    },{
+                        title:'White from',
+                        dataIndex:'white_rise_from'
+                    },{
+                        title:'Blue from',
+                        dataIndex:'blue_rise_from'
                     },
                 ],
                 athleteColumns:[
@@ -153,8 +158,21 @@ import Tournament64 from '@/Components/TournamentTable/Elimination64.vue';
             }
         },
         created() {
+            this.rebuildBouts();
         },
         methods: {
+            rebuildBouts(){
+                this.program.bouts.forEach(b=>{
+                    b.white_name_display=b.white_player.name_display;
+                    b.blue_name_display=b.blue_player.name_display;
+                    if(this.masterSequence){
+                        b.circle=b.sequence
+                    }else{
+                        b.circle=b.in_program_sequence
+                    }
+                    this.bouts.push(b)
+                })
+            },
             onCreateRecord(){
                 this.modal.title="Create"
                 this.modal.isOpen=true

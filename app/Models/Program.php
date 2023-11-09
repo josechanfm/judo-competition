@@ -13,6 +13,6 @@ class Program extends Model
         return $this->hasMany(Bout::class);
     }
     public function athletes(){
-        return $this->belongsToMany(Athlete::class);
+        return $this->belongsToMany(Athlete::class)->withPivot('id as athlete_program_id');
     }
 }

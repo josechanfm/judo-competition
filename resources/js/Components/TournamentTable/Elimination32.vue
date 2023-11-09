@@ -4,10 +4,10 @@
     <table id="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>
-            <td class="playerBox" >{{athletes[0].name_display}}</td>
+            <td class="playerBox" >{{bouts[0].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">1</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[0].circle}}</span></td></tr>
                 </table>
             </td>
             <td></td>
@@ -18,10 +18,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">2</td>
-            <td class="playerBox">{{athletes[1].name_display}}</td>
+            <td class="playerBox">{{bouts[0].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">17</span>
+                <span class="circle">{{bouts[16].circle}}</span>
             </td>
             <td rowspan="2"></td>
             <td></td>
@@ -44,7 +44,7 @@
             <td class="firstColumn"></td>
             <td class="bottomRight" rowspan="2"></td>
             <td class="topRight alignRightBottom" rowspan="4">
-                <span class="circle">25</span>
+                <span class="circle">{{bouts[24].circle}}</span>
             </td>
             <td></td>
             <td></td>
@@ -52,10 +52,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">5</td>
-            <td class="playerBox">{{athletes[2].name_display}}</td>
+            <td class="playerBox">{{bouts[1].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">2</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[1].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -66,7 +66,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">6</td>
-            <td class="playerBox">{{athletes[3].name_display}}</td>
+            <td class="playerBox">{{bouts[1].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <!-- <td></td> -->
@@ -92,17 +92,17 @@
             <td rowspan="2"></td>
             <td class="bottomRight" rowspan="4"></td>
             <td class="topRight alignRightBottom" rowspan="8">
-                <span class="circle">29</span>
+                <span class="circle">{{bouts[28].circle}}</span>
             </td>
             <td></td>
             <td></td>
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">9</td>
-            <td class="playerBox" >{{athletes[4].name_display}}</td>
+            <td class="playerBox" >{{bouts[2].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">3</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[2].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -113,10 +113,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">10</td>
-            <td class="playerBox">{{athletes[5].name_display}}</td>
+            <td class="playerBox">{{bouts[2].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">18</span>
+                <span class="circle">{{bouts[17].circle}}</span>
             </td>
             <!-- <td></td> -->
             <!-- <td></td> -->
@@ -145,10 +145,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">13</td>
-            <td class="playerBox">{{athletes[6].name_display}}</td>
+            <td class="playerBox">{{bouts[3].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">4</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[3].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -159,7 +159,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">14</td>
-            <td class="playerBox">{{athletes[7].name_display}}</td>
+            <td class="playerBox">{{bouts[3].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <td></td>
@@ -186,16 +186,16 @@
             <td></td>
             <td class="bottomRight" rowspan="8"></td>
             <td class="topRight alignRightBottom" rowspan="16">
-                <span class="circle">31</span>
+                <span class="circle">{{bouts[30].circle}}</span>
             </td>
             <td></td>
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">17</td>
-            <td class="playerBox" >{{athletes[8].name_display}}</td>
+            <td class="playerBox" >{{bouts[4].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">5</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[4].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -206,10 +206,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">18</td>
-            <td class="playerBox">{{athletes[9].name_display}}</td>
+            <td class="playerBox">{{bouts[4].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">19</span>
+                <span class="circle">{{bouts[18].circle}}</span>
             </td>
             <td rowspan="2"></td>
             <!-- <td></td> -->
@@ -232,7 +232,7 @@
             <td class="firstColumn"></td>
             <td class="bottomRight" rowspan="2"></td>
             <td class="topRight alignRightBottom" rowspan="4">
-                <span class="circle">26</span>
+                <span class="circle">{{bouts[25].circle}}</span>
             </td>
             <!-- <td></td> -->
             <!-- <td></td> -->
@@ -240,10 +240,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">21</td>
-            <td class="playerBox">{{athletes[10].name_display}}</td>
+            <td class="playerBox">{{bouts[5].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">6</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[5].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -254,7 +254,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">22</td>
-            <td class="playerBox">{{athletes[11].name_display}}</td>
+            <td class="playerBox">{{bouts[5].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <!-- <td></td> -->
@@ -285,10 +285,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">25</td>
-            <td class="playerBox" >{{athletes[12].name_display}}</td>
+            <td class="playerBox" >{{bouts[6].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">7</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[6].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -299,10 +299,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">26</td>
-            <td class="playerBox">{{athletes[13].name_display}}</td>
+            <td class="playerBox">{{bouts[6].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">20</span>
+                <span class="circle">{{bouts[19].circle}}</span>
             </td>
             <!-- <td></td> -->
             <td></td>
@@ -331,10 +331,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">29</td>
-            <td class="playerBox">{{athletes[14].name_display}}</td>
+            <td class="playerBox">{{bouts[7].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">8</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[7].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -345,7 +345,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">30</td>
-            <td class="playerBox">{{athletes[15].name_display}}</td>
+            <td class="playerBox">{{bouts[7].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <td></td>
@@ -376,10 +376,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">33</td>
-            <td class="playerBox" >{{athletes[16].name_display}}</td>
+            <td class="playerBox" >{{bouts[8].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">9</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[8].circle}}</span></td></tr>
                 </table>
             </td>
             <td></td>
@@ -390,10 +390,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">34</td>
-            <td class="playerBox">{{athletes[17].name_display}}</td>
+            <td class="playerBox">{{bouts[8].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">21</span>
+                <span class="circle">{{bouts[20].circle}}</span>
             </td>
             <td rowspan="2"></td>
             <td></td>
@@ -416,7 +416,7 @@
             <td class="firstColumn"></td>
             <td class="bottomRight" rowspan="2"></td>
             <td class="topRight alignRightBottom" rowspan="4">
-                <span class="circle">27</span>
+                <span class="circle">{{bouts[26].circle}}</span>
             </td>
             <td></td>
             <!-- <td></td> -->
@@ -424,10 +424,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">37</td>
-            <td class="playerBox">{{athletes[18].name_display}}</td>
+            <td class="playerBox">{{bouts[9].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">10</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[9].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -438,7 +438,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">38</td>
-            <td class="playerBox">{{athletes[19].name_display}}</td>
+            <td class="playerBox">{{bouts[9].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <!-- <td></td> -->
@@ -464,17 +464,17 @@
             <td rowspan="2"></td>
             <td class="bottomRight" rowspan="4"></td>
             <td class="topRight alignRightBottom" rowspan="8">
-                <span class="circle">30</span>
+                <span class="circle">{{bouts[29].circle}}</span>
             </td>
             <!-- <td></td> -->
             <td></td>
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">41</td>
-            <td class="playerBox" >{{athletes[20].name_display}}</td>
+            <td class="playerBox" >{{bouts[10].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">11</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[10].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -485,10 +485,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">42</td>
-            <td class="playerBox">{{athletes[21].name_display}}</td>
+            <td class="playerBox">{{bouts[10].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">22</span>
+                <span class="circle">{{bouts[21].circle}}</span>
             </td>
             <!-- <td></td> -->
             <!-- <td></td> -->
@@ -517,10 +517,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">45</td>
-            <td class="playerBox">{{athletes[22].name_display}}</td>
+            <td class="playerBox">{{bouts[11].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">12</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[11].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -531,7 +531,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">46</td>
-            <td class="playerBox">{{athletes[23].name_display}}</td>
+            <td class="playerBox">{{bouts[11].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <td></td>
@@ -562,10 +562,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">49</td>
-            <td class="playerBox" >{{athletes[24].name_display}}</td>
+            <td class="playerBox" >{{bouts[12].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">13</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[12].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -576,10 +576,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">50</td>
-            <td class="playerBox">{{athletes[25].name_display}}</td>
+            <td class="playerBox">{{bouts[12].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">23</span>
+                <span class="circle">{{bouts[22].circle}}</span>
             </td>
             <td rowspan="2"></td>
             <!-- <td></td> -->
@@ -602,7 +602,7 @@
             <td class="firstColumn"></td>
             <td class="bottomRight" rowspan="2"></td>
             <td class="topRight alignRightBottom" rowspan="4">
-                <span class="circle">28</span>
+                <span class="circle">{{bouts[27].circle}}</span>
             </td>
             <!-- <td></td> -->
             <td></td>
@@ -610,10 +610,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">53</td>
-            <td class="playerBox">{{athletes[26].name_display}}</td>
+            <td class="playerBox">{{bouts[13].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">14</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[13].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -624,7 +624,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">54</td>
-            <td class="playerBox">{{athletes[27].name_display}}</td>
+            <td class="playerBox">{{bouts[13].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <!-- <td></td> -->
@@ -655,10 +655,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">57</td>
-            <td class="playerBox" >{{athletes[28].name_display}}</td>
+            <td class="playerBox" >{{bouts[14].white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">15</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[14].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -669,10 +669,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">58</td>
-            <td class="playerBox">{{athletes[29].name_display}}</td>
+            <td class="playerBox">{{bouts[14].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">24 </span>
+                <span class="circle">{{bouts[23].circle}}</span>
             </td>
             <!-- <td></td> -->
             <td></td>
@@ -701,10 +701,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">61</td>
-            <td class="playerBox">{{athletes[30].name_display}}</td>
+            <td class="playerBox">{{bouts[15].white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">16</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{bouts[15].circle}}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -715,7 +715,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">62</td>
-            <td class="playerBox">{{athletes[31].name_display}}</td>
+            <td class="playerBox">{{bouts[15].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <td></td>
@@ -731,7 +731,7 @@
 export default {
     components: {
     },
-    props: ['"athletes'],
+    props: ['bouts'],
     data() {
         return {
             showTableSeq:false,

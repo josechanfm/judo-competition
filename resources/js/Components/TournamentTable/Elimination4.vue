@@ -61,7 +61,7 @@
 export default {
     components: {
     },
-    props: ['bouts'],
+    props: ['contest_system','bouts'],
     data() {
         return {
             showTableSeq:false,

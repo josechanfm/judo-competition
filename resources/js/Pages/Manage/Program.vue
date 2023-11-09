@@ -45,7 +45,11 @@
                         </div>                        
                     </a-col>
                     <a-col :span="12">
-                        <component :is="tournamentTable" :bouts="bouts"/>
+                        <ol>
+                            <li v-for="bout in bouts">{{bout.in_program_sequence}}</li>
+                        </ol>
+                        {{bouts}}
+                        <component :is="tournamentTable" :contestSystem="program.contest_system" :bouts="bouts"/>
                     </a-col>
                 </a-row>
             </div>
@@ -172,6 +176,12 @@ import Tournament64 from '@/Components/TournamentTable/Elimination64.vue';
                     }
                     this.bouts.push(b)
                 })
+                if(this.program.contest_system=='kos'){
+                    this.bouts.splice(this.program.chart_size-2,0,'')
+                    this.bouts.splice(this.program.chart_size-1,0,'')
+                    this.bouts.splice(this.program.chart_size-4,0,'')
+                    this.bouts.splice(this.program.chart_size-3,0,'')
+                }
             },
             onCreateRecord(){
                 this.modal.title="Create"

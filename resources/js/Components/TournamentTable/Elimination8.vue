@@ -1,7 +1,8 @@
 <template>
     <a-button @click="showTableSeq=!showTableSeq">Sequence</a-button>
     <a-button @click="showTableGridLine=!showTableGridLine">Grid Line</a-button>
-    <table id="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
+
+    <table class="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>
             <td class="playerBox" >{{bouts[0].white_name_display}}</td>
@@ -19,7 +20,7 @@
             <td class="playerBox">{{bouts[0].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">5</span>
+                <span class="circle">{{bouts[6].circle}}</span>
             </td>
             <td rowspan="2"></td>
             <td></td>
@@ -38,7 +39,7 @@
             <td class="firstColumn"></td>
             <td class="bottomRight" rowspan="2"></td>
             <td class="topRight alignRightBottom" rowspan="4">
-                <span class="circle">7</span>
+                <span class="circle">{{bouts[10].circle}}</span>
             </td>
             <td></td>
         </tr>
@@ -56,7 +57,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">6</td>
-            <td class="playerBox">{{bouts[1].white_name_display}}</td>
+            <td class="playerBox">{{bouts[1].blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <!-- <td></td> -->
@@ -96,7 +97,7 @@
             <td class="playerBox">{{bouts[2].blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">6</span>
+                <span class="circle">{{bouts[7].circle}}</span>
             </td>
             <!-- <td></td> -->
             <td></td>
@@ -138,6 +139,102 @@
             <td></td>
         </tr>
     </table>
+
+
+    <table class="tblTournament" :class="showTableGridLine?'gridLine':''">
+        <tr>
+            <th colspan="5">
+                <a-typography-title :level="3">Repeat Chart</a-typography-title>
+            </th>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">1</td>
+            <td class="playerBox" >player1</td>
+            <td class="firstColumn" rowspan="2" >
+                <table class="innerTable">
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[4].circle }}</span></td></tr>
+                </table>
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">2</td>
+            <td class="playerBox" >player2</td>
+            <!-- <td>a</td> -->
+            <td class="topRight alignRightBottom"><span class="circle">{{ bouts[8].circle }}</span></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">3</td>
+            <td></td>
+            <td class="bottomRight" colspan="2" rowspan="2"></td>
+            <!-- <td>a</td> -->
+            <!-- <td>a</td> -->
+            <td class="topOnly"></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">4</td>
+            <td class="playerBox" rowspan="2">player2</td>
+            <td colspan="2"></td>
+            <!-- <td>a</td> -->
+            <!-- <td>a</td> -->
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">5</td>
+            <!-- <td></td> -->
+            <td colspan="2"></td>
+            <!-- <td>a</td> -->
+            <td></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">6</td>
+            <td style="height:50px!important"></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">1</td>
+            <td class="playerBox" >player1</td>
+            <td class="firstColumn" rowspan="2" >
+                <table class="innerTable">
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[5].circle }}</span></td></tr>
+                </table>
+            </td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">2</td>
+            <td class="playerBox" >player2</td>
+            <!-- <td>a</td> -->
+            <td class="topRight alignRightBottom"><span class="circle">{{ bouts[9].circle }}</span></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">3</td>
+            <td></td>
+            <td class="bottomRight" colspan="2" rowspan="2"></td>
+            <!-- <td>a</td> -->
+            <!-- <td>a</td> -->
+            <td class="topOnly"></td>
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">4</td>
+            <td class="playerBox" rowspan="2">player2</td>
+            <td colspan="2"></td>
+            <!-- <td>a</td> -->
+            <!-- <td>a</td> -->
+        </tr>
+        <tr>
+            <td v-if="showTableSeq" class="seq">5</td>
+            <!-- <td></td> -->
+            <td colspan="2"></td>
+            <!-- <td>a</td> -->
+            <td></td>
+        </tr>
+    </table>
 </template>
 
 <script>
@@ -159,10 +256,10 @@ export default {
 
 <style scoped>
 
-table#tblTournament{
+table.tblTournament{
   border-spacing: 0;
 }
-table#tblTournament td{
+table.tblTournament td{
   width:80px;
   height:0px;
 }

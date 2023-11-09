@@ -101,63 +101,64 @@ class ProgramController extends Controller
                         'blue'=>0,
                     ];
                 }
-                //repeatcharge round 1
-                if($roundSize==4){
-                    $data[]=[
-                        'program_id'=>$program->id,
-                        'sequence'=>$sequence++,
-                        'in_program_sequence'=>$inProgramSequence++,
-                        'queue'=>0,
-                        'mat'=>$program->mat,
-                        'section'=>$program->section,
-                        'contest_system'=>$program->contest_system,
-                        'round'=>7,
-                        'turn'=>0,
-                        'white'=>0,
-                        'blue'=>0,
-                    ];
-                    $data[]=[
-                        'program_id'=>$program->id,
-                        'sequence'=>$sequence++,
-                        'in_program_sequence'=>$inProgramSequence++,
-                        'queue'=>0,
-                        'mat'=>$program->mat,
-                        'section'=>$program->section,
-                        'contest_system'=>$program->contest_system,
-                        'round'=>7,
-                        'turn'=>0,
-                        'white'=>0,
-                        'blue'=>0,
-                    ];
-                }
-                if($roundSize==2 && $program->chart_size>4){
-                    $data[]=[
-                        'program_id'=>$program->id,
-                        'sequence'=>$sequence++,
-                        'in_program_sequence'=>$inProgramSequence++,
-                        'queue'=>0,
-                        'mat'=>$program->mat,
-                        'section'=>$program->section,
-                        'contest_system'=>$program->contest_system,
-                        'round'=>3,
-                        'turn'=>0,
-                        'white'=>0,
-                        'blue'=>0,
-                    ];
-                    $data[]=[
-                        'program_id'=>$program->id,
-                        'sequence'=>$sequence++,
-                        'in_program_sequence'=>$inProgramSequence++,
-                        'queue'=>0,
-                        'mat'=>$program->mat,
-                        'section'=>$program->section,
-                        'contest_system'=>$program->contest_system,
-                        'round'=>3,
-                        'turn'=>0,
-                        'white'=>0,
-                        'blue'=>0,
-                    ];
-
+                //repeatcharge round 1, only for program contest_system "erm" 
+                if($program->contest_system=='erm'){
+                    if($roundSize==4){
+                        $data[]=[
+                            'program_id'=>$program->id,
+                            'sequence'=>$sequence++,
+                            'in_program_sequence'=>$inProgramSequence++,
+                            'queue'=>0,
+                            'mat'=>$program->mat,
+                            'section'=>$program->section,
+                            'contest_system'=>$program->contest_system,
+                            'round'=>7,
+                            'turn'=>0,
+                            'white'=>0,
+                            'blue'=>0,
+                        ];
+                        $data[]=[
+                            'program_id'=>$program->id,
+                            'sequence'=>$sequence++,
+                            'in_program_sequence'=>$inProgramSequence++,
+                            'queue'=>0,
+                            'mat'=>$program->mat,
+                            'section'=>$program->section,
+                            'contest_system'=>$program->contest_system,
+                            'round'=>7,
+                            'turn'=>0,
+                            'white'=>0,
+                            'blue'=>0,
+                        ];
+                    }
+                    if($roundSize==2 && $program->chart_size>4){
+                        $data[]=[
+                            'program_id'=>$program->id,
+                            'sequence'=>$sequence++,
+                            'in_program_sequence'=>$inProgramSequence++,
+                            'queue'=>0,
+                            'mat'=>$program->mat,
+                            'section'=>$program->section,
+                            'contest_system'=>$program->contest_system,
+                            'round'=>3,
+                            'turn'=>0,
+                            'white'=>0,
+                            'blue'=>0,
+                        ];
+                        $data[]=[
+                            'program_id'=>$program->id,
+                            'sequence'=>$sequence++,
+                            'in_program_sequence'=>$inProgramSequence++,
+                            'queue'=>0,
+                            'mat'=>$program->mat,
+                            'section'=>$program->section,
+                            'contest_system'=>$program->contest_system,
+                            'round'=>3,
+                            'turn'=>0,
+                            'white'=>0,
+                            'blue'=>0,
+                        ];
+                    }
                 }
                 $round=$round/2;
             }
@@ -169,7 +170,7 @@ class ProgramController extends Controller
             ['sequence','queue','mat','section','contest_system','round','turn','white','blue']
         );
         
-        //rearrage the sequence number based on section and mat id, the bouts are order by chart_size and sequence of programs
+        //Rearrage the sequence number based on section and mat id, the bouts are order by chart_size and sequence of programs
         $matNumber=$competition->mat_number;
         $sectionNumber=$competition->section_number;
         for($s=1;$s<=$sectionNumber;$s++){
@@ -202,8 +203,11 @@ class ProgramController extends Controller
         };
 
         //Assign rise from, both whtie_rise_from and blue_rise_from
-        $programs=$competition->programs->where('contest_system','erm')->where('chart_size','>',4);
-        $riseFrom=[
+        //erm
+        $riseFromErm=[
+            '4'=>[
+                '3'=>[1,2],
+            ],
             '8'=>[
                 '5'=>[-2,-4],
                 '6'=>[-1,-3],
@@ -285,14 +289,96 @@ class ProgramController extends Controller
                 '67'=>[63,64]
             ],
         ];
+        $programs=$competition->programs->where('contest_system','erm');
         foreach($programs as $program){
-            foreach($riseFrom[$program->chart_size] as $seq=>$rise){
-                Bout::where('program_id',$program->id)->where('in_program_sequence',$seq)->update([
+            foreach($riseFromErm[$program->chart_size] as $seq=>$rise){
+                $bouts=Bout::where('program_id',$program->id)->where('in_program_sequence',$seq)->update([
+                    'white_rise_from'=>$rise[0],
+                    'blue_rise_from'=>$rise[1]
+                ]);
+                
+            };
+        };
+        //kos
+        $riseFromKos=[
+            '4'=>[
+                '3'=>[1,2],
+            ],
+            '8'=>[
+                '5'=>[1,3],
+                '6'=>[2,4],
+                '7'=>[5,6]
+            ],
+            '16'=>[
+                '9'=>[1,5],
+                '10'=>[2,6],
+                '11'=>[3,7],
+                '12'=>[4,8],
+                '13'=>[9,11],
+                '14'=>[10,12],
+                '15'=>[13,14]
+            ],
+            '32'=>[
+                '17'=>[1,9],
+                '18'=>[2,10],
+                '19'=>[3,11],
+                '20'=>[4,12],
+                '21'=>[5,13],
+                '22'=>[6,14],
+                '23'=>[7,15],
+                '24'=>[8,16],
+                '25'=>[17,21],
+                '26'=>[18,22],
+                '27'=>[19,23],
+                '28'=>[20,24],
+                '29'=>[25,27],
+                '30'=>[26,28],
+                '31'=>[29,30]
+            ],
+            '64'=>[
+                '33'=>[1,17],
+                '34'=>[2,18],
+                '35'=>[3,19],
+                '36'=>[4,20],
+                '37'=>[5,21],
+                '38'=>[6,22],
+                '39'=>[7,23],
+                '40'=>[8,24],
+                '41'=>[9,25],
+                '42'=>[10,26],
+                '43'=>[11,27],
+                '44'=>[12,28],
+                '45'=>[13,29],
+                '46'=>[14,30],
+                '47'=>[15,31],
+                '48'=>[16,32],
+                '49'=>[33,41],
+                '50'=>[34,42],
+                '51'=>[35,43],
+                '52'=>[36,44],
+                '53'=>[37,45],
+                '54'=>[38,46],
+                '55'=>[39,47],
+                '56'=>[40,48],
+                '57'=>[49,53],
+                '58'=>[50,54],
+                '59'=>[51,55],
+                '60'=>[52,56],
+                '61'=>[57,59],
+                '62'=>[58,60],
+                '63'=>[61,62]
+            ],
+        ];
+        $programs=$competition->programs->where('contest_system','kos');
+        foreach($programs as $program){
+            foreach($riseFromKos[$program->chart_size] as $seq=>$rise){
+                $bouts=Bout::where('program_id',$program->id)->where('in_program_sequence',$seq)->update([
                     'white_rise_from'=>$rise[0],
                     'blue_rise_from'=>$rise[1]
                 ]);
             };
         };
+
         
         return response()->json($program);
     }

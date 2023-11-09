@@ -21,7 +21,7 @@ class ProgramSeeder extends Seeder
             'weight_group'=>'男子55公斤以下',
             'mat'=>'1',
             'section'=>'1',
-            'contest_system'=>'em',
+            'contest_system'=>'erm',
             'chart_size'=>'4',
             'duration'=>'00:04:00',
             'status'=>0
@@ -34,7 +34,7 @@ class ProgramSeeder extends Seeder
             'weight_group'=>'男子60公斤以下',
             'mat'=>'1',
             'section'=>'1',
-            'contest_system'=>'em',
+            'contest_system'=>'erm',
             'chart_size'=>'8',
             'duration'=>'00:04:00',
             'status'=>0
@@ -47,7 +47,7 @@ class ProgramSeeder extends Seeder
             'weight_group'=>'男子65公斤以下',
             'mat'=>'1',
             'section'=>'1',
-            'contest_system'=>'em',
+            'contest_system'=>'erm',
             'chart_size'=>'16',
             'duration'=>'00:04:00',
             'status'=>0
@@ -60,7 +60,7 @@ class ProgramSeeder extends Seeder
             'weight_group'=>'男子72公斤以下',
             'mat'=>'1',
             'section'=>'1',
-            'contest_system'=>'em',
+            'contest_system'=>'erm',
             'chart_size'=>'32',
             'duration'=>'00:04:00',
             'status'=>0
@@ -73,7 +73,7 @@ class ProgramSeeder extends Seeder
             'weight_group'=>'男子78公斤以下',
             'mat'=>'1',
             'section'=>'1',
-            'contest_system'=>'em',
+            'contest_system'=>'erm',
             'chart_size'=>'64',
             'duration'=>'00:04:00',
             'status'=>0

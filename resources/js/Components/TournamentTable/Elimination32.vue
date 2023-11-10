@@ -92,7 +92,7 @@
             <td rowspan="2"></td>
             <td class="bottomRight" rowspan="4"></td>
             <td class="topRight alignRightBottom" rowspan="8">
-                <span class="circle">{{bouts[28].circle}}</span>
+                <span class="circle">{{bouts[30].circle}}</span>
             </td>
             <td></td>
             <td></td>
@@ -186,7 +186,7 @@
             <td></td>
             <td class="bottomRight" rowspan="8"></td>
             <td class="topRight alignRightBottom" rowspan="16">
-                <span class="circle">{{bouts[30].circle}}</span>
+                <span class="circle">{{bouts[34].circle}}</span>
             </td>
             <td></td>
         </tr>
@@ -464,7 +464,7 @@
             <td rowspan="2"></td>
             <td class="bottomRight" rowspan="4"></td>
             <td class="topRight alignRightBottom" rowspan="8">
-                <span class="circle">{{bouts[29].circle}}</span>
+                <span class="circle">{{bouts[31].circle}}</span>
             </td>
             <!-- <td></td> -->
             <td></td>
@@ -725,13 +725,16 @@
         </tr>
 
     </table>
+    <RepeatChart :bouts="bouts" v-if="contestSystem=='erm'" />
 </template>
 
 <script>
+import RepeatChart from '@/Components/TournamentTable/RepeatChart.vue';
 export default {
     components: {
+        RepeatChart
     },
-    props: ['bouts'],
+    props: ['contestSystem','bouts'],
     data() {
         return {
             showTableSeq:false,
@@ -745,95 +748,5 @@ export default {
 </script>
 
 <style scoped>
-
-table#tblTournament{
-  border-spacing: 0;
-}
-table#tblTournament td{
-  width:60px;
-  height:0px;
-}
-table.gridLine td{
-    border: 1px dotted lightgray;
-}
-.seq{
-    height:5px!important;
-    font-size:10px;
-    width:10px!important
-}.gapRow{
-    height:8px!important
-}
-.playerBox{
-    width:200px!important;
-    height:25px!important;
-    border: 1px solid black!important;
-    border-radius: 5px;
-}
-.firstColumn{
-    width:10px!important;
-}
-.topOnly{
-    border-top: 1px solid black!important;
-}.topRight{
-    border-top: 1px solid black!important;
-    border-right: 1px solid black!important;
-    border-top-right-radius: 5px;
-}
-.bottomRight{
-    border-bottom: 1px solid black!important;
-    border-right: 1px solid black!important;
-    border-bottom-right-radius: 5px;
-}
-.topOnly.win{
-    border-top: 3px solid red!important;
-}
-.bottomOnly.win{
-    border-bottom: 3px solid red!important;
-    border-right: 1px solid black!important;
-    border-bottom-right-radius: 5px;
-}
-.top.win{
-    border-top: 3px solid red!important;
-    border-right: 1px solid black!important;
-    border-top-right-radius: 5px;
-}
-.topRight.win{
-    border-top: 3px solid red!important;
-    border-right: 3px solid red!important;
-}.bottomRight.win{
-    border-bottom: 3px solid red!important;
-    border-right: 3px solid red!important;
-}
-
-.alignRightBottom{
-    text-align:right;
-    vertical-align: bottom;
-}
-span.circle {
-    background: #e3e3e3;
-    border-radius: 50%;
-    -moz-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    color: #6e6e6e;
-    display: inline-block;
-    font-weight: bold;
-    line-height: 30px;
-    width: 30px;
-    margin-right: 5px;
-    text-align: center;
-    position:relative;
-    top:20px;
-    left:20px;
-}
-.innerTable{
-    border-spacing: 0;  
-}
-.innerTable td{
-    height:20px!important
-}
-.innerTable .circle{
-    top:0px!important;
-    left:25px;
-}
-
+    @import "@/../css/tournamentChart.css";
 </style>

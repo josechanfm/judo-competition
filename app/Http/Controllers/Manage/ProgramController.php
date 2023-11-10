@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Models\Competition;
 use App\Models\Program;
 use App\Models\Bout;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProgramController extends Controller
 {
@@ -76,8 +77,29 @@ class ProgramController extends Controller
         //
     }
 
+    public function progress(Competition $competition){
+        $competition->bouts;
+        $competition->programs;
+        return Inertia::render('Manage/ProgramProgress',[
+            'competition'=>$competition,
+        ]);
+    }
+
+    public function chartPdf(Competition $competition){
+        $program=Program::find(1);
+        $program->bouts;
+        $program->athletes;
+        $data=[
+            'program'=>$program
+        ];
+
+        $pdf = Pdf::loadView('Manage/Program', $data);
+        return $pdf->download('invoice.pdf');
+    }
+
     public function gen_bouts(Competition $competition){
         //Create bouts records according to the contest system of each program, the in_program_sequence is given, but the sequence column is temporary
+        $competition->bouts()->delete();
         $programs=$competition->programs->sortBy('sequence')->sortByDesc('chart_size');
         $data=[];
         $sequence=1;

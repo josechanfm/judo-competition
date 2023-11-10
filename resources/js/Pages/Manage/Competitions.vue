@@ -17,6 +17,7 @@
                             <a-button @click="onEditRecord(record)">Edit</a-button>
                             <a-button :href="route('manage.competition.athletes.index',record.id)">Athletes</a-button>
                             <a-button :href="route('manage.competition.programs.index',record.id)">Manage</a-button>
+                            <a-button :href="route('manage.competition.progress',record.id)">Progress</a-button>
                         </template>
                         <template v-else>
                                 {{ record[column.dataIndex] }}

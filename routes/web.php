@@ -42,6 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('manage/competition/{competition}/programs',App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
     Route::resource('manage/competition/{competition}/athletes',App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
     Route::get('manage/competition/{competition}/program/gen_bouts',[App\Http\Controllers\Manage\ProgramController::class,'gen_bouts'])->name('manage.competition.program.gen_bouts');
+    Route::get('manage/competition/{competition}/progress',[App\Http\Controllers\Manage\ProgramController::class,'progress'])->name('manage.competition.progress');
+    Route::get('manage/competition/{competition}/program/chartPdf',[App\Http\Controllers\Manage\ProgramController::class,'chartPdf'])->name('manage.competition.program.chartPdf');
 });
 
 

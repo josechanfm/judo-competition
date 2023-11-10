@@ -26,6 +26,7 @@ table.gridLine td{
 }
 .topOnly{
     border-top: 1px solid black!important;
+    width:40px;
 }.topRight{
     border-top: 1px solid black!important;
     border-right: 1px solid black!important;

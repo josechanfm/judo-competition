@@ -1,13 +1,23 @@
-<template>
-    <a-button @click="showTableSeq=!showTableSeq">Sequence</a-button>
-    <a-button @click="showTableGridLine=!showTableGridLine">Grid Line</a-button>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Laravel</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
+    </head>
+    <body>
     <table class="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>
-            <td class="playerBox" >{{bouts[0].white_name_display}}</td>
+            <td class="playerBox" >{{$bouts[0]->white_player->name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[0].circle }}</span></td></tr>
+                    <tr><td class="topRight bottomRight "></td></tr>
                 </table>
             </td>
             <td></td>
@@ -15,12 +25,12 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">2</td>
-            <td class="playerBox">{{bouts[0].blue_name_display}}</td>
+            <td class="playerBox">{{$bouts[0]->blue_player->name_display}}</td>
             <!-- <td></td> -->
-            <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">{{ bouts[2].circle }}</span>
+            <td class="topRight alignTopLeft" rowspan="2">
+                <span class="circle">{{ $bouts[0]->circle }}</span>
             </td>
-            <td rowspan="2"></td>
+            <td class="bottomOnly" rowspan="2"></td>
         </tr>
         <tr class="gapRow">
             <td v-if="showTableSeq" class="seq">3</td>
@@ -34,53 +44,36 @@
             <td></td>
             <td class="firstColumn"></td>
             <td class="bottomRight" rowspan="2"></td>
-            <td class="topOnly"></td>
+            <td class="alignTopLeft" rowspan="2"><span class="circle">{{ $bouts[2]->circle }}</span></td>
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">5</td>
-            <td class="playerBox">{{bouts[1].white_name_display}}</td>
+            <td class="playerBox">{{$bouts[1]->white_player->name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[1].circle }}</span></td></tr>
+                    <tr><td class="topRight bottomRight "></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
-            <td></td>
+            <!-- <td></td> -->
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">6</td>
-            <td class="playerBox">{{bouts[1].blue_name_display}}</td>
+            <td class="playerBox">{{$bouts[1]->blue_player->name_display}}</td>
             <!-- <td></td> -->
-            <td></td>
+            <td class="alignTopLeft"><span class="circle">{{ $bouts[1]->circle }}</span></td>
             <td></td>
         </tr>
     </table>
-</template>
+    </body>
+</html>
 
-<script>
-export default {
-    components: {
-    },
-    props: ['contest_system','bouts'],
-    data() {
-        return {
-            showTableSeq:false,
-            showTableGridLine:false,
-        }
-    },
-    created(){
-    },
-    mounted(){
-    }
-}
-</script>
-
-<style scoped>
-
-table#tblTournament{
+<style>
+table.tblTournament{
   border-spacing: 0;
+  z-index:-1
 }
-table#tblTournament td{
+table.tblTournament td{
   width:80px;
   height:0px;
 }
@@ -105,42 +98,31 @@ table.gridLine td{
 }
 .topOnly{
     border-top: 1px solid black!important;
-}.topRight{
+    width:40px;
+}
+.topRight{
     border-top: 1px solid black!important;
     border-right: 1px solid black!important;
     border-top-right-radius: 5px;
+}
+.bottomOnly{
+    border-bottom: 1px solid black!important;
+    width:40px;
 }
 .bottomRight{
     border-bottom: 1px solid black!important;
     border-right: 1px solid black!important;
     border-bottom-right-radius: 5px;
 }
-.topOnly.win{
-    border-top: 3px solid red!important;
+.alignTopLeft{
+    text-align:left;
+    vertical-align: top;
 }
-.bottomOnly.win{
-    border-bottom: 3px solid red!important;
-    border-right: 1px solid black!important;
-    border-bottom-right-radius: 5px;
-}
-.top.win{
-    border-top: 3px solid red!important;
-    border-right: 1px solid black!important;
-    border-top-right-radius: 5px;
-}
-.topRight.win{
-    border-top: 3px solid red!important;
-    border-right: 3px solid red!important;
-}.bottomRight.win{
-    border-bottom: 3px solid red!important;
-    border-right: 3px solid red!important;
-}
-
-.alignRightBottom{
+.alignTopRight{
     text-align:right;
-    vertical-align: bottom;
+    vertical-align: top;
 }
-span.circle {
+span.circle{
     background: #e3e3e3;
     border-radius: 50%;
     -moz-border-radius: 50%;
@@ -148,23 +130,30 @@ span.circle {
     color: #6e6e6e;
     display: inline-block;
     font-weight: bold;
-    line-height: 30px;
+    line-height: 25px;
+    height: 30px;
     width: 30px;
     margin-right: 5px;
     text-align: center;
     position:relative;
-    top:20px;
-    left:20px;
+    top:-18px;
+    left:-18px;
 }
 .innerTable{
     border-spacing: 0;  
+    width:100%;
 }
 .innerTable td{
-    height:20px!important
+    height:40px!important
+
 }
 .innerTable .circle{
     top:0px!important;
-    left:25px;
+    left:18px;
+    z-index:100
 }
+
+
+</style>
 
 </style>

@@ -23,13 +23,13 @@
                         
                         <p>Category: {{ currentSection.mats[mat].program.category_group }}</p>
                         <p>Weight: {{ currentSection.mats[mat].program.weight_group }}</p>
-                        <!-- <template v-if="currentSection.mats[mat].bout">
+                        <template v-if="currentSection.mats[mat].bout">
                             <a-typography-title :level="3">
                                 <span v-if="currentSection.mats[mat].bout.white==0">---</span><span v-else>{{ currentSection.mats[mat].bout.white_player.name_display }}</span>
                                 vs
                                 <span v-if="currentSection.mats[mat].bout.white==0">---</span><span v-else>{{ currentSection.mats[mat].bout.blue_player.name_display }}</span>
                             </a-typography-title>
-                        </template> -->
+                        </template>
                     </a-col>
                 </a-row>
             </div>  

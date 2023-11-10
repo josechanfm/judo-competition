@@ -86,15 +86,21 @@ class ProgramController extends Controller
     }
 
     public function chartPdf(Competition $competition){
-        $program=Program::find(1);
-        $program->bouts;
+        $program=Program::find(3);
+        $bouts=$competition->bouts;
+        foreach($bouts as $i=>$bout){
+            $bouts[$i]->circle=$bout->sequence;
+        };
         $program->athletes;
         $data=[
-            'program'=>$program
+            'program'=>$program,
+            'bouts'=>$bouts
         ];
+        return view('chartPdf.tournament16',$data);
 
-        $pdf = Pdf::loadView('Manage/Program', $data);
-        return $pdf->download('invoice.pdf');
+        $pdf = Pdf::loadView('chartPdf.tournament16', $data);
+        return $pdf->stream();
+        //return $pdf->download('chartPdf.pdf');
     }
 
     public function gen_bouts(Competition $competition){

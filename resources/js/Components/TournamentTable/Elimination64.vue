@@ -1,7 +1,7 @@
 <template>
     <a-button @click="showTableSeq=!showTableSeq">Sequence</a-button>
     <a-button @click="showTableGridLine=!showTableGridLine">Grid Line</a-button>
-    <table id="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
+    <table class="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>
             <td class="playerBox" >{{bouts[0].white_name_display}}</td>

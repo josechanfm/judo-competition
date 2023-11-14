@@ -11,16 +11,26 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,600&display=swap" rel="stylesheet" />
     </head>
     <body>
+        <ol>
+        @foreach($bouts as $b)
+            <li>{{ $b}}</li>
+        @endforeach
+        </ol>
+    
     <table class="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td class="seq"></td>
             <td></td>
             <td></td>
             <td rowspan="2"></td>
-            <td rowspan="4"></td>
+            <td rowspan="2"></td>
+            <td rowspan="2"></td>
+            <td rowspan="2"></td>
+            <td></td>
+            <td></td>
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>
-            <td class="playerBox" >{{$bouts[0]->white_player->name_display}}</td>
+            <td class="playerBox" >0{{$bouts[0]->white_player->name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
                     <tr><td class="topRight bottomRight "></td></tr>
@@ -28,33 +38,52 @@
             </td>
             {{-- <td></td> --}}
             {{-- <td></td> --}}
+            {{-- <td></td> --}}
+            {{-- <td></td> --}}
+            <td rowspan="2">
+                <table class="innerTable">
+                    <tr><td class="topLeft bottomLeft"></td></tr>
+                </table>
+            </td>
+            <td class="playerBox" >1{{$bouts[1]->white_player->name_display}}</td>
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">2</td>
-            <td class="playerBox">{{$bouts[0]->blue_player->name_display}}</td>
-            <!-- <td></td> -->
+            <td class="playerBox">4{{$bouts[4]->blue_player->name_display}}</td>
+            {{-- <td></td> --}}
             <td class="topRight alignTopLeft" rowspan="2">
                 <span class="circle">{{ $bouts[0]->circle }}</span>
             </td>
-            {{-- <td class="bottomOnly" rowspan="2"></td> --}}
+            <td class="rightOnly" rowspan="2"></td>
+            <td rowspan="2"></td>
+            <td class="topLeft alignTopRight" rowspan="2">
+                <span class="circle">{{ $bouts[1]->circle }}</span>
+            </td>
+            <td class="playerBox">5{{$bouts[5]->white_player->name_display}}</td>
         </tr>
         <tr class="gapRow">
             <td v-if="showTableSeq" class="seq">3</td>
             <td></td>
             <td class="firstColumn"></td>
-            <!-- <td></td> -->
-            <!-- <td></td> -->
+            {{-- <td></td> --}}
+            {{-- <td></td> --}}
+            <td></td>
+            <td></td>
         </tr>
         <tr class="gapRow">
             <td v-if="showTableSeq" class="seq">4</td>
             <td></td>
             <td class="firstColumn"></td>
             <td class="bottomRight" rowspan="2"></td>
-            <td class="alignTopLeft topOnly" rowspan="4"><span class="circle">{{ $bouts[2]->circle }}</span></td>
+            <td class="alignTopLeft topOnly" rowspan="2"><span class="circle">{{ $bouts[4]->circle }}</span></td>
+            <td class="alignTopRight topOnly"rowspan="2"><span class="circle">{{ $bouts[5]->circle }}</span></td>
+            <td class="bottomLeft" rowspan="2"></td>
+            <td></td>
+            <td></td>
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">5</td>
-            <td class="playerBox">{{$bouts[1]->white_player->name_display}}</td>
+            <td class="playerBox">2{{$bouts[2]->white_player->name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
                     <tr><td class="topRight bottomRight "></td></tr>
@@ -62,13 +91,22 @@
             </td>
             <!-- <td></td> -->
             <!-- <td></td> -->
+            <td rowspan="2">
+                <table class="innerTable">
+                    <tr><td class="topLeft bottomLeft"></td></tr>
+                </table>
+
+            </td>
+            <td class="playerBox" >3{{$bouts[3]->white_player->name_display}}</td>
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">6</td>
-            <td class="playerBox">{{$bouts[1]->blue_player->name_display}}</td>
-            <!-- <td></td> -->
-            <td class="alignTopLeft" rowspan="2"><span class="circle">{{ $bouts[1]->circle }}</span></td>
-            {{-- <td></td> --}}
+            <td class="playerBox">6{{$bouts[6]->blue_player->name_display}}</td>
+            <td class="alignTopLeft" rowspan="2"><span class="circle">{{ $bouts[2]->circle }}</span></td>
+            <td rowspan="2"></td>
+            <td rowspan="2"></td>
+            <td class="alignTopRight" rowspan="2"><span class="circle">{{ $bouts[3]->circle }}</span></td>
+            <td class="playerBox" >7{{$bouts[7]->white_player->name_display}}</td>
         </tr>
         <tr>
             <td class="seq"></td>
@@ -76,6 +114,8 @@
             <td></td>
             {{-- <td></td> --}}
             {{-- <td></td> --}}
+            <td></td>
+            <td></td>
         </tr>
     </table>
     </body>
@@ -87,7 +127,6 @@ table.tblTournament{
   z-index:-1
 }
 table.tblTournament td{
-  border:1px dotted lightgray;
   width:80px;
   height:0px;
 }
@@ -119,6 +158,11 @@ table.gridLine td{
     border-right: 1px solid black!important;
     border-top-right-radius: 5px;
 }
+.topLeft{
+    border-top: 1px solid black!important;
+    border-left: 1px solid black!important;
+    border-top-left-radius: 5px;
+}
 .bottomOnly{
     border-bottom: 1px solid black!important;
     width:40px;
@@ -128,6 +172,14 @@ table.gridLine td{
     border-right: 1px solid black!important;
     border-bottom-right-radius: 5px;
 }
+.bottomLeft{
+    border-bottom: 1px solid black!important;
+    border-left: 1px solid black!important;
+    border-bottom-left-radius: 5px;
+}
+.rightOnly{
+    border-right: 1px solid black!important;
+}
 .alignTopLeft{
     text-align:left;
     vertical-align: top;
@@ -136,7 +188,7 @@ table.gridLine td{
     text-align:right;
     vertical-align: top;
 }
-span.circle{
+.alignTopLeft .circle{
     background: #e3e3e3;
     border-radius: 50%;
     -moz-border-radius: 50%;
@@ -153,6 +205,24 @@ span.circle{
     top:-18px;
     left:-18px;
 }
+.alignTopRight .circle{
+    background: #e3e3e3;
+    border-radius: 50%;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    color: #6e6e6e;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 25px;
+    height: 30px;
+    width: 30px;
+    margin-right: 5px;
+    text-align: center;
+    position:relative;
+    top:-18px;
+    left:18px;
+}
+
 .innerTable{
     border-spacing: 0;  
     width:100%;

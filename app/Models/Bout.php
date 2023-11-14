@@ -10,6 +10,9 @@ class Bout extends Model
     use HasFactory;
     protected $appends=['white_player','blue_player'];
 
+    public function program(){
+        return $this->belongsTo(Program::class);
+    }
     public function getWhitePlayerAttribute(){
         if($this->white==0){
             return (object)["name_display"=>""];

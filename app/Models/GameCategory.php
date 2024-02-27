@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class GameCategory extends Model
 {
     use HasFactory;
-    protected $casts=['weights'=>'json'];
-
+    protected $fillable = ['game_type_id', 'name', 'name_secondary', 'code', 'weights', 'duration'];
+    protected $casts = ['weights' => 'json'];
 }

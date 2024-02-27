@@ -20,6 +20,6 @@
     "dependencies": {
         "ant-design-vue": "^4.0.6",
         "vite-svg-loader": "^4.0.0",
-        "vue-svg-loader": "^0.16.0"
+        "vue-svg-loader": "^0.10.0"
     }
 }

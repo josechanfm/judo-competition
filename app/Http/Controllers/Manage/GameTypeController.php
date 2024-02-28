@@ -17,9 +17,14 @@ class GameTypeController extends Controller
      */
     public function index()
     {
+        $gameTypes = GameType::with('categories')->get();
+        foreach ($gameTypes as $type) {
+            foreach ($type->categories as $category) {
+                $category->duration = str_pad(strval(intval(($category->duration ?? 0) / 60)), 2, '0', STR_PAD_LEFT) . ':' . str_pad(strval($category->duration % 60), 2, '0', STR_PAD_RIGHT);
+            }
+        };
         return Inertia::render('Manage/GameTypes', [
-            'gameTypes' => GameType::with('categories')->get(),
-            'gameCategories' => GameCategory::all(),
+            'gameTypes' => $gameTypes,
             'languages' => Config::item('languages')
         ]);
     }
@@ -37,7 +42,56 @@ class GameTypeController extends Controller
      */
     public function store(Request $request)
     {
+        $validated = $request->validate([
+            'id' => 'sometimes',
+            'name' => 'required',
+            'name_secondary' => 'required_if:is_language_secondary_enabled,true',
+            // TODO: add filtering
+            'language' => 'required',
+            'is_language_secondary_enabled' => 'required|boolean',
+            'language_secondary' => 'required_if:is_language_secondary_enabled,true',
+            'code' => 'required',
+            'categories' => 'array',
+            'categories.*.id' => 'sometimes',
+            'categories.*.name' => 'required_if:categories,true',
+            //            'categories.*.name_en' => 'required',
+            'categories.*.name_secondary' => 'required_if:is_language_secondary_enabled,true',
+            'categories.*.code' => 'required_if:categories,true',
+            'categories.*.duration' => 'required_if:categories,true|integer',
+            'categories.*.weights' => 'array|required_if:categories,true',
+            'delete_categories' => 'array',
+        ]);
+        $gameType = GameType::updateOrCreate(
+            ['id' => $validated['id'] ?? null],
+            [
+                'name' => $validated['name'],
+                //                'name_en' => $validated['name_en'],
+                'name_secondary' => $validated['name_secondary'] ?? null,
+                'language' => $validated['language'],
+                'is_language_secondary_enabled' => $validated['is_language_secondary_enabled'],
+                'language_secondary' => $validated['language_secondary'] ?? null,
+                'code' => $validated['code'],
+            ]
+        );
+
+        collect($request->categories)->map(function ($category) use ($gameType) {
+            // if > 1,000,000, then it is a timestamp placeholder, not an actual id
+            $gameType->categories()->updateOrCreate(
+                [
+                    'id' => $category['id'] ?? null,
+                ],
+                [
+                    'game_type_id' => $category['game_type_id'],
+                    'name' => $category['name'],
+                    'name_secondary' => $category['name_secondary'],
+                    'code' => $category['code'],
+                    'weights' => WeightUtil::sortWeights($category['weights']),
+                    'duration' => $category['editDuration'],
+                ]
+            );
+        });
         //
+        return redirect()->back();
     }
 
     /**
@@ -61,36 +115,6 @@ class GameTypeController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $gameType = GameType::where('id', $id)->first();
-
-        $gameType->name = $request->name;
-        $gameType->name_secondary = $request->name_secondary;
-        $gameType->code = $request->code;
-        $gameType->winner_plus = $request->winner_plus;
-        $gameType->language = $request->language;
-        $gameType->is_language_secondary_enabled = $request->is_language_secondary_enabled;
-        $gameType->language_secondary = $request->language_secondary;
-
-        $gameType->save();
-
-        collect($request->categories)->map(function ($category) use ($gameType) {
-            // if > 1,000,000, then it is a timestamp placeholder, not an actual id
-            $gameType->categories()->updateOrCreate(
-                [
-                    'id' => $category['id'] ?? null,
-                ],
-                [
-                    'game_type_id' => $category['game_type_id'],
-                    'name' => $category['name'],
-                    'name_secondary' => $category['name_secondary'],
-                    'code' => $category['code'],
-                    'weights' => WeightUtil::sortWeights($category['weights']),
-                    'duration' => $category['editDuration'],
-                ]
-            );
-        });
-        //
-        return redirect()->back();
     }
 
     /**

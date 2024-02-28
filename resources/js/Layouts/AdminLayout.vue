@@ -47,18 +47,18 @@
       </a-menu>
     </a-layout-sider>
     <a-layout>
-      <!-- <a-layout-header style="background: #fff; padding: 0">
-      <menu-unfold-outlined
-        v-if="collapsed"
-        class="trigger"
-        @click="() => (collapsed = !collapsed)"
-      />
-      <menu-fold-outlined
-        v-else
-        class="trigger"
-        @click="() => (collapsed = !collapsed)"
-      />
-    </a-layout-header> -->
+      <a-layout-header style="background: #fff; padding: 0">
+        <menu-unfold-outlined
+          v-if="collapsed"
+          class="trigger"
+          @click="() => (collapsed = !collapsed)"
+        />
+        <menu-fold-outlined
+          v-else
+          class="trigger"
+          @click="() => (collapsed = !collapsed)"
+        />
+      </a-layout-header>
       <a-layout-content>
         <template #header>
           <div>

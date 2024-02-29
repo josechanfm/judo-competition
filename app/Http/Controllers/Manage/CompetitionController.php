@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Models\Competition;
 use App\Models\GameType;
@@ -16,10 +17,10 @@ class CompetitionController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Manage/Competitions',[
-            'countries'=>Country::all(),
-            'competitionTypes'=>GameType::all(),
-            'competitions'=>Competition::all()
+        return Inertia::render('Manage/Competitions', [
+            'countries' => Country::all(),
+            'competitionTypes' => GameType::all(),
+            'competitions' => Competition::all()
         ]);
     }
 
@@ -36,8 +37,18 @@ class CompetitionController extends Controller
      */
     public function store(Request $request)
     {
-        Competition::create($request->all());
-        return response()->json($request->all());
+        $token = Str::random(12);
+        $gameType = GameType::where('id', $request->competition_type_id)->first();
+        Competition::create([
+            ...$request->all(),
+            'token' => $token,
+            'status' => 0,
+            'is_cancelled' => 0,
+            'language' => $gameType->language,
+            'is_language_secondary_enabled' => $gameType->is_language_secondary_enabled,
+            'language_secondary' => $gameType->language_secondary,
+        ]);
+        return redirect()->back();
     }
 
     /**
@@ -45,7 +56,6 @@ class CompetitionController extends Controller
      */
     public function show(Competition $competition)
     {
-
     }
 
     /**
@@ -63,7 +73,6 @@ class CompetitionController extends Controller
     {
         $competition->update($request->all());
         return redirect()->back();
-        
     }
 
     /**

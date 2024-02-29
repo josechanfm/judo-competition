@@ -40,7 +40,18 @@
                   style="width: 200px"
                 ></a-select>
               </a-form-item>
-              <a-form-item name="language" label="Language Secondary">
+              <a-form-item label="開啓第二語言">
+                <a-switch
+                  v-model:checked="newGameType.is_language_secondary_enabled"
+                  :unCheckedValue="0"
+                  :checkedValue="1"
+                />
+              </a-form-item>
+              <a-form-item
+                name="language"
+                label="Language Secondary"
+                v-if="newGameType.is_language_secondary_enabled == 1"
+              >
                 <a-select
                   v-model:value="newGameType.language_secondary"
                   :options="languages"
@@ -67,7 +78,7 @@
         </div>
       </a-card>
       <template v-for="gameType in gameTypes" :key="gameType.id">
-        <a-card :title="gameType.name" :bordered="false">
+        <a-card :title="gameType.name" :bordered="false" class="mb-4">
           <template #extra>
             <a-button v-if="gameType.isEditing" @click="gameType.isEditing = false"
               >Cancel</a-button
@@ -96,7 +107,18 @@
                     {{ languages.find((l) => l.value == gameType.language).label }}
                   </p>
                 </a-form-item>
-                <a-form-item name="language" label="Language Secondary">
+                <a-form-item label="開啓第二語言" v-if="gameType.isEditing">
+                  <a-switch
+                    v-model:checked="gameType.is_language_secondary_enabled"
+                    :unCheckedValue="0"
+                    :checkedValue="1"
+                  />
+                </a-form-item>
+                <a-form-item
+                  name="language"
+                  label="Language Secondary"
+                  v-if="gameType.is_language_secondary_enabled == 1"
+                >
                   <a-select
                     v-if="gameType.isEditing"
                     v-model:value="gameType.language_secondary"
@@ -297,7 +319,12 @@ export default {
       );
       // console.log(record.categories);
       this.$inertia.post(route("manage.gameTypes.store"), record, {
-        onSuccess(res) {},
+        onSuccess(res) {
+          console.log(res);
+        },
+        onError(errors) {
+          console.log(errors);
+        },
       });
     },
     test() {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Models\Config;
 use App\Models\GameCategory;
@@ -42,13 +43,14 @@ class GameTypeController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($validated['is_language_secondary_enabled']);
         $validated = $request->validate([
             'id' => 'sometimes',
             'name' => 'required',
             'name_secondary' => 'required_if:is_language_secondary_enabled,true',
             // TODO: add filtering
             'language' => 'required',
-            'is_language_secondary_enabled' => 'required|boolean',
+            'is_language_secondary_enabled' => 'required',
             'language_secondary' => 'required_if:is_language_secondary_enabled,true',
             'code' => 'required',
             'categories' => 'array',
@@ -57,7 +59,7 @@ class GameTypeController extends Controller
             //            'categories.*.name_en' => 'required',
             'categories.*.name_secondary' => 'required_if:is_language_secondary_enabled,true',
             'categories.*.code' => 'required_if:categories,true',
-            'categories.*.duration' => 'required_if:categories,true|integer',
+            'categories.*.editDuration' => 'required_if:categories,true|integer',
             'categories.*.weights' => 'array|required_if:categories,true',
             'delete_categories' => 'array',
         ]);
@@ -68,7 +70,7 @@ class GameTypeController extends Controller
                 //                'name_en' => $validated['name_en'],
                 'name_secondary' => $validated['name_secondary'] ?? null,
                 'language' => $validated['language'],
-                'is_language_secondary_enabled' => $validated['is_language_secondary_enabled'],
+                'is_language_secondary_enabled' => $validated['is_language_secondary_enabled'] == true ? 1 : 0,
                 'language_secondary' => $validated['language_secondary'] ?? null,
                 'code' => $validated['code'],
             ]

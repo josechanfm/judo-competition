@@ -175,7 +175,11 @@
                     >
                       編輯
                     </a-button>
-                    <a-button type="link" danger @click="removeCategory(category)">
+                    <a-button
+                      type="link"
+                      danger
+                      @click="removeCategory(gameType, category)"
+                    >
                       移除
                     </a-button>
                   </template>
@@ -241,6 +245,9 @@
                     </a-space>
                   </div>
                 </div>
+              </div>
+              <div v-if="gameType.isEditing == true">
+                <a-button @click="addCategory(gameType)">添加組別</a-button>
               </div>
             </div>
           </div>
@@ -327,6 +334,18 @@ export default {
         },
       });
     },
+    addCategory(gameType) {
+      gameType.categories.push({
+        id: 100000000,
+        code: "",
+        game_type_id: gameType.id,
+        name: "",
+        weights: [],
+        name_secondary: "",
+        duartion: "",
+      });
+      gameType.editCategory = 100000000;
+    },
     test() {
       console.log(this.gameTypes);
     },
@@ -336,7 +355,14 @@ export default {
       });
     },
     removeCategory(gameType, category) {
-      gameType.removeCategorys.push(category);
+      if (!gameType.removeCategories) {
+        gameType.removeCategories = [];
+      }
+      gameType.removeCategories.push(category);
+      const index = gameType.categories.findIndex((c) => c.id === category.id);
+      if (index >= 0) {
+        gameType.categories.splice(index, 1);
+      }
     },
     confirmAddWeight(category) {
       if (

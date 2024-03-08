@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+
 use Inertia\Inertia;
 use App\Models\Config;
 use App\Models\GameCategory;
@@ -80,7 +80,7 @@ class GameTypeController extends Controller
             // if > 1,000,000, then it is a timestamp placeholder, not an actual id
             $gameType->categories()->updateOrCreate(
                 [
-                    'id' => $category['id'] ?? null,
+                    'id' => $category['id'] < 10000000 ? $category['id'] : null,
                 ],
                 [
                     'game_type_id' => $category['game_type_id'],
@@ -92,6 +92,10 @@ class GameTypeController extends Controller
                 ]
             );
         });
+        collect($request->removeCategories)->map(function ($category) {
+            GameCategory::where('id', $category['id'])->delete();
+        });
+        // dd($request->removeCategories);
         //
         return redirect()->back();
     }

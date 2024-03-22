@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('competitions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('competition_type_id');
+
             $table->date('date_start');
             $table->date('date_end');
             $table->string('country');
@@ -27,9 +27,7 @@ return new class extends Migration
             $table->string('token');
             $table->unsignedSmallInteger('status');
             $table->boolean('is_cancelled');
-            $table->string('language');
-            $table->boolean('is_language_secondary_enabled');
-            $table->string('language_secondary');
+            
             $table->timestamps();
         });
     }

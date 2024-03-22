@@ -14,16 +14,16 @@ return new class extends Migration
         Schema::create('programs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
-            $table->integer('sequence');
+            $table->foreignId('competition_category_id')->constrained()->cascadeOnDelete();
+            $table->integer('sequence')->default(0);
             $table->date('date');
-            $table->string('category_group');
-            $table->string('weight_group');
+            $table->string('weight_code');
             $table->integer('mat');
             $table->integer('section');
             $table->string('contest_system');
             $table->unsignedTinyInteger('chart_size');
-            $table->time('duration');
-            $table->unsignedSmallInteger('status')->default(0);          
+            $table->integer('duration');
+            $table->unsignedSmallInteger('status')->default(0);
             $table->timestamps();
         });
     }

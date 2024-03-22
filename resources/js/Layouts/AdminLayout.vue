@@ -34,11 +34,15 @@
       <a-menu v-model:selectedKeys="selectedKeys" theme="light" mode="inline">
         <a-menu-item key="1">
           <user-outlined />
-          <span>Home</span>
+          <inertia-link class="mx-2" :href="route('manage.competitions.index')">
+            Home
+          </inertia-link>
         </a-menu-item>
         <a-menu-item key="2">
           <video-camera-outlined />
-          <span>Users</span>
+          <inertia-link class="mx-2" :href="route('manage.gameTypes.index')">
+            Game Type
+          </inertia-link>
         </a-menu-item>
         <a-menu-item key="3">
           <upload-outlined />

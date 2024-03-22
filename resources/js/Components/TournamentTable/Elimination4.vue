@@ -4,10 +4,10 @@
     <table class="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>
-            <td class="playerBox" >{{bouts[0].white_name_display}}</td>
+            <td class="playerBox" >{{bouts[0]?.white_name_display}}</td>
             <td class="firstColumn" rowspan="2" >
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[0].circle }}</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[0]?.circle }}</span></td></tr>
                 </table>
             </td>
             <td></td>
@@ -15,10 +15,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">2</td>
-            <td class="playerBox">{{bouts[0].blue_name_display}}</td>
+            <td class="playerBox">{{bouts[0]?.blue_name_display}}</td>
             <!-- <td></td> -->
             <td class="topRight alignRightBottom" rowspan="2">
-                <span class="circle">{{ bouts[2].circle }}</span>
+                <span class="circle">{{ bouts[2]?.circle }}</span>
             </td>
             <td rowspan="2"></td>
         </tr>
@@ -38,10 +38,10 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">5</td>
-            <td class="playerBox">{{bouts[1].white_name_display}}</td>
+            <td class="playerBox">{{bouts[1]?.white_name_display}}</td>
             <td class="firstColumn" rowspan="2">
                 <table class="innerTable">
-                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[1].circle }}</span></td></tr>
+                    <tr><td class="topRight bottomRight alignRightBottom"><span class="circle">{{ bouts[1]?.circle }}</span></td></tr>
                 </table>
             </td>
             <!-- <td></td> -->
@@ -49,7 +49,7 @@
         </tr>
         <tr>
             <td v-if="showTableSeq" class="seq">6</td>
-            <td class="playerBox">{{bouts[1].blue_name_display}}</td>
+            <td class="playerBox">{{bouts[1]?.blue_name_display}}</td>
             <!-- <td></td> -->
             <td></td>
             <td></td>

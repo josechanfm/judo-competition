@@ -13,8 +13,10 @@ class Bout extends Model
     public function program(){
         return $this->belongsTo(Program::class);
     }
+
     public function getWhitePlayerAttribute(){
         if($this->white==0){
+            //return Athlete::make(["name_display"=>"ss"]);
             return (object)["name_display"=>""];
         }else{
             return  Athlete::find($this->white);
@@ -28,3 +30,6 @@ class Bout extends Model
         };
     }
 }
+
+
+

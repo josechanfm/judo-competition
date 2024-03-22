@@ -7,7 +7,7 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
       </div>
     </template>
-    <div class="py-12 mx-auto max-w-6xl">
+    <div class="py-12 mx-8 md:max-w-6xl xl:mx-auto">
       <div class="mb-8 flex justify-between">
         <div class="text-xl font-bold">賽事類型設定</div>
         <div>
@@ -80,9 +80,7 @@
       <template v-for="gameType in gameTypes" :key="gameType.id">
         <a-card :title="gameType.name" :bordered="false" class="mb-4">
           <template #extra>
-            <a-button v-if="gameType.isEditing" @click="gameType.isEditing = false"
-              >Cancel</a-button
-            >
+            <a-button v-if="gameType.isEditing" @click="reload">Cancel</a-button>
             <a-button v-else @click="gameType.isEditing = true">Edit</a-button>
           </template>
           <div class="flex gap-6 sm:flex-row flex-col">
@@ -294,19 +292,11 @@ export default {
       },
     };
   },
-  setup(props) {
-    console.log(props.gameTypes);
-    // const formatTime = (gameCategories) => {
-    //   gameCategories.forEach((category) => {
-    //     category.duration = dayjs.duration(category.duration, "s").format("mm:ss");
-    //   });
-    // };
-    // props.gameTypes.forEach((type) => {
-    //   formatTime(type.categories);
-    // });
-  },
   created() {},
   methods: {
+    reload() {
+      this.$inertia.reload(["gameTypes"]);
+    },
     createNewGameType() {
       this.newGameType = {
         is_language_secondary_enabled: 0,

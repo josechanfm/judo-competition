@@ -25,7 +25,7 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard',function(){
+Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 });
 Route::get('default/dashboard', function () {
@@ -37,16 +37,17 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('manage/game_types',App\Http\Controllers\Manage\GameTypeController::class)->names('manage.gameTypes');
-    Route::resource('manage/competitions',App\Http\Controllers\Manage\CompetitionController::class)->names('manage.competitions');
-    Route::resource('manage/competition/{competition}/programs',App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
-    Route::resource('manage/competition/{competition}/athletes',App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
-    Route::get('manage/competition/{competition}/program/gen_bouts',[App\Http\Controllers\Manage\ProgramController::class,'gen_bouts'])->name('manage.competition.program.gen_bouts');
-    Route::get('manage/competition/{competition}/progress',[App\Http\Controllers\Manage\ProgramController::class,'progress'])->name('manage.competition.progress');
-    Route::get('manage/competition/{competition}/chart_pdf',[App\Http\Controllers\Manage\ProgramController::class,'chartPdf'])->name('manage.competition.chartPdf');
+    Route::resource('manage/game_types', App\Http\Controllers\Manage\GameTypeController::class)->names('manage.gameTypes');
+    Route::resource('manage/competitions', App\Http\Controllers\Manage\CompetitionController::class)->names('manage.competitions');
+    Route::resource('manage/competition/{competition}/programs', App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
+    Route::resource('manage/competition/{competition}/athletes', App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
+    Route::get('manage/competition/{competition}/program/gen_bouts', [App\Http\Controllers\Manage\ProgramController::class, 'gen_bouts'])->name('manage.competition.program.gen_bouts');
+    Route::get('manage/competition/{competition}/progress', [App\Http\Controllers\Manage\ProgramController::class, 'progress'])->name('manage.competition.progress');
+    Route::get('manage/competition/{competition}/chart_pdf', [App\Http\Controllers\Manage\ProgramController::class, 'chartPdf'])->name('manage.competition.chartPdf');
+    Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
 });
 
 
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

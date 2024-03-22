@@ -17,9 +17,9 @@ class GameCategorySeeder extends Seeder
             'game_type_id' => '1',
             'name' => 'A組',
             'name_secondary' => 'Untitled',
-            'code'=>'A',
-            'weights'=>'["MW55-","MW60-","FW48-"]',
-            'duration'=>'4'
+            'code' => 'A',
+            'weights' => '["MW55-","MW60-","FW48-"]',
+            'duration' => 240
         ]);
     }
 }

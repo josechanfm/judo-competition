@@ -39,7 +39,7 @@ return new class extends Migration
             $table->bigInteger('winner')->default(0);
             $table->foreignId('white_score')->default(0);
             $table->foreignId('blue_score')->default(0);
-            $table->time('duration')->default(0);
+            $table->integer('duration')->default(0);
 
             $table->tinyInteger('status')->default(0);            
             $table->timestamps();

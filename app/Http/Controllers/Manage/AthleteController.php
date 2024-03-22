@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
+use App\Models\Athlete;
 use App\Models\Competition;
+use App\Models\Team;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,8 +18,12 @@ class AthleteController extends Controller
     public function index(Competition $competition)
     {
         $competition->athletes;
-        return Inertia::render('Manage/Athletes',[
-            'competition'=>$competition
+        $programs = $competition->programs;
+        $teams = Team::all();
+        return Inertia::render('Manage/Athletes', [
+            'competition' => $competition,
+            'programs' => $programs,
+            'teams' => $teams
         ]);
     }
 
@@ -56,9 +62,20 @@ class AthleteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Competition $competition, Athlete $athlete)
     {
         //
+        // dd($request);
+        $validated = $request->validate([
+            'name_zh' => 'required',
+            // TODO: add filtering
+            'name_pt' => '',
+            'name_display' => '',
+            'gender' => 'required',
+            'team_id' => 'required',
+        ]);
+
+        $athlete->update($validated);
     }
 
     /**

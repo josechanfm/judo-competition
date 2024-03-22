@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "ant-design-vue": "^4.0.6",
+        "moment": "^2.30.1",
         "vite-svg-loader": "^4.0.0",
         "vue-svg-loader": "^0.10.0"
     }

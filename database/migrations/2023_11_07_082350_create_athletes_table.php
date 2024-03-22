@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name_pt')->nullable();
             $table->string('name_display');
             $table->string('gender');
-            $table->string('team_id')->nullable();
+            $table->integer('team_id');
             $table->double('weight')->nullable();
             // unique athlete identifier, will be used later
             $table->string('uai')->nullable();            

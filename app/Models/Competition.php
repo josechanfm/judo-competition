@@ -25,4 +25,12 @@ class Competition extends Model
     {
         return $this->hasMany(Athlete::class);
     }
+    public function categories()
+    {
+        return $this->hasMany(CompetitionCategory::class);
+    }
+    public function competition_type()
+    {
+        return $this->hasOne(CompetitionType::class);
+    }
 }

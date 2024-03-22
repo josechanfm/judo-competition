@@ -14,14 +14,13 @@ return new class extends Migration
         Schema::create('competition_categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
-            $table->integer('sequence');
-            $table->date('date');
-            $table->string('category');
-            $table->string('weight_group');
-            $table->integer('mat');
-            $table->integer('section');
-            $table->string('contest_system');
-            $table->time('duration');
+
+            $table->string('code');
+            $table->string('name');
+            $table->string('name_secondary');
+            $table->integer('duration');
+            $table->json('weights');
+
             $table->timestamps();
         });
     }

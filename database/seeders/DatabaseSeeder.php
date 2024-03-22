@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
             CompetitionSeeder::class,
             ProgramSeeder::class,
             AthleteSeeder::class,
+            TeamSeeder::class,
         ]);
-
     }
 }

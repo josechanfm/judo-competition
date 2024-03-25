@@ -315,6 +315,7 @@ export default {
             .asSeconds())
       );
       // console.log(record.categories);
+      console.log(record);
       this.$inertia.post(route("manage.gameTypes.store"), record, {
         onSuccess(res) {
           console.log(res);

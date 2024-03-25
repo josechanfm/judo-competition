@@ -157,7 +157,16 @@
             </div>
             <div class="w-full flex flex-col" v-if="modal.title == 'Edit'">
               <div class="">
-                <a-form-item label="Competition Name" name="competition_name">
+                <a-form-item
+                  label="Competition Name"
+                  :name="['competition_type', 'name_secondary']"
+                  :rules="[
+                    {
+                      required: true,
+                      message: 'Competition Name is required!',
+                    },
+                  ]"
+                >
                   <a-input v-model:value="modal.data.competition_type.name"></a-input>
                 </a-form-item>
               </div>
@@ -167,7 +176,13 @@
               >
                 <a-form-item
                   label="Competition Name (Foreign)"
-                  name="competition_name_secondary"
+                  :name="['competition_type', 'name_secondary']"
+                  :rules="[
+                    {
+                      required: true,
+                      message: 'Competition Name (Foreign) is required!',
+                    },
+                  ]"
                 >
                   <a-input
                     v-model:value="modal.data.competition_type.name_secondary"
@@ -177,7 +192,13 @@
             </div>
             <div class="w-full flex flex-col" v-if="modal.title == 'Edit'">
               <div class="">
-                <a-form-item label="Competition Language" name="language">
+                <a-form-item
+                  label="Competition Language"
+                  :name="['competition_type', 'language']"
+                  :rules="[
+                    { required: true, message: 'Competition Language is required!' },
+                  ]"
+                >
                   <a-select
                     v-model:value="modal.data.competition_type.language"
                     :options="selectLanguage"
@@ -191,7 +212,13 @@
               >
                 <a-form-item
                   label="Competition Language (Foreign)"
-                  name="language_secondary"
+                  :name="['competition_type', 'language_secondary']"
+                  :rules="[
+                    {
+                      required: true,
+                      message: 'Competition Language (Foreign) is required!',
+                    },
+                  ]"
                 >
                   <a-select
                     v-model:value="modal.data.competition_type.language_secondary"
@@ -201,8 +228,11 @@
                 </a-form-item>
               </div>
             </div>
-            <div class="w-full" v-if="modal.title == 'Edit'">
-              <a-form-item label="開啓第二語言">
+            <div class="w-1/2" v-if="modal.title == 'Edit'">
+              <a-form-item
+                label="開啓第二語言"
+                name="competition_type_is_language_secondary_enabled"
+              >
                 <a-switch
                   v-model:checked="
                     modal.data.competition_type.is_language_secondary_enabled
@@ -389,7 +419,6 @@ export default {
               },
             }
           );
-
           console.log("values", this.modal.data, this.modal.data);
         })
         .catch((error) => {

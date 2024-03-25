@@ -43,6 +43,7 @@ class GameTypeController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request->all());
         // dd($validated['is_language_secondary_enabled']);
         $validated = $request->validate([
             'id' => 'sometimes',

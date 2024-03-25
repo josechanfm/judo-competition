@@ -86,7 +86,7 @@ export default {
         },
         {
           title: "Weight Group",
-          dataIndex: "weight_group",
+          dataIndex: "weight_code",
         },
         {
           title: "Mat",
@@ -102,7 +102,7 @@ export default {
         },
         {
           title: "Duration",
-          dataIndex: "duration",
+          dataIndex: "duration_formatted",
         },
         {
           title: "Athletes",

@@ -19,13 +19,18 @@ class ProgramController extends Controller
      */
     public function index(Competition $competition)
     {
-        $athletes = $competition->athletes;
-        $programs = Program::where('competition_id', $competition->id)->with('athletes')->get();
         //$competition->categories;
         // dd($programs);
         return Inertia::render('Manage/Programs', [
-            'programs' => $programs,
-            'athletes' => $athletes,
+            'programs' => $competition->programs()
+                ->with('competitionCategory')
+                ->withCount('athletes')
+                ->orderBy('date')
+                ->orderBy('section')
+                ->orderBy('mat')
+                ->orderBy('sequence')
+                ->get(),
+            'athletes' => $competition->athletes,
             'competition' => $competition
         ]);
     }
@@ -51,11 +56,10 @@ class ProgramController extends Controller
      */
     public function show(Competition $competition, Program $program)
     {
-        $program->bouts;
-        $program->athletes;
-        // dd($program);
+        // dd($program->athletes);
         return Inertia::render('Manage/Program', [
-            'program' => $program
+            'program' => $program,
+            'athletes' => $competition->athletes,
         ]);
     }
 
@@ -86,6 +90,12 @@ class ProgramController extends Controller
     public function removeAthlete($programId, $athleteId)
     {
         AthleteProgram::where('program_id', $programId)->where('athlete_id', $athleteId)->delete();
+
+        return redirect()->back();
+    }
+    public function joinAthlete($programId, $athleteId)
+    {
+        AthleteProgram::insert(['program_id' => $programId, 'athlete_id' => $athleteId]);
 
         return redirect()->back();
     }
@@ -425,5 +435,21 @@ class ProgramController extends Controller
 
 
         return response()->json($program);
+    }
+
+    public function updateSequence(Request $request)
+    {
+        $validated = $request->validate([
+            '*.id' => 'required',
+            '*.mat' => 'required',
+            '*.section' => 'required',
+            '*.sequence' => 'required',
+        ]);
+
+        collect($validated)->each(function (array $val) {
+            Program::where('id', $val['id'])->update($val);
+        });
+
+        return redirect()->back();
     }
 }

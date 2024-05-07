@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Athlete extends Model
 {
     protected $fillable = [
-        'name_zh', 'name_pt', 'name_display', 'gender', 'team_id'
+        'name_zh', 'name_pt', 'name_display', 'gender', 'team_id', 'competition_id'
     ];
     use HasFactory;
 

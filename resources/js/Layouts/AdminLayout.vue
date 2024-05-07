@@ -30,21 +30,20 @@
           </div>
         </inertia-link>
       </div>
-
       <a-menu v-model:selectedKeys="selectedKeys" theme="light" mode="inline">
-        <a-menu-item key="1">
+        <a-menu-item key="competitions.index">
           <user-outlined />
           <inertia-link class="mx-2" :href="route('manage.competitions.index')">
             Home
           </inertia-link>
         </a-menu-item>
-        <a-menu-item key="2">
+        <a-menu-item key="gameTypes.index">
           <video-camera-outlined />
           <inertia-link class="mx-2" :href="route('manage.gameTypes.index')">
             Game Type
           </inertia-link>
         </a-menu-item>
-        <a-menu-item key="3">
+        <a-menu-item key="contest_type">
           <upload-outlined />
           <span>Contest Types</span>
         </a-menu-item>
@@ -108,6 +107,10 @@ export default {
       selectedKeys,
       collapsed,
     };
+  },
+  mounted() {
+    console.log(route().current().split(".").slice(1).join("."));
+    this.selectedKeys.push(route().current().split(".").slice(1).join("."));
   },
 };
 </script>

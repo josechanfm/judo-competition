@@ -78,6 +78,7 @@ class CompetitionController extends Controller
             // dd($gc);
             unset($gc['game_type_id']);
             unset($gc['id']);
+            $seq = 1;
             $competitionCategory = CompetitionCategory::create([...$gc, 'competition_id' => $competition->id]);
             foreach ($competitionCategory->weights as $w) {
                 Program::create([
@@ -87,12 +88,13 @@ class CompetitionController extends Controller
                     'mat' => 1,
                     'section' => 1,
                     'weight_code' => $w,
-                    'sequence' => 0,
+                    'sequence' => $seq,
                     'contest_system' => 'kos',
                     'duration' => $competitionCategory->duration,
                     'chart_size' => 0,
                     'status' => 0,
                 ]);
+                $seq++;
             }
         }
         return redirect()->back();

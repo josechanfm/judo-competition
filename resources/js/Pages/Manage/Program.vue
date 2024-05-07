@@ -1,5 +1,5 @@
 <template>
-  <inertia-head :title="program.category_group + program.weight_group" />
+  <inertia-head :title="program.weight_code" />
 
   <AdminLayout>
     <!-- Section, Mat sequences
@@ -42,10 +42,15 @@
                     placement="rightTop"
                     ok-text="Yes"
                     cancel-text="No"
-                    @confirm="joinAthlete"
+                    @confirm="joinAthlete(selectAthlete)"
                   >
+                    <template #icon> </template>
                     <template #title>
-                      <a-select></a-select>
+                      <a-select
+                        class="w-40"
+                        v-model:value="selectAthlete"
+                        :options="selectAthletes"
+                      ></a-select>
                     </template>
                     <a-button type="primary">加入運動員</a-button>
                   </a-popconfirm>
@@ -100,11 +105,13 @@ export default {
     Tournament32,
     Tournament64,
   },
-  props: ["program"],
+  props: ["program", "athletes"],
   data() {
     return {
       masterSequence: false,
       bouts: [],
+      selectAthlete: "",
+      selectAthletes: [],
       tournamentTable: "Tournament" + this.program.chart_size,
       dateFormat: "YYYY-MM-DD",
       playersList: [
@@ -199,6 +206,12 @@ export default {
   },
   created() {
     this.rebuildBouts();
+    this.selectAthletes = this.athletes.map(function (x) {
+      return {
+        label: x.name_zh,
+        value: x.id,
+      };
+    });
   },
   methods: {
     rebuildBouts() {
@@ -219,6 +232,18 @@ export default {
         this.bouts.splice(this.program.chart_size - 4, 0, "");
         this.bouts.splice(this.program.chart_size - 3, 0, "");
       }
+    },
+    joinAthlete(athlete) {
+      console.log(athlete);
+      this.$inertia.post(
+        route("manage.program.joinAthlete", {
+          program: this.program.id,
+          athlete: athlete,
+        }),
+        {
+          onSuccess: (page) => {},
+        }
+      );
     },
     moveAthlete(athlete) {
       this.$inertia.delete(

@@ -8,9 +8,25 @@ use Illuminate\Database\Eloquent\Model;
 class Program extends Model
 {
     use HasFactory;
+
+    public const ERM = 'erm';
+    public const RRB = 'rrb';
+    public const KOS = 'kos';
+    public const RRBA = 'rrba';
+
+    public const ALL_CONTEST_SYSTEMS = [
+        self::ERM,
+        self::RRB,
+        self::KOS,
+        self::RRBA,
+    ];
+
     protected $fillable = ['competition_id', 'competition_category_id', 'sequence', 'date', 'weight_code', 'mat', 'section', 'contest_system', 'chart_size', 'duration', 'status'];
     protected $appends = [
         'duration_formatted',
+        'bouts',
+        'athletes',
+        'bouts_count',
     ];
     public function bouts()
     {
@@ -21,8 +37,50 @@ class Program extends Model
         return $this->belongsToMany(Athlete::class)->withPivot('id as athlete_program_id');
     }
 
+    public function competitionCategory()
+    {
+        return $this->belongsTo(CompetitionCategory::class);
+    }
+
+    private function _roundToBaseTwoCeil($number): int
+    {
+        if ($number == 0) {
+            return 1;
+        } else {
+            return pow(2, ceil(log($number, 2)));
+        }
+    }
+
+    public function getAthletesAttribute()
+    {
+        return $this->athletes()->get();
+    }
+    public function getBoutsAttribute()
+    {
+        return $this->bouts()->get();
+    }
+
     public function getDurationFormattedAttribute()
     {
         return sprintf('%02d:%02d', floor($this->duration / 60), $this->duration % 60);
+    }
+
+    public function getBoutsCountAttribute(): int
+    {
+        if ($this->bouts()->exists()) {
+            return $this->bouts()->count();
+        }
+
+        switch ($this->contest_system) {
+            case self::RRBA:
+                return 6;
+            case self::RRB:
+                $cnt = $this->athletes()->count();
+                return $cnt * ($cnt - 1) / 2;
+            case self::KOS:
+                return $this->_roundToBaseTwoCeil($this->athletes()->count()) - 1;
+            case self::ERM:
+                return $this->_roundToBaseTwoCeil($this->athletes()->count()) + ($this->chart_size < 8 ? 0 : 3);
+        }
     }
 }

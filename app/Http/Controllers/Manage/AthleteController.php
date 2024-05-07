@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
+use App\Imports\AthletesImport;
 use App\Models\Athlete;
 use App\Models\Competition;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
 
 
 class AthleteController extends Controller
@@ -19,7 +21,7 @@ class AthleteController extends Controller
     {
         $competition->athletes;
         $programs = $competition->programs;
-        $teams = Team::all();
+        $teams = $competition->teams;
         return Inertia::render('Manage/Athletes', [
             'competition' => $competition,
             'programs' => $programs,
@@ -38,9 +40,21 @@ class AthleteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Competition $competition, Request $request)
     {
         //
+        $validated = $request->validate([
+            'name_zh' => 'required',
+            // TODO: add filtering
+            'name_pt' => '',
+            'name_display' => '',
+            'gender' => 'required',
+            'team_id' => 'required',
+        ]);
+
+        Athlete::Create([...$validated, 'competition_id' => $competition->id]);
+
+        return redirect()->back();
     }
 
     /**
@@ -59,6 +73,29 @@ class AthleteController extends Controller
         //
     }
 
+    public function import(Request $request, Competition $competition)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+        ]);
+
+        $competition->athletes()->delete();
+
+        // remove all athletes in programs
+        $competition->programs()->each(function ($program) {
+            $program->athletes()->detach();
+        });
+
+        $import = new AthletesImport($competition);
+
+        $import->import(request()->file('file'));
+        // dd($import->failures());
+        $competition->update(['status' => 1]);
+
+        return response()->json([
+            'errors' => $import->failures()
+        ]);
+    }
     /**
      * Update the specified resource in storage.
      */

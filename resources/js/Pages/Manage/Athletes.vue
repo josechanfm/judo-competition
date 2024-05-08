@@ -301,7 +301,7 @@ export default {
       // TODO: handle import athlete list
       window.axios
         .post(
-          route("admin.contests.athletes.import", this.$page.props.contest.id),
+          route("manage.competition.athletes.import", this.$page.props.competition.id),
           formData,
           {
             headers: {

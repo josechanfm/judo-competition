@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\BoutGenerationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,5 +37,9 @@ class Competition extends Model
     public function competition_type()
     {
         return $this->hasOne(CompetitionType::class);
+    }
+    public function generateBouts()
+    {
+        (new BoutGenerationService($this))->generate();
     }
 }

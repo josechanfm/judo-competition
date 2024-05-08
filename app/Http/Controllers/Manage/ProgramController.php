@@ -128,7 +128,15 @@ class ProgramController extends Controller
         return $pdf->stream();
         //return $pdf->download('chartPdf.pdf');
     }
+    public function lock(Competition $competition)
+    {
+        // remove previously generated bouts
+        $competition->bouts()->delete();
+        // TODO: generate bouts
+        $competition->generateBouts();
 
+        return redirect()->back();
+    }
     public function gen_bouts(Competition $competition)
     {
         //Create bouts records according to the contest system of each program, the in_program_sequence is given, but the sequence column is temporary

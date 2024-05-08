@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\AthletesImport;
 use App\Models\Athlete;
 use App\Models\Competition;
+use App\Models\Program;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -72,19 +73,25 @@ class AthleteController extends Controller
     {
         //
     }
-
+    public function lock(Competition $competition)
+    {
+        $competition->programs->each(function (Program $program) {
+            $program->setProgram();
+        });
+    }
     public function import(Request $request, Competition $competition)
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls',
         ]);
 
-        $competition->athletes()->delete();
-
-        // remove all athletes in programs
         $competition->programs()->each(function ($program) {
             $program->athletes()->detach();
         });
+
+        $competition->athletes()->delete();
+
+        // remove all athletes in programs
 
         $import = new AthletesImport($competition);
 

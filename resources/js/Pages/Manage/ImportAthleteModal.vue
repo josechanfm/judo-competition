@@ -65,14 +65,13 @@ export default {
   },
   methods: {
     handleImport() {
-      console.log(this.$page.props);
       const formData = new FormData();
       formData.append("file", this.files[0].originFileObj);
 
       // TODO: handle import athlete list
       window.axios
         .post(
-          route("admin.competitions.athletes.import", this.$page.props.competition.id),
+          route("admin.competitions.athletes.import"),
           formData,
           {
             headers: {

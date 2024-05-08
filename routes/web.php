@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('manage/competition/{competition}/athletes', App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
     Route::post('manage/competition/{competition}/programs/updateSequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.programs.sequence.update');
     Route::post('manage/competition/{competition}/athletes/import', [App\Http\Controllers\Manage\AthleteController::class, 'import'])->name('manage.competition.athletes.import');
+    Route::post('manage/competition/{competition}/programs/lock', [\App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.programs.lock');
     Route::get('manage/competition/{competition}/program/gen_bouts', [App\Http\Controllers\Manage\ProgramController::class, 'gen_bouts'])->name('manage.competition.program.gen_bouts');
     Route::get('manage/competition/{competition}/progress', [App\Http\Controllers\Manage\ProgramController::class, 'progress'])->name('manage.competition.progress');
     Route::get('manage/competition/{competition}/chart_pdf', [App\Http\Controllers\Manage\ProgramController::class, 'chartPdf'])->name('manage.competition.chartPdf');

@@ -65,6 +65,39 @@ class Program extends Model
         return sprintf('%02d:%02d', floor($this->duration / 60), $this->duration % 60);
     }
 
+    public function updateChartSize()
+    {
+        $athletesCount = $this->athletes()->count();
+
+        $chartSize = pow(2, strlen(decbin($athletesCount - 1)));
+
+        switch ($this->contest_system) {
+            case self::ERM:
+            case self::KOS:
+                $this->chart_size = $chartSize;
+                break;
+            case self::RRB:
+            case self::RRBA:
+                $this->chart_size = $athletesCount;
+                break;
+        }
+    }
+    public function setProgram()
+    {
+        $athletesCount = $this->athletes()->count();
+
+        // convert to rrb if athlete count < 8
+        if ($athletesCount < 6) {
+            $this->contest_system = self::RRB;
+        }
+
+        if ($athletesCount > 32) {
+            $this->contest_system = self::KOS;
+        }
+
+        $this->updateChartSize();
+        $this->save();
+    }
     public function getBoutsCountAttribute(): int
     {
         if ($this->bouts()->exists()) {

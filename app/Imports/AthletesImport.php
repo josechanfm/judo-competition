@@ -27,7 +27,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
      * @return \Illuminate\Database\Eloquent\Model|null
      */
 
-    private Competition $contest;
+    private Competition $competition;
 
     public function startRow(): int
     {
@@ -38,16 +38,16 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     {
         return 2;
     }
-    public function __construct(Competition $contest)
+    public function __construct(Competition $competition)
     {
-        $this->contest = $contest;
+        $this->competition = $competition;
     }
 
     public function collection(Collection $rows): void
     {
         // dd($rows);
         foreach ($rows as $index => $row) {
-            $categories = $this->contest->openedCategories()->pluck('id', 'code');
+            $categories = $this->competition->categories()->pluck('id', 'code');
 
             $validator = Validator::make($row->toArray(), [
                 'gender' => 'required|in:M,F',
@@ -61,9 +61,9 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
                     if (!$categories->has($row['category'])) {
                         $weightCodeNotExist = true;
                     } else {
-                        $weightCodeNotExist = $this->contest->programs()
+                        $weightCodeNotExist = $this->competition->programs()
                             ->where('weight_code', $value)
-                            ->where('category_id', $categories[$row['category']])
+                            ->where('competition_category_id', $categories[$row['category']])
                             ->doesntExist();
                     }
 
@@ -84,10 +84,10 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
 
                 continue;
             }
-            $categoryId = $this->contest->openedCategories->where('code', $row['category'])->first()->id ?? null;
+            $categoryId = $this->competition->categories->where('code', $row['category'])->first()->id ?? null;
 
-            $program = Program::where('contest_id', $this->contest->id)
-                ->where('category_id', $categoryId)
+            $program = Program::where('competition_id', $this->competition->id)
+                ->where('competition_category_id', $categoryId)
                 ->where('weight_code', $row['weight_code'])
                 ->first();
 
@@ -109,7 +109,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     {
         // 創建代表隊資料
         return Team::firstOrCreate([
-            'contest_id' => $this->contest->id,
+            'competition_id' => $this->competition->id,
             'abbreviation' => $row['team'],
         ]);
     }
@@ -118,9 +118,10 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     {
         return Athlete::firstOrCreate([
             'gender' => $row['gender'],
-            'name' => $row['name'],
-            'name_secondary' => $row['name_secondary'],
-            'contest_id' => $this->contest->id,
+            'name_zh' => $row['name'],
+            'name_pt' => $row['name_secondary'],
+            'name_display' => $row['name'],
+            'competition_id' => $this->competition->id,
             'team_id' => $team->id,
         ]);
     }
@@ -128,8 +129,8 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     private function enrollToProgram(Program $program, Athlete $athlete, $row)
     {
         $program->athletes()->attach($athlete->id, [
-            'contest_id' => $this->contest->id,
-            'seed' => $row['seed']
+            'program_id' => $program->id,
+            'athlete_id' => $athlete->id,
         ]);
     }
 }

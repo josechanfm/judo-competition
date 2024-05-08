@@ -28,7 +28,9 @@
             </div>
           </div>
           <div class="">
-            <a-button type="primary">鎖定排序</a-button>
+            <a-button type="primary" @click="confirmProgramArrangement"
+              >鎖定排序</a-button
+            >
           </div>
         </div>
         <div class="flex w-full gap-6">
@@ -77,57 +79,65 @@
             </div>
             <template v-else>
               <div class="pr-4 py-2 flex justify-between bg-white shadow-md rounded-sm">
-                <div class="" v-if="!multipleMove">
-                  <a-button type="link" @click="multipleMove = !multipleMove"
-                    >批量移動(場地/時段)</a-button
-                  >
-                </div>
-                <div v-else class="flex gap-2 items-center pl-4">
-                  <span> 將 {{ selectedPrograms.length }} 項移動至： </span>
-                  <a-select class="w-32" v-model:value="batchMoveForm.day" name="day">
-                    <a-select-option
-                      v-for="day in competition.days"
-                      :id="`opt-day-${day}`"
-                      :key="day"
-                      :value="day"
-                      >{{ day }}
-                    </a-select-option>
-                  </a-select>
-                  <a-select
-                    class="w-24"
-                    v-model:value="batchMoveForm.section"
-                    name="section"
-                  >
-                    <a-select-option
-                      v-for="section in competition.section_number"
-                      :id="`opt-section-${section}`"
-                      :key="section"
-                      :value="section"
-                      >時段 {{ section }}
-                    </a-select-option>
-                  </a-select>
-                  <a-select class="w-24" v-model:value="batchMoveForm.mat" name="mat">
-                    <a-select-option
-                      v-for="mat in competition.mat_number"
-                      :id="`opt-mat-${mat}`"
-                      :key="mat"
-                      :value="mat"
-                      >場地 {{ mat }}
-                    </a-select-option>
-                  </a-select>
-                  <a-button @click="batchMovePrograms"> 移動 </a-button>
+                <div class="flex justify-start">
+                  <div v-if="!editDraggable">
+                    <div v-if="!multipleMove">
+                      <a-button type="link" @click="multipleMove = !multipleMove"
+                        >批量移動(場地/時段)</a-button
+                      >
+                    </div>
+                    <div v-else class="flex gap-2 items-center pl-4">
+                      <span> 將 {{ selectedPrograms.length }} 項移動至： </span>
+                      <a-select class="w-32" v-model:value="batchMoveForm.day" name="day">
+                        <a-select-option
+                          v-for="day in competition.days"
+                          :id="`opt-day-${day}`"
+                          :key="day"
+                          :value="day"
+                          >{{ day }}
+                        </a-select-option>
+                      </a-select>
+                      <a-select
+                        class="w-24"
+                        v-model:value="batchMoveForm.section"
+                        name="section"
+                      >
+                        <a-select-option
+                          v-for="section in competition.section_number"
+                          :id="`opt-section-${section}`"
+                          :key="section"
+                          :value="section"
+                          >時段 {{ section }}
+                        </a-select-option>
+                      </a-select>
+                      <a-select class="w-24" v-model:value="batchMoveForm.mat" name="mat">
+                        <a-select-option
+                          v-for="mat in competition.mat_number"
+                          :id="`opt-mat-${mat}`"
+                          :key="mat"
+                          :value="mat"
+                          >場地 {{ mat }}
+                        </a-select-option>
+                      </a-select>
+                      <a-button @click="batchMovePrograms">移動並保存</a-button>
+                      <a-button @click="cancelMovePrograms">取消</a-button>
+                    </div>
+                  </div>
                 </div>
                 <div class="flex justify-end">
-                  <a-button
-                    type="link"
-                    v-if="!editDraggable"
-                    @click="editDraggable = !editDraggable"
-                    >編輯</a-button
-                  >
-                  <template v-else>
-                    <a-button type="link" @click="saveDrag">保存</a-button>
-                    <a-button type="link" @click="cancelDrag">取消</a-button> </template
-                  ><a-button type="link">
+                  <div v-if="!multipleMove">
+                    <a-button
+                      type="link"
+                      v-if="!editDraggable"
+                      @click="editDraggable = !editDraggable"
+                      >編輯</a-button
+                    >
+                    <template v-else>
+                      <a-button type="link" @click="saveDrag">保存</a-button>
+                      <a-button type="link" @click="cancelDrag">取消</a-button>
+                    </template>
+                  </div>
+                  <a-button type="link">
                     <template #icon> <DownloadOutlined /> </template>匯出pdf</a-button
                   >
                 </div>
@@ -224,9 +234,9 @@
                               :value="element.id"
                               :checked="isProgramChecked(element)"
                               :id="`chk-${element.id}`"
+                              @change="toggleProgramChecked(element)"
                             />
                           </div>
-                          {{ selectedPrograms }}
                           <div class="flex-1">
                             <div class="mb-2">
                               <a-tag>
@@ -595,6 +605,30 @@ export default {
         }) ?? []
       );
     },
+    toggleProgramChecked(program) {
+      console.debug("toggleProgramChecked", program);
+      console.debug("batchMoveForm", this.batchMoveForm);
+
+      const isSameFromGroup =
+        program.date === this.batchMoveForm.from.day &&
+        program.section === this.batchMoveForm.from.section &&
+        program.mat === this.batchMoveForm.from.mat;
+
+      console.debug("isSameFromGroup", isSameFromGroup);
+
+      if (!this.selectedPrograms.length || !isSameFromGroup) {
+        this.selectedPrograms = [];
+        this.batchMoveForm.from.day = program.date;
+        this.batchMoveForm.from.section = program.section;
+        this.batchMoveForm.from.mat = program.mat;
+      }
+
+      if (this.selectedPrograms.includes(program.id)) {
+        this.selectedPrograms = this.selectedPrograms.filter((id) => id !== program.id);
+      } else {
+        this.selectedPrograms.push(program.id);
+      }
+    },
     onDragEnd(day, section, mat) {
       this.partitionedPrograms[day][section][mat].forEach((element, idx) => {
         element.sequence = idx + 1;
@@ -627,10 +661,54 @@ export default {
       this.editDraggable = false;
       this.getPartitionedPrograms();
     },
+    cancelMovePrograms() {
+      this.selectedPrograms = [];
+      this.multipleMove = false;
+    },
     batchMovePrograms() {
       const day = this.batchMoveForm.day;
       const section = this.batchMoveForm.section;
       const mat = this.batchMoveForm.mat;
+
+      console.debug("batchMoveForm", this.batchMoveForm);
+
+      const fromSection = this.partitionedPrograms[this.batchMoveForm.from.day][
+        this.batchMoveForm.from.section
+      ][this.batchMoveForm.from.mat];
+      const toSection = this.partitionedPrograms[day][section][mat];
+
+      this.selectedPrograms.forEach((programId) => {
+        // FIXME: old position not removed
+        // remove from old position
+        const program = fromSection.splice(
+          fromSection.findIndex((program) => program.id === programId),
+          1
+        )[0];
+        // change day section and mat
+        program.date = day;
+        program.section = section;
+        program.mat = mat;
+
+        // add to new position
+        toSection.push(program);
+      });
+
+      this.selectedPrograms = [];
+      this.saveDrag();
+      this.multipleMove = false;
+      this.$message.success("移動成功");
+    },
+    confirmProgramArrangement() {
+      this.$inertia.post(route("manage.competition.programs.lock", this.competition), null, {
+        preserveScroll: true,
+        onSuccess: () => {
+          this.$message.success("已確認比賽安排");
+          this.$inertia.reload({
+            preserveScroll: true,
+            only: ["programs"],
+          });
+        },
+      });
     },
   },
 };

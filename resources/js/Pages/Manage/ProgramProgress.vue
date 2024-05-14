@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Dashboard" />
 
-  <AdminLayout>
+  <ProgramLayout>
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
@@ -116,16 +116,16 @@
         </a-row>
       </div>
     </div>
-  </AdminLayout>
+  </ProgramLayout>
 </template>
 
 <script>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 import { extractIdentifiers } from "@vue/compiler-core";
 
 export default {
   components: {
-    AdminLayout,
+    ProgramLayout,
   },
   props: ["competition"],
   data() {

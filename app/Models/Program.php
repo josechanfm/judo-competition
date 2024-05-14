@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\BoutGenerationService;
+use App\Services\DrawService;
 
 class Program extends Model
 {
@@ -21,16 +23,34 @@ class Program extends Model
         self::RRBA,
     ];
 
+    public const STATUS_CREATED = 0;
+    public const STATUS_DREW = 1;
+    public const STATUS_DREW_CONFIRMED = 2;
+    public const STATUS_STARTED = 3;
+    public const STATUS_FINISHED = 4;
+
+    protected $attributes = [
+        'status' => self::STATUS_CREATED,
+    ];
+
     protected $fillable = ['competition_id', 'competition_category_id', 'sequence', 'date', 'weight_code', 'mat', 'section', 'contest_system', 'chart_size', 'duration', 'status'];
     protected $appends = [
         'duration_formatted',
-        'bouts',
         'athletes',
-        'bouts_count',
     ];
+
+    protected $with = [
+        'competitionCategory'
+    ];
+
     public function bouts()
     {
         return $this->hasMany(Bout::class);
+    }
+
+    public function competition()
+    {
+        return $this->belongsTo(Competition::class);
     }
     public function athletes()
     {
@@ -54,10 +74,6 @@ class Program extends Model
     public function getAthletesAttribute()
     {
         return $this->athletes()->get();
-    }
-    public function getBoutsAttribute()
-    {
-        return $this->bouts()->get();
     }
 
     public function getDurationFormattedAttribute()
@@ -98,22 +114,25 @@ class Program extends Model
         $this->updateChartSize();
         $this->save();
     }
-    public function getBoutsCountAttribute(): int
-    {
-        if ($this->bouts()->exists()) {
-            return $this->bouts()->count();
-        }
 
-        switch ($this->contest_system) {
-            case self::RRBA:
-                return 6;
-            case self::RRB:
-                $cnt = $this->athletes()->count();
-                return $cnt * ($cnt - 1) / 2;
-            case self::KOS:
-                return $this->_roundToBaseTwoCeil($this->athletes()->count()) - 1;
-            case self::ERM:
-                return $this->_roundToBaseTwoCeil($this->athletes()->count()) + ($this->chart_size < 8 ? 0 : 3);
+    public function draw(): array
+    {
+        $athletes = (new DrawService($this))->draw();
+
+
+        foreach ($athletes as $athlete) {
+            $this->athletes()->where('athletes.id', $athlete['id'])->update([
+                'seat' => $athlete['seat'],
+            ]);
         }
+        (new BoutGenerationService($this->competition))->assignAthletesToBouts($this);
+        $this->status = Program::STATUS_DREW;
+        $this->save();
+        return $athletes;
+    }
+    public function confirmDraw()
+    {
+        $this->status = self::STATUS_DREW_CONFIRMED;
+        $this->save();
     }
 }

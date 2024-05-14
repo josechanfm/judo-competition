@@ -5,9 +5,13 @@ namespace App\Models;
 use App\Services\BoutGenerationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Competition extends Model
+class Competition extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
     use HasFactory;
     protected $fillable = ['competition_type_id', 'type_id', 'date_start', 'date_end', 'country', 'name', 'name_secondary', 'scale', 'days', 'remark', 'mat_number', 'section_number', 'language', 'is_language_secondary_enabled', 'language_secondary', 'token', 'is_cancelled', 'status'];
     protected $casts = [
@@ -41,5 +45,14 @@ class Competition extends Model
     public function generateBouts()
     {
         (new BoutGenerationService($this))->generate();
+    }
+    public function getDrawBackgroundUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl('draw-background') == '' ? asset('assets/draw-background.jpg') : $this->getFirstMediaUrl('draw-background');
+    }
+
+    public function getDrawCoverUrlAttribute(): string
+    {
+        return $this->getFirstMediaUrl('draw-cover') == '' ? asset('assets/draw-background.jpg') : $this->getFirstMediaUrl('draw-cover');
     }
 }

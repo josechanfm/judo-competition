@@ -22,7 +22,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     use SkipsFailures, Importable;
     /**
      * @param array $row
-     * @var Contest $contest
+     * @var Competition $competition
      * 
      * @return \Illuminate\Database\Eloquent\Model|null
      */

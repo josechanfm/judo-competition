@@ -12,4 +12,9 @@ class Team extends Model
     protected $fillable = [
         'competition_id', 'name_zh', 'name_en', 'name_pt', 'abbreviation'
     ];
+
+    public function athletes()
+    {
+        return $this->hasMany(Athlete::class);
+    }
 }

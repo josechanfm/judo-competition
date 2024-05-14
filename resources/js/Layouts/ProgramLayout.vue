@@ -31,22 +31,54 @@
         </inertia-link>
       </div>
       <a-menu v-model:selectedKeys="selectedKeys" theme="light" mode="inline">
-        <a-menu-item key="competitions.index">
+        <a-menu-item key="competition.programs.index">
           <user-outlined />
-          <inertia-link class="mx-2" :href="route('manage.competitions.index')">
-            Home
+          <inertia-link
+            class="mx-2"
+            :href="route('manage.competition.programs.index', $page.props.competition.id)"
+          >
+            Program
           </inertia-link>
         </a-menu-item>
-        <a-menu-item key="gameTypes.index">
-          <video-camera-outlined />
-          <inertia-link class="mx-2" :href="route('manage.gameTypes.index')">
-            Game Type
-          </inertia-link>
-        </a-menu-item>
-        <a-menu-item key="contest_type">
+        <a-sub-menu key="submenu1">
+          <template #icon>
+            <video-camera-outlined />
+          </template>
+          <template #title>Athletes</template>
+          <a-menu-item key="competition.athletes.index">
+            <inertia-link
+              class="mx-2"
+              :href="
+                route('manage.competition.athletes.index', $page.props.competition.id)
+              "
+            >
+              Athletes List
+            </inertia-link>
+          </a-menu-item>
+          <a-menu-item key="competition.athletes.drawControl">
+            <inertia-link
+              class="mx-2"
+              :href="
+                route(
+                  'manage.competition.athletes.drawControl',
+                  $page.props.competition.id
+                )
+              "
+            >
+              Athletes Draw
+            </inertia-link>
+          </a-menu-item>
+        </a-sub-menu>
+        <a-menu-item key="competition.progress">
           <upload-outlined />
-          <span>Contest Types</span>
+          <inertia-link
+            class="mx-2"
+            :href="route('manage.competition.progress', $page.props.competition.id)"
+          >
+            Progress
+          </inertia-link>
         </a-menu-item>
+        <a-menu-item> </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>

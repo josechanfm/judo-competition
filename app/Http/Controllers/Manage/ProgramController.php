@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Competition;
 use App\Models\Program;
+use App\Services\BoutGenerationService;
 use App\Models\Bout;
 use App\Models\Athlete;
 use App\Models\AthleteProgram;
@@ -24,7 +25,7 @@ class ProgramController extends Controller
         return Inertia::render('Manage/Programs', [
             'programs' => $competition->programs()
                 ->with('competitionCategory')
-                ->withCount('athletes')
+                ->withCount('athletes', 'bouts')
                 ->orderBy('date')
                 ->orderBy('section')
                 ->orderBy('mat')
@@ -57,6 +58,11 @@ class ProgramController extends Controller
     public function show(Competition $competition, Program $program)
     {
         // dd($program->athletes);
+        if (request()->wantsJson()) {
+            return response()->json([
+                'program' => $program->load(['athletes.athlete', 'athletes.athlete.team']),
+            ]);
+        }
         return Inertia::render('Manage/Program', [
             'program' => $program,
             'athletes' => $competition->athletes,
@@ -108,6 +114,17 @@ class ProgramController extends Controller
         ]);
     }
 
+    public function draw(Competition $competition, Program $program)
+    {
+        $athletes = $program->draw();
+
+        $program->confirmDraw();
+
+        return response()->json([
+            'athletes' => $athletes
+        ]);
+    }
+
     public function chartPdf(Competition $competition)
     {
         $program = Program::find(4);
@@ -134,6 +151,8 @@ class ProgramController extends Controller
         $competition->bouts()->delete();
         // TODO: generate bouts
         $competition->generateBouts();
+
+        $competition->update(['status' => 2]);
 
         return redirect()->back();
     }
@@ -458,6 +477,23 @@ class ProgramController extends Controller
             Program::where('id', $val['id'])->update($val);
         });
 
+        return redirect()->back();
+    }
+
+    public function lockSeat(Competition $competition)
+    {
+        $competition->update(['status' => 3]);
+
+        $service = (new BoutGenerationService($competition));
+
+        $service->invalidateByeBouts();
+
+        $service->resequence();
+
+        $competition->programs()->each(function (Program $program) {
+            $program->confirmDraw();
+        });
+        dd('aaa');
         return redirect()->back();
     }
 }

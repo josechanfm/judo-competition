@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('name_display');
             $table->string('gender');
             $table->integer('team_id');
+            $table->integer('seed');
+            $table->integer('seat');
             $table->double('weight')->nullable();
             // unique athlete identifier, will be used later
             $table->string('uai')->nullable();            

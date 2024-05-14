@@ -1,15 +1,21 @@
 <template>
   <inertia-head title="運動員列表" />
 
-  <AdminLayout>
+  <ProgramLayout>
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">運動員列表</h2>
       </div>
     </template>
-    <div class="py-12">
+    <div class="py-12 mx-8">
       <div class="overflow-hidden flex flex-col gap-3">
-        <div class="grid grid-cols-4 gap-12 py-4 mx-8">
+        <div class="text-right">
+          <a-button v-if="competition.status === 0" type="primary" @click="lockAthletes"
+            >鎖定名單</a-button
+          >
+          <span v-else class="text-blue-500">名單已鎖定</span>
+        </div>
+        <div class="grid grid-cols-4 gap-12 py-4">
           <a-card class="shadow-lg">
             <a-statistic title="Status" value="Ready to start" />
           </a-card>
@@ -26,12 +32,22 @@
             <a-statistic title="Atheles" :value="competition.athletes.length" />
           </a-card>
         </div>
-        <div class="p-4 mx-8 mb-2 shadow-lg border border-indigo-600 bg-white rounded-lg">
+        <div class="p-4 mb-2 shadow-lg border border-indigo-600 bg-white rounded-lg">
           <div class="flex justify-between">
             <div class="text-xl font-bold pb-2">運動員列表</div>
             <div class="flex gap-3">
-              <a-button type="primary" @click="onCreateRecord">新增運動員</a-button>
-              <a-button type="primary" @click="visible = true">匯入運動員</a-button>
+              <a-button
+                type="primary"
+                v-if="competition.status === 0"
+                @click="onCreateRecord"
+                >新增運動員</a-button
+              >
+              <a-button
+                type="primary"
+                v-if="competition.status === 0"
+                @click="visible = true"
+                >匯入運動員</a-button
+              >
             </div>
           </div>
           <a-table :dataSource="competition.athletes" :columns="columns">
@@ -157,11 +173,11 @@
         </div>
       </template>
     </a-modal>
-  </AdminLayout>
+  </ProgramLayout>
 </template>
 
 <script>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 import { message } from "ant-design-vue";
 import {
   DownloadOutlined,
@@ -173,7 +189,7 @@ export default {
     DownloadOutlined,
     FileExcelOutlined,
     WarningOutlined,
-    AdminLayout,
+    ProgramLayout,
   },
   props: ["competition", "programs", "teams"],
   data() {
@@ -320,6 +336,20 @@ export default {
         .catch(() => {
           this.$message.error("匯入失敗");
         });
+    },
+    lockAthletes() {
+      this.$inertia.post(
+        route("manage.competition.athletes.lock", this.competition.id),
+        "",
+        {
+          onSuccess: (page) => {
+            console.log(page);
+          },
+          onError: (err) => {
+            console.log(err);
+          },
+        }
+      );
     },
     handleFileChange(info) {
       this.imported = false;

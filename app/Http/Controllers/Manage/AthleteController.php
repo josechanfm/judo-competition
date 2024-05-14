@@ -75,9 +75,19 @@ class AthleteController extends Controller
     }
     public function lock(Competition $competition)
     {
+        $competition->programs()->doesntHave('athletes')
+            ->orWhere(function ($query) {
+                $query->has('athletes', '<', 2);
+            })
+            ->delete();
+
         $competition->programs->each(function (Program $program) {
             $program->setProgram();
         });
+
+        $competition->update(['status' => 1]);
+
+        return redirect()->back();
     }
     public function import(Request $request, Competition $competition)
     {
@@ -128,5 +138,25 @@ class AthleteController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function drawControl(Competition $competition)
+    {
+        // dd($competition->programs[0]->competitionCategory);
+        return Inertia::render('Draw/DrawControl', [
+            'competition' => fn () => $competition,
+            'programs' => $competition->programs()->get(),
+        ]);
+    }
+
+    public function drawScreen(Competition $competition)
+    {
+        return Inertia::render('Draw/DrawScreen', [
+            'competition' => fn () => $competition,
+            'draw' => [
+                'cover' => $competition->getDrawCoverUrlAttribute(),
+                'background' => $competition->getDrawBackgroundUrlAttribute(),
+            ]
+        ]);
     }
 }

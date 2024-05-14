@@ -279,7 +279,7 @@ class BoutGenerationService
     public function assignAthletesToBouts(Program $program): void
     {
 
-        $athletes = $program->programAthletes();
+        $athletes = $program->athletes();
 
         switch ($program->contest_system) {
             case Program::KOS:
@@ -451,7 +451,6 @@ class BoutGenerationService
             $bout->turn = $rrbBout['round'];
             $bout->white = $rrbBout['white'];
             $bout->blue = $rrbBout['blue'];
-            dd($bout);
             $bout->save();
         }
     }

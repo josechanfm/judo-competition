@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Dashboard" />
 
-  <AdminLayout>
+  <ProgramLayout>
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
@@ -27,10 +27,14 @@
               </a-tag>
             </div>
           </div>
-          <div class="">
-            <a-button type="primary" @click="confirmProgramArrangement"
+          <div>
+            <a-button
+              v-if="competition.status === 1"
+              type="primary"
+              @click="confirmProgramArrangement"
               >鎖定排序</a-button
             >
+            <span v-else class="text-blue-500">排序已鎖定</span>
           </div>
         </div>
         <div class="flex w-full gap-6">
@@ -78,7 +82,10 @@
               </a-table>
             </div>
             <template v-else>
-              <div class="pr-4 py-2 flex justify-between bg-white shadow-md rounded-sm">
+              <div
+                v-if="competition.status === 1"
+                class="pr-4 py-2 flex justify-between bg-white shadow-md rounded-sm"
+              >
                 <div class="flex justify-start">
                   <div v-if="!editDraggable">
                     <div v-if="!multipleMove">
@@ -170,7 +177,7 @@
                                 <a
                                   :href="
                                     route('admin.contests.programs.pdf-mat-brackets', {
-                                      contest: contest,
+                                      competition: competition,
                                       date: day,
                                       section: section,
                                       mat: mat,
@@ -185,7 +192,7 @@
                                 <a
                                   :href="
                                     route('admin.contests.programs.pdf-mat-brackets', {
-                                      contest: contest,
+                                      competition: competition,
                                       date: day,
                                       section: section,
                                       mat: mat,
@@ -203,7 +210,7 @@
                                 <a
                                   :href="
                                     route('admin.contests.programs.pdf-mat-bouts', {
-                                      contest: contest,
+                                      competition: competition,
                                       date: day,
                                       section: section,
                                       mat: mat,
@@ -313,8 +320,8 @@
                                   type="text"
                                   class="handle"
                                   v-if="
-                                    contest.status < CONTEST_STATUS.program_arranged &&
-                                    contest.status >= CONTEST_STATUS.athletes_confirmed &&
+                                    competition.status < COMPETITION_STATUS.program_arranged &&
+                                    competition.status >= COMPETITION_STATUS.athletes_confirmed &&
                                     editing
                                   "
                                 >
@@ -352,11 +359,11 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  </ProgramLayout>
 </template>
 
 <script>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 import dayjs from "dayjs";
 import { message } from "ant-design-vue";
 import { VueDraggableNext } from "vue-draggable-next";
@@ -376,7 +383,7 @@ import {
 dayjs.extend(duration);
 export default {
   components: {
-    AdminLayout,
+    ProgramLayout,
     UnorderedListOutlined,
     AppstoreOutlined,
     HolderOutlined,
@@ -699,16 +706,20 @@ export default {
       this.$message.success("移動成功");
     },
     confirmProgramArrangement() {
-      this.$inertia.post(route("manage.competition.programs.lock", this.competition), null, {
-        preserveScroll: true,
-        onSuccess: () => {
-          this.$message.success("已確認比賽安排");
-          this.$inertia.reload({
-            preserveScroll: true,
-            only: ["programs"],
-          });
-        },
-      });
+      this.$inertia.post(
+        route("manage.competition.programs.lock", this.competition),
+        null,
+        {
+          preserveScroll: true,
+          onSuccess: () => {
+            this.$message.success("已確認比賽安排");
+            this.$inertia.reload({
+              preserveScroll: true,
+              only: ["programs"],
+            });
+          },
+        }
+      );
     },
   },
 };

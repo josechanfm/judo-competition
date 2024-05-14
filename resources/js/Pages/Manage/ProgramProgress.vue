@@ -93,6 +93,7 @@
                       <tbody>
                         <template v-for="bout in competition.bouts">
                           <tr
+                            :key="bout.id"
                             v-if="bout.mat == mat && bout.section == selectSection"
                             class="border-b dark:border-neutral-500 dark:bg-neutral-600 odd:bg-neutral-100"
                           >

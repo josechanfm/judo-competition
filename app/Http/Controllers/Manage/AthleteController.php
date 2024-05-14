@@ -159,4 +159,16 @@ class AthleteController extends Controller
             ]
         ]);
     }
+
+    public function Weights(Competition $competition)
+    {
+        // dd($competition->days);
+        return Inertia::render('Manage/Weights', [
+            'competition' => $competition,
+            'programs' => $competition->programs,
+            'athletes' => $competition->athletes,
+            'categories' => $competition->programs->unique(fn ($program) => $program->competitionCategory->id)->pluck('competitionCategory'),
+            'weights' => $competition->programs->unique(fn ($program) => $program->weight_code)->pluck('weight_code'),
+        ]);
+    }
 }

@@ -68,6 +68,16 @@
               Athletes Draw
             </inertia-link>
           </a-menu-item>
+          <a-menu-item key="competition.athletes.weights">
+            <inertia-link
+              class="mx-2"
+              :href="
+                route('manage.competition.athletes.weights', $page.props.competition.id)
+              "
+            >
+              Athletes Weight
+            </inertia-link>
+          </a-menu-item>
         </a-sub-menu>
         <a-menu-item key="competition.progress">
           <upload-outlined />

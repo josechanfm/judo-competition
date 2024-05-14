@@ -109,7 +109,7 @@ export default {
     };
   },
   mounted() {
-    console.log(route().current().split(".").slice(1).join("."));
+    console.log(route().current());
     this.selectedKeys.push(route().current().split(".").slice(1).join("."));
   },
 };

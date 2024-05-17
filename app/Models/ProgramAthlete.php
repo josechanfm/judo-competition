@@ -8,4 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class ProgramAthlete extends Model
 {
     use HasFactory;
+
+    protected $table = 'programs_athletes';
+
+    public function athlete()
+    {
+        return $this->belongsTo(Athlete::class);
+    }
+
+    public function program()
+    {
+        return $this->belongsTo(Program::class);
+    }
 }

@@ -226,6 +226,7 @@
                         </a-dropdown>
                       </template>
                       <draggable
+                        class="py-2"
                         :disabled="!editDraggable"
                         @end="onDragEnd(day, section, mat)"
                         :list="partitionedPrograms[day][section][mat]"

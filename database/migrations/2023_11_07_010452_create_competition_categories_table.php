@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('competition_categories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
-
             $table->string('code');
             $table->string('name');
             $table->string('name_secondary');

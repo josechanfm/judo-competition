@@ -14,13 +14,13 @@ class CompetitionSeeder extends Seeder
     public function run(): void
     {
         DB::table('competitions')->insert([
-            'date_start' => '2023-04-15',
-            'date_end' => '2023-04-16',
+            'date_start' => '2024-04-15',
+            'date_end' => '2024-04-16',
             'country' => '澳門',
             'name' => '第二十四屆學界柔道比賽',
             'name_secondary' => '24th Compeonato Escolar de Judo',
             'scale' => '本地賽',
-            'days' => '["2023-01-15","2023-04-16"]',
+            'days' => '["2024-04-15","2024-04-16"]',
             'remark' => '',
             'mat_number' => 2,
             'section_number' => 3,

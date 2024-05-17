@@ -58,13 +58,14 @@ class ProgramController extends Controller
     public function show(Competition $competition, Program $program)
     {
         // dd($program->athletes);
+        // dd($program->load(['programAthletes.athlete', 'programAthletes.athlete.team']));
         if (request()->wantsJson()) {
             return response()->json([
-                'program' => $program->load(['athletes.athlete', 'athletes.athlete.team']),
+                'program' => $program->load(['programAthletes.athlete', 'programAthletes.athlete.team']),
             ]);
         }
         return Inertia::render('Manage/Program', [
-            'program' => $program,
+            'program' => $program->load(['programAthletes.athlete', 'programAthletes.athlete.team', 'bouts']),
             'athletes' => $competition->athletes,
         ]);
     }
@@ -493,7 +494,6 @@ class ProgramController extends Controller
         $competition->programs()->each(function (Program $program) {
             $program->confirmDraw();
         });
-        dd('aaa');
         return redirect()->back();
     }
 }

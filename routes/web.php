@@ -17,7 +17,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Manage/Programs', [
+    return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
         'laravelVersion' => Application::VERSION,
@@ -46,8 +46,12 @@ Route::middleware('auth')->group(function () {
     Route::post('manage/competition/{competition}/program/{program}/draw', [App\Http\Controllers\Manage\ProgramController::class, 'draw'])->name('manage.competition.program.draw');
     Route::post('manage/competition/{competition}/programs/update-sequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.programs.sequence.update');
     Route::post('manage/competition/{competition}/programs/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.programs.lock');
+    Route::post('manage/competition/{competition}/programs/lock-seat', [App\Http\Controllers\Manage\ProgramController::class, 'lockSeat'])->name('manage.competition.programs.lock-seat');
+    Route::post('manage/competition/{competition}/programAthlete/{programAthlete}/weight-pass', [App\Http\Controllers\Manage\AthleteController::class, 'fail'])->name('manage.competition.programAthlete.weight-fail');
+    Route::post('manage/competition/{competition}/athletes/weights-lock', [App\Http\Controllers\Manage\AthleteController::class, 'Weightslock'])->name('manage.competition.athletes.weights.lock');
     Route::post('manage/competition/{competition}/athletes/import', [App\Http\Controllers\Manage\AthleteController::class, 'import'])->name('manage.competition.athletes.import');
     Route::post('manage/competition/{competition}/athletes/lock', [App\Http\Controllers\Manage\AthleteController::class, 'lock'])->name('manage.competition.athletes.lock');
+    Route::post('manage/competition/{competition}/programAthlete/{programAthlete}/weight-pass', [App\Http\Controllers\Manage\AthleteController::class, 'pass'])->name('manage.competition.programAthlete.weight-pass');
     Route::get('manage/competition/{competition}/program/gen_bouts', [App\Http\Controllers\Manage\ProgramController::class, 'gen_bouts'])->name('manage.competition.program.gen_bouts');
     Route::get('manage/competition/{competition}/progress', [App\Http\Controllers\Manage\ProgramController::class, 'progress'])->name('manage.competition.progress');
     Route::get('manage/competition/{competition}/chart_pdf', [App\Http\Controllers\Manage\ProgramController::class, 'chartPdf'])->name('manage.competition.chartPdf');

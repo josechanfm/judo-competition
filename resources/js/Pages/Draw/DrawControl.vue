@@ -158,9 +158,9 @@
                     <div class="flex items-center text-xl mr-4">
                       {{ item.seat }}
                     </div>
-                    <div v-if="item.name_zh">
-                      <div>{{ item.name_zh }}</div>
-                      <div>{{ item.team.name_zh }}</div>
+                    <div v-if="item.athlete">
+                      <div>{{ item.athlete.name_zh }}</div>
+                      <div>{{ item.athlete.team.name_zh }}</div>
                       <div v-if="competition.is_language_secondary_enabled">
                         {{ item.name_pt }}
                       </div>
@@ -364,6 +364,7 @@ export default {
     },
     padAthleteList() {
       const athletes = [...this.athletes];
+
       if (this.activeProgram.status > 0) {
         console.log("activeProgram");
         const empty = {};
@@ -395,8 +396,9 @@ export default {
             athlete: null,
           });
         }
-        return athletes;
       }
+
+      return athletes;
     },
   },
   methods: {
@@ -411,7 +413,7 @@ export default {
         )
         .then(({ data }) => {
           this.program = data.program;
-          this.athletes = data.program.athletes.sort((a, b) => a.seat - b.seat);
+          this.athletes = data.program.program_athletes.sort((a, b) => a.seat - b.seat);
         });
     },
     draw() {

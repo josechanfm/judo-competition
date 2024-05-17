@@ -4,7 +4,21 @@
       <template #extra>
         <template v-if="competition.status >= COMPETITION_STATUS.athletes_confirmed">
           <a-button
-            v-if="this.athletes.find((x) => x.confirmed == 0) == undefined"
+            v-if="
+              this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null) !=
+              undefined
+            "
+            type="link"
+          >
+            待全部過磅{{
+              this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null)
+            }}
+          </a-button>
+          <a-button
+            v-else-if="
+              this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null) ==
+              undefined
+            "
             type="primary"
             @click="confirmAllWeight"
           >
@@ -16,7 +30,7 @@
             v-if="this.athletes.find((x) => x.confirmed == 0) == undefined"
             >完成過磅</a-button
           > -->
-          <a-button v-else type="link"> 待全部過磅 </a-button>
+          <a-button v-else type="link"> 已完成過磅 </a-button>
           <!-- <a :href="route('manage.competition.weights.pdf', competition)" target="_blank">
             <a-button type="link"> 下載過磅表 </a-button>
           </a>
@@ -65,7 +79,7 @@
             ></a-select>
           </div>
 
-          <!-- <div>
+          <div>
             <a-input-search
               show-icon
               clearable
@@ -73,13 +87,88 @@
               v-model:value="filtered.name"
               @search="applyFilter"
             />
-          </div> -->
+          </div>
         </div>
+        <a-table
+          :dataSource="programAthletes.data"
+          :columns="columns"
+          :row-class-name="
+            (record, index) =>
+              record.is_weight_passed !== null
+                ? record.is_weight_passed === 0
+                  ? 'red'
+                  : 'green'
+                : 'gray'
+          "
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'athlete'">
+              <div>{{ record.athlete.name_zh }}</div>
+            </template>
+            <template v-if="column.key === 'program'">
+              <div>
+                {{ record.program.weight_code }} &centerdot;
+                {{ record.program.competition_category.name }}
+              </div>
+            </template>
+            <template v-if="column.dataIndex === 'result'">
+              <CheckCircleOutlined
+                v-if="record.is_weight_passed == 1"
+                class="!text-green-800 dark:!text-green-400"
+              />
+              <CloseCircleOutlined
+                v-else-if="record.is_weight_passed == 0"
+                class="!text-red-800 dark:!text-red-400"
+              />
+              <QuestionCircleOutlined v-else />
+            </template>
+            <template v-else-if="column.dataIndex === 'weight'">
+              <div class="flex gap-3 justify-end">
+                <div class="font-bold flex gap-1 items-center" v-if="!record.confirmed">
+                  <a-input-number
+                    v-model:value="record.weight"
+                    :default-value="0"
+                    name="weight"
+                    :min="0"
+                    :max="999"
+                    :precision="2"
+                    :step="0.01"
+                  ></a-input-number
+                  >kg
+                </div>
+                <span v-else class="font-bold"> {{ record.weight }} kg </span>
+                <a-button
+                  @click="passWeight(record)"
+                  name="pass"
+                  shape="circle"
+                  v-if="!record.confirmed"
+                >
+                  <template #icon>
+                    <CheckOutlined />
+                  </template>
+                </a-button>
 
+                <a-button
+                  @click="failWeight(record)"
+                  name="fail"
+                  shape="circle"
+                  v-if="!record.confirmed"
+                >
+                  <template #icon>
+                    <CloseOutlined />
+                  </template>
+                </a-button>
+              </div>
+            </template>
+            <template v-else>
+              {{ record[column.dataIndex] }}
+            </template>
+          </template>
+        </a-table>
         <!-- <a-progress
             :steps="programAthletes.total"
             :percent="percent"
-            v-if="table.filtered.weight_code"
+            v-if="filtered.weight_code"
           /> -->
       </template>
 
@@ -127,6 +216,10 @@ export default {
       type: Object,
       required: true,
     },
+    programAthletes: {
+      type: Object,
+      required: true,
+    },
     categories: {
       type: Array,
       required: true,
@@ -155,12 +248,10 @@ export default {
       {
         key: "athlete",
         title: "運動員",
-        dataIndex: "athlete",
       },
       {
         key: "program",
         title: "組別",
-        dataIndex: "program",
       },
       {
         key: "weight",
@@ -275,7 +366,7 @@ export default {
       }
 
       this.$inertia.post(
-        route("manage.competition.program-athletes.weight.pass", {
+        route("manage.competition.programAthlete.weight-pass", {
           weight: record.weight,
           competition: this.competition.id,
           programAthlete: record.id,
@@ -300,7 +391,7 @@ export default {
       }
 
       this.$inertia.post(
-        route("manage.competition.program-athletes.weight.fail", {
+        route("manage.competition.programAthlete.weight-fail", {
           weight: record.weight,
           competition: this.competition.id,
           programAthlete: record.id,
@@ -314,7 +405,7 @@ export default {
     },
     applyFilter() {},
     confirmAllWeight() {
-      console.log(this.table.filtered.date[0]);
+      console.log(this.filtered.date[0]);
       Modal.confirm({
         title: "確認過磅",
         content: "確認過磅後，將無法再修改過磅結果",
@@ -323,9 +414,9 @@ export default {
         onOk: () => {
           window.axios
             .post(
-              route("manage.competition.weights.lock", {
+              route("manage.competition.athletes.weights.lock", {
                 competition: this.competition.id,
-                date: this.table.filtered.date[0],
+                date: this.filtered.date[0],
               })
             )
             .then(() => {

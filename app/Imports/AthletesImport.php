@@ -102,7 +102,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
             $athlete = $this->addAthleteToTeam($team, $row);
 
             // 關聯項目與選手
-            $this->enrollToProgram($program, $athlete, $row);
+            $this->enrollToProgram($program, $athlete, $team, $row);
         }
     }
     private function createTeam($row): Team
@@ -126,9 +126,11 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         ]);
     }
 
-    private function enrollToProgram(Program $program, Athlete $athlete, $row)
+    private function enrollToProgram(Program $program, Athlete $athlete, Team $team,  $row)
     {
         $program->athletes()->attach($athlete->id, [
+            'competition_id' => $this->competition->id,
+            'team_id' => $team->id,
             'program_id' => $program->id,
             'athlete_id' => $athlete->id,
         ]);

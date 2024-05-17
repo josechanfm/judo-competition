@@ -54,7 +54,12 @@ class Program extends Model
     }
     public function athletes()
     {
-        return $this->belongsToMany(Athlete::class)->withPivot('id as athlete_program_id');
+        return $this->belongsToMany(Athlete::class, 'programs_athletes');
+    }
+
+    public function programAthletes()
+    {
+        return $this->hasMany(ProgramAthlete::class);
     }
 
     public function competitionCategory()
@@ -121,7 +126,7 @@ class Program extends Model
 
 
         foreach ($athletes as $athlete) {
-            $this->athletes()->where('athletes.id', $athlete['id'])->update([
+            $this->programAthletes()->where('id', $athlete['id'])->update([
                 'seat' => $athlete['seat'],
             ]);
         }

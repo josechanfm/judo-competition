@@ -330,7 +330,7 @@ export default {
           this.files = [];
           this.errors = data.errors;
           this.imported = true;
-
+          this.$inertia.reload();
           this.$emit("imported");
         })
         .catch(() => {

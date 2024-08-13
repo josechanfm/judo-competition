@@ -10,15 +10,10 @@
             "
             type="link"
           >
-            待全部過磅{{
-              this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null)
-            }}
+            待全部過磅
           </a-button>
           <a-button
-            v-else-if="
-              this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null) ==
-              undefined
-            "
+            v-else-if="this.athletes.find((x) => x.confirm == 1) == undefined"
             type="primary"
             @click="confirmAllWeight"
           >
@@ -176,7 +171,7 @@
         <a-card>
           <a-empty>
             <template #description>
-              <h3 class="font-bold text-lg">抽籤完成</h3>
+              <h3 class="font-bold text-lg">抽籤未完成</h3>
               <p>抽籤未完成</p>
             </template>
           </a-empty>

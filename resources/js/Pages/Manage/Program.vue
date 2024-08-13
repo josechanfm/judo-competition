@@ -1,7 +1,7 @@
 <template>
   <inertia-head :title="program.weight_code" />
 
-  <AdminLayout>
+  <ProgramLayout>
     <!-- Section, Mat sequences
     <a-switch v-model:checked="masterSequence" @change="rebuildBouts" />
     <br />
@@ -85,11 +85,11 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  </ProgramLayout>
 </template>
 
 <script>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 import Tournament4 from "@/Components/TournamentTable/Elimination4.vue";
 import Tournament8 from "@/Components/TournamentTable/Elimination8.vue";
 import Tournament16 from "@/Components/TournamentTable/Elimination16.vue";

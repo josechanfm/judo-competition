@@ -28,8 +28,9 @@
             </div>
           </div>
           <div>
+            <span v-if="competition.status < 1">未鎖定運動員名單</span>
             <a-button
-              v-if="competition.status === 1"
+              v-else-if="competition.status === 1"
               type="primary"
               @click="confirmProgramArrangement"
               >鎖定排序</a-button
@@ -245,21 +246,26 @@
                               @change="toggleProgramChecked(element)"
                             />
                           </div>
-                          <div class="flex-1">
-                            <div class="mb-2">
-                              <a-tag>
-                                {{ element.competition_category.name }}
-                              </a-tag>
-                              <a-tag class="uppercase"
-                                >{{ element.contest_system }}
-                              </a-tag>
-                              {{ element.weight_code }}
-                            </div>
-                            <div class="text-sm text-neutral-500">
-                              共 {{ element.athletes_count }} 人，{{
-                                element.bouts_count
-                              }}
-                              場次
+                          <div class="flex-1 flex items-center gap-3">
+                            <template v-if="editDraggable">
+                              <HolderOutlined />
+                            </template>
+                            <div>
+                              <div class="mb-2">
+                                <a-tag>
+                                  {{ element.competition_category.name }}
+                                </a-tag>
+                                <a-tag class="uppercase"
+                                  >{{ element.contest_system }}
+                                </a-tag>
+                                {{ element.weight_code }}
+                              </div>
+                              <div class="text-sm text-neutral-500">
+                                共 {{ element.athletes_count }} 人，{{
+                                  element.bouts_count
+                                }}
+                                場次
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -394,7 +400,6 @@ export default {
     DownloadOutlined,
     ClockCircleOutlined,
     MoreOutlined,
-    dayjs,
     draggable: VueDraggableNext,
   },
   props: ["competition", "programs", "athletes"],
@@ -660,7 +665,8 @@ export default {
         {
           onSuccess: (page) => {
             this.editDraggable = false;
-            console.log(page);
+            this.multipleMove = false;
+            this.$message.success("移動成功");
           },
         }
       );
@@ -703,8 +709,6 @@ export default {
 
       this.selectedPrograms = [];
       this.saveDrag();
-      this.multipleMove = false;
-      this.$message.success("移動成功");
     },
     confirmProgramArrangement() {
       this.$inertia.post(

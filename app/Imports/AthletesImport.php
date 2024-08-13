@@ -54,7 +54,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
 
                 'category' => ['required', function ($attribute, $value, $fail) use (&$categories) {
                     if (!$categories->has($value)) {
-                        $fail(trans('validation.invalid_category_code'));
+                        $fail('沒有此運動員的組別');
                     }
                 }],
                 'weight_code' => ['required', function ($attribute, $value, $fail) use ($row, &$categories) {
@@ -68,7 +68,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
                     }
 
                     if ($weightCodeNotExist) {
-                        $fail(trans('validation.invalid_weight_code'));
+                        $fail('沒有此運動員的公斤級');
                     }
                 }],
                 'team' => 'required',

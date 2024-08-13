@@ -1,6 +1,6 @@
 <template>
   <ProgramLayout>
-    <a-page-header title="Draw Control">
+    <a-page-header title="抽籤">
       <template #extra>
         <a-button type="link" v-if="competition.status > COMPETITION_STATUS.seat_locked">
           lock
@@ -12,12 +12,13 @@
             competition.status === COMPETITION_STATUS.program_arranged && allProgramsDrew
           "
         >
-          lock seat
+          鎖定抽籤
         </a-button>
+        <span></span>
       </template>
 
       <template #tags>
-        <a-tag color="success" v-if="allProgramsDrew"> All programs drew </a-tag>
+        <a-tag color="success" v-if="allProgramsDrew"> 所有組別完成抽籤 </a-tag>
       </template>
     </a-page-header>
 
@@ -55,8 +56,8 @@
         <a-alert
           type="info"
           show-icon
-          message="all draw"
-          description="all drew description"
+          message="所有組別完成抽籤"
+          description="如果抽籤結果沒有問題請鎖定抽籤"
           v-if="
             allProgramsDrew && competition.status === COMPETITION_STATUS.program_arranged
           "

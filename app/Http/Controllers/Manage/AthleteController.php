@@ -241,6 +241,7 @@ class AthleteController extends Controller
         $service->invalidateByeBouts($request->date, 1);
         $service->resequence($request->date);
 
+        $competition->update(['status' => 4]);
         return redirect()->back();
     }
 }

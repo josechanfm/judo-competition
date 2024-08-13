@@ -88,7 +88,6 @@
             Progress
           </inertia-link>
         </a-menu-item>
-        <a-menu-item> </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>

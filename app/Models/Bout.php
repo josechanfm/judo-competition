@@ -15,7 +15,7 @@ class Bout extends Model
     ];
 
     protected $appends = ['white_player', 'blue_player', 'rank', 'status_text', 'duration_formatted', 'time_formatted', 'bout_name'];
-
+    protected $cast=['competition_referee_ids'=>'json'];
 
     public const STATUS_CANCELLED = -1;
     public const STATUS_PENDING = 0;
@@ -624,5 +624,9 @@ class Bout extends Model
     public function blueRiseFromQueue($bout): int
     {
         return $this->blueRiseFrom($bout)->queue;
+    }
+
+    public function referees(){
+        return CompetitionReferee::whereIn('id',$this->competition_referee_ids)->with('referee')->get();
     }
 }

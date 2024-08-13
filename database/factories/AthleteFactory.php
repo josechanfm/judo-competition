@@ -17,7 +17,7 @@ class AthleteFactory extends Factory
     public function definition(): array
     {
         return [
-            'name_zh'=> fake()->name(),
+            'name'=> fake()->name(),
             'name_display'=> fake()->firstName(),
             'gender'=>fake()->randomElement(['M','F'])
         ];

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
+use App\Models\CompetitionAthlete;
 use App\Models\CompetitionCategory;
 use Illuminate\Database\Seeder;
 
@@ -26,10 +27,9 @@ class DatabaseSeeder extends Seeder
             ConfigSeeder::class,
             CountrySeeder::class,
             GameTypeSeeder::class,
-            GameCategorySeeder::class,
-            CompetitionSeeder::class,
-            ProgramSeeder::class,
             AthleteSeeder::class,
+            CompetitionSeeder::class,
+            //CompetitionAthlete::class,
             TeamSeeder::class,
         ]);
     }

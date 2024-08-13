@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('programs_athletes', function (Blueprint $table) {
+        Schema::create('programs_athlete', function (Blueprint $table) {
             $table->id();
 
             $table->foreignId('program_id')->constrained()->cascadeOnDelete();
             $table->foreignId('athlete_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('team_id')->constrained()->cascadeOnDelete();
+            //$table->foreignId('competition_id')->constrained()->cascadeOnDelete();
+            //$table->foreignId('team_id')->constrained()->cascadeOnDelete();
             $table->unsignedTinyInteger('seed')->nullable();
             $table->unsignedTinyInteger('seat')->default(0);
             $table->double('weight')->nullable();
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('programs_athletes');
+        Schema::dropIfExists('programs_athlete');
     }
 };

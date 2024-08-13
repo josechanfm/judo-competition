@@ -15,8 +15,8 @@ class TeamSeeder extends Seeder
     {
         DB::table('teams')->insert([
             'competition_id' => 1,
-            'name_zh' => '柔道隊',
-            'name_pt' => 'Judo Team',
+            'name' => '柔道隊',
+            'name_secondary' => 'Judo Team',
             'abbreviation' => 'CST',
         ]);
     }

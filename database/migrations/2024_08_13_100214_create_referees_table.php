@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('athletes', function (Blueprint $table) {
+        Schema::create('referees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('name_display');
-            $table->string('gender');
-            $table->integer('team_id');
-            // unique athlete identifier, from jua_membership system
-            $table->string('membership_id')->nullable();
+            $table->string('country')->nullable();
+            $table->string('city')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('athletes');
+        Schema::dropIfExists('referees');
     }
 };

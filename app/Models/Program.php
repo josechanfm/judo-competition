@@ -33,7 +33,7 @@ class Program extends Model
         'status' => self::STATUS_CREATED,
     ];
 
-    protected $fillable = ['competition_id', 'competition_category_id', 'sequence', 'date', 'weight_code', 'mat', 'section', 'contest_system', 'chart_size', 'duration', 'status'];
+    protected $fillable = ['competition_category_id', 'sequence', 'date', 'weight_code', 'mat', 'section', 'contest_system', 'chart_size', 'duration', 'status'];
     protected $appends = [
         'duration_formatted',
         'athletes',
@@ -48,9 +48,13 @@ class Program extends Model
         return $this->hasMany(Bout::class);
     }
 
+    public function category(){
+        return $this->belongsTo(CompetitionCategory::class);
+    }
+
     public function competition()
     {
-        return $this->belongsTo(Competition::class);
+        return $this->category->competition();
     }
     public function athletes()
     {

@@ -41,7 +41,8 @@ return new class extends Migration
             $table->foreignId('blue_score')->default(0);
             $table->integer('duration')->default(0);
 
-            $table->tinyInteger('status')->default(0);            
+            $table->tinyInteger('status')->default(0);
+            $table->string('competition_referee_ids')->nullable();
             $table->timestamps();
 
             $table->unique(['program_id', 'in_program_sequence']);

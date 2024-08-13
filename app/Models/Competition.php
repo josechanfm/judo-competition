@@ -59,4 +59,7 @@ class Competition extends Model implements HasMedia
     {
         return $this->getFirstMediaUrl('draw-cover') == '' ? asset('assets/draw-background.jpg') : $this->getFirstMediaUrl('draw-cover');
     }
+    public function referees(){
+        return $this->hasMany(Referee::class);
+    }
 }

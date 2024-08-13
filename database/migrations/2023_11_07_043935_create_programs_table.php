@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('programs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
+            //$table->foreignId('competition_id')->constrained()->cascadeOnDelete();
             $table->foreignId('competition_category_id')->constrained()->cascadeOnDelete();
             $table->integer('sequence')->default(0);
             $table->date('date');

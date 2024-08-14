@@ -10,7 +10,7 @@ use App\Models\Program;
 use App\Services\BoutGenerationService;
 use App\Models\Bout;
 use App\Models\Athlete;
-use App\Models\AthleteProgram;
+use App\Models\ProgramAthlete;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProgramController extends Controller
@@ -21,10 +21,11 @@ class ProgramController extends Controller
     public function index(Competition $competition)
     {
         //$competition->categories;
-        // dd($programs);
+        // $program=Program::find(1);
+        // dd($program);
         return Inertia::render('Manage/Programs', [
             'programs' => $competition->programs()
-                ->with('competitionCategory')
+                //->with('competitionCategory')
                 ->withCount('athletes', 'bouts')
                 ->orderBy('date')
                 ->orderBy('section')
@@ -58,14 +59,14 @@ class ProgramController extends Controller
     public function show(Competition $competition, Program $program)
     {
         // dd($program->athletes);
-        // dd($program->load(['programAthletes.athlete', 'programAthletes.athlete.team']));
+        // dd($program->load(['programsAthletes.athlete', 'programsAthletes.athlete.team']));
         if (request()->wantsJson()) {
             return response()->json([
-                'program' => $program->load(['programAthletes.athlete', 'programAthletes.athlete.team']),
+                'program' => $program->load(['programsAthletes.athlete', 'programsAthletes.athlete.team']),
             ]);
         }
         return Inertia::render('Manage/Program', [
-            'program' => $program->load(['programAthletes.athlete', 'programAthletes.athlete.team', 'bouts']),
+            'program' => $program->load(['programsAthletes.athlete', 'programsAthletes.athlete.team', 'bouts']),
             'athletes' => $competition->athletes,
         ]);
     }
@@ -96,20 +97,24 @@ class ProgramController extends Controller
 
     public function removeAthlete($programId, $athleteId)
     {
-        AthleteProgram::where('program_id', $programId)->where('athlete_id', $athleteId)->delete();
+        ProgramAthlete::where('program_id', $programId)->where('athlete_id', $athleteId)->delete();
 
         return redirect()->back();
     }
     public function joinAthlete($programId, $athleteId)
     {
-        AthleteProgram::insert(['program_id' => $programId, 'athlete_id' => $athleteId]);
+        ProgramAthlete::insert(['program_id' => $programId, 'athlete_id' => $athleteId]);
 
         return redirect()->back();
     }
     public function progress(Competition $competition)
     {
-        $competition->bouts;
-        $competition->programs;
+        // $program=Program::find(1);
+        // dd($program->gen_bouts);
+        $competition->programsAthletes;
+        dd($competition);
+        $competition->programsBouts;
+        //$competition->programs;
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
         ]);

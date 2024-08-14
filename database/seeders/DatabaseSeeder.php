@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             ConfigSeeder::class,
             CountrySeeder::class,
             GameTypeSeeder::class,
-            AthleteSeeder::class,
+            //AthleteSeeder::class,
             CompetitionSeeder::class,
             //CompetitionAthlete::class,
             TeamSeeder::class,

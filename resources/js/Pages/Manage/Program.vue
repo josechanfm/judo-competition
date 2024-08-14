@@ -1,14 +1,13 @@
 <template>
   <inertia-head :title="program.weight_code" />
 
-  <ProgramLayout>
+  <ProgramLayout :competitionId="program.competition_category.competition_id">
     <!-- Section, Mat sequences
     <a-switch v-model:checked="masterSequence" @change="rebuildBouts" />
     <br />
     <a-button :href="route('manage.competition.program.gen_bouts', program.id)"
       >Create Bouts</a-button
     > -->
-    <div class=""></div>
     <div class="py-12 xl:mx-16 mx-8">
       <div class="overflow-hidden flex flex-col gap-3">
         <div class="grid grid-cols-4 gap-12 py-4">
@@ -27,7 +26,7 @@
         </div>
         <div class="grid grid-cols-4 gap-12">
           <div class="col-span-3 flex flex-col gap-6">
-            <a-card class="w-full">
+            <a-card class="w-full" v-if="program.contest_system">
               <template #title><div class="font-normal">上線表</div></template>
               <component
                 :is="tournamentTable"
@@ -98,14 +97,14 @@ import Tournament64 from "@/Components/TournamentTable/Elimination64.vue";
 
 export default {
   components: {
-    AdminLayout,
+    ProgramLayout,
     Tournament4,
     Tournament8,
     Tournament16,
     Tournament32,
     Tournament64,
   },
-  props: ["program", "athletes"],
+  props: ["competition","program", "athletes"],
   data() {
     return {
       masterSequence: false,

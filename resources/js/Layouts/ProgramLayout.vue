@@ -35,7 +35,7 @@
           <user-outlined />
           <inertia-link
             class="mx-2"
-            :href="route('manage.competition.programs.index', $page.props.competition.id)"
+            :href="route('manage.competition.programs.index', competitionId)"
           >
             Program
           </inertia-link>
@@ -49,7 +49,7 @@
             <inertia-link
               class="mx-2"
               :href="
-                route('manage.competition.athletes.index', $page.props.competition.id)
+                route('manage.competition.athletes.index', competitionId)
               "
             >
               Athletes List
@@ -61,7 +61,7 @@
               :href="
                 route(
                   'manage.competition.athletes.drawControl',
-                  $page.props.competition.id
+                  competitionId
                 )
               "
             >
@@ -72,7 +72,7 @@
             <inertia-link
               class="mx-2"
               :href="
-                route('manage.competition.athletes.weights', $page.props.competition.id)
+                route('manage.competition.athletes.weights', competitionId)
               "
             >
               Athletes Weight
@@ -83,7 +83,7 @@
           <upload-outlined />
           <inertia-link
             class="mx-2"
-            :href="route('manage.competition.progress', $page.props.competition.id)"
+            :href="route('manage.competition.progress', competitionId)"
           >
             Progress
           </inertia-link>
@@ -132,6 +132,7 @@ import {
 import JudokaLogo from "@/Svgs/judoka-logo.svg";
 
 export default {
+  props: ["competitionId"],
   components: {
     MenuOutlined,
     UserOutlined,

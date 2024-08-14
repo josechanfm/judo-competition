@@ -307,7 +307,7 @@ class Bout extends Model
             return 0;
         }
 
-        if ($this->white === $programAthlete->id) {
+        if ($this->white === $programAthlete>id) {
             return $this->result->w_score;
         } else if ($this->blue === $programAthlete->id) {
             return $this->result->b_score;
@@ -331,7 +331,7 @@ class Bout extends Model
 
     private function setRankForRRB($winColor)
     {
-        $athletes = $this->program->programAthletes;
+        $athletes = $this->program->programsAthletes;
         $athletes->each(function (ProgramAthlete $programAthlete) {
             $programAthlete->collectScore();
         });
@@ -364,7 +364,7 @@ class Bout extends Model
         });
 
         // $athletes = $athletes->sortByDesc('rank')->values();
-        // $athletes->each(function (ProgramAthlete $programAthlete, $index) use ($athletes, &$maxRank) {
+        // $athletes->each(function (AthleteProgram $programAthlete, $index) use ($athletes, &$maxRank) {
         //     $rank = $programAthlete->rank + 1;
         //     for ($i = 0; $i < $maxRank; $i++) {
         //         if ($index != $i) {
@@ -387,7 +387,7 @@ class Bout extends Model
         }
 
         if ($this->in_program_sequence === 5) {
-            $this->program->programAthletes()->where('rank', 3)->update(['rank' => 5]);
+            $this->program->programsAthletes()->where('rank', 3)->update(['rank' => 5]);
             $this->getWinner()?->setRank(3);
             $this->getLoser()?->setRank(4);
         }
@@ -506,7 +506,7 @@ class Bout extends Model
     {
         if ($this->in_program_sequence === 4) {
             // get total score for player 1,3,5
-            $groupYellow = $this->program->programAthletes()->whereIn('seat', [1, 3, 5])->orderBy('score', 'desc')->get();
+            $groupYellow = $this->program->programsAthletes()->whereIn('seat', [1, 3, 5])->orderBy('score', 'desc')->get();
             $yellow1st = $groupYellow->first();
             $yellow2nd = $groupYellow->skip(1)->first();
 
@@ -519,7 +519,7 @@ class Bout extends Model
             ]);
         } else if ($this->in_program_sequence === 2) {
             // get total score for player 2,4
-            $groupGreen = $this->program->programAthletes()->whereIn('seat', [2, 4])->orderBy('score', 'desc')->get();
+            $groupGreen = $this->program->programsAthletes()->whereIn('seat', [2, 4])->orderBy('score', 'desc')->get();
             $green1st = $groupGreen->first();
             $green2nd = $groupGreen->skip(1)->first();
 

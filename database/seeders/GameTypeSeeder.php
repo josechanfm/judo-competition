@@ -28,7 +28,7 @@ class GameTypeSeeder extends Seeder
                         'name' => 'A組',
                         'name_secondary' => 'Untitled',
                         'code' => 'A',
-                        'weights' => '["MW55-","MW60-","FW48-"]',
+                        'weights' => ["MW55-","MW60-","FW48-"],
                         'duration' => 240
                     ]
                 ]

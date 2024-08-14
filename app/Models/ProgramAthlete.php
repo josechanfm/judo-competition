@@ -9,7 +9,7 @@ class ProgramAthlete extends Model
 {
     use HasFactory;
 
-    protected $table = 'programs_athlete';
+    protected $table = 'program_athlete';
 
     public function athlete()
     {

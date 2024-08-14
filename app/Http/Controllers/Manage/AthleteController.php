@@ -167,35 +167,39 @@ class AthleteController extends Controller
     public function Weights(Request $request, Competition $competition)
     {
         // dd($competition->days);
+        $competition->categories;
+        $competition->programs;
+        $competition->programsAthletes;
         return Inertia::render('Manage/Weights', [
             'competition' => $competition,
-            'programs' => $competition->programs,
-            'programAthletes' => QueryBuilder::for($competition->programAthletes())
-                ->allowedFilters([
-                    AllowedFilter::exact('category', 'program.category_id'),
-                    AllowedFilter::exact('weight_code', 'program.weight_code'),
-                    AllowedFilter::exact('date', 'program.date')->default($competition?->days[0] ?? ''),
-                    AllowedFilter::custom('name', new class implements Filter
-                    {
-                        public function __invoke($query, $value, string $property)
-                        {
-                            $query->whereHas('athlete', function ($query) use ($value) {
-                                $query->where('name', 'like', "%$value%")
-                                    ->orWhere('name_secondary', 'like', "%$value%")
-                                    ->orWhere('id', $value);
-                            });
-                        }
-                    }),
-                ])
-                ->with(['athlete.team', 'program'])
-                ->paginate(
-                    $request->input('per_page', 10)
-                ),
-            'athletes' => QueryBuilder::for($competition->programAthletes())->allowedFilters([
-                AllowedFilter::exact('category', 'program.category_id'),
-                AllowedFilter::exact('weight_code', 'program.weight_code'),
-                AllowedFilter::exact('date', 'program.date')->default($competition->days[0])
-            ])->get(),
+            // 'programs' => $competition->programs,
+            // 'programsAthletes'=>$competition->programsAthletes,
+            // 'programsAthletes' => QueryBuilder::for($competition->programsAthletes())
+            //     ->allowedFilters([
+            //         AllowedFilter::exact('category', 'program.category_id'),
+            //         AllowedFilter::exact('weight_code', 'program.weight_code'),
+            //         AllowedFilter::exact('date', 'program.date')->default($competition?->days[0] ?? ''),
+            //         AllowedFilter::custom('name', new class implements Filter
+            //         {
+            //             public function __invoke($query, $value, string $property)
+            //             {
+            //                 $query->whereHas('athlete', function ($query) use ($value) {
+            //                     $query->where('name', 'like', "%$value%")
+            //                         ->orWhere('name_secondary', 'like', "%$value%")
+            //                         ->orWhere('id', $value);
+            //                 });
+            //             }
+            //         }),
+            //     ])
+            //     ->with(['athlete.team', 'program'])
+            //     ->paginate(
+            //         $request->input('per_page', 10)
+            //     ),
+            // 'athletes' => QueryBuilder::for($competition->programsAthletes())->allowedFilters([
+            //     AllowedFilter::exact('category', 'program.category_id'),
+            //     AllowedFilter::exact('weight_code', 'program.weight_code'),
+            //     AllowedFilter::exact('date', 'program.date')->default($competition->days[0])
+            // ])->get(),
             'categories' => $competition->programs->unique(fn ($program) => $program->competitionCategory->id)->pluck('competitionCategory'),
             'weights' => $competition->programs->unique(fn ($program) => $program->weight_code)->pluck('weight_code'),
         ]);
@@ -213,7 +217,7 @@ class AthleteController extends Controller
     public function fail(Request $request, Competition $competition, ProgramAthlete $programAthlete)
     {
 
-        $programAthlete->weight = $request->weight;
+        $programAthlete->weight = $request->weight; 
         $programAthlete->is_weight_passed = 0;
         // $programAthlete->confirmed = true;
         $programAthlete->save();
@@ -224,12 +228,12 @@ class AthleteController extends Controller
     public function Weightslock(Competition $competition, Request $request)
     {
         // TODO: check whether all athletes have weight-in
-        if ($competition->programAthletes()->where('is_weight_passed', null)->whereHas('program', function ($query) use ($request) {
+        if ($competition->programsAthletes()->where('is_weight_passed', null)->whereHas('program', function ($query) use ($request) {
             return $query->where('date', $request->date);
         })->exists()) {
             abort(409, 'Not all athletes have confirm');
         } else {
-            $competition->programAthletes()->whereHas('program', function ($query) use ($request) {
+            $competition->programsAthletes()->whereHas('program', function ($query) use ($request) {
                 return $query->where('date', $request->date);
             })->update(['confirm' => 1]);
         }

@@ -58,10 +58,10 @@ class Program extends Model
     }
     public function athletes()
     {
-        return $this->belongsToMany(Athlete::class, 'programs_athletes');
+        return $this->belongsToMany(Athlete::class,'program_athlete')->withPivot(['seed','seat','weight','is_weight_passed','rank','score','confirm']);
     }
 
-    public function programAthletes()
+    public function programsAthletes()
     {
         return $this->hasMany(ProgramAthlete::class);
     }
@@ -130,7 +130,7 @@ class Program extends Model
 
 
         foreach ($athletes as $athlete) {
-            $this->programAthletes()->where('id', $athlete['id'])->update([
+            $this->programsAthletes()->where('id', $athlete['id'])->update([
                 'seat' => $athlete['seat'],
             ]);
         }

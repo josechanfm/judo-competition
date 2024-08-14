@@ -44,9 +44,9 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/competition/{competition}/drawScreen', [App\Http\Controllers\Manage\AthleteController::class, 'drawScreen'])->name('manage.competition.athletes.draw-screen');
     Route::resource('manage/competition/{competition}/athletes', App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
     Route::post('manage/competition/{competition}/program/{program}/draw', [App\Http\Controllers\Manage\ProgramController::class, 'draw'])->name('manage.competition.program.draw');
-    Route::post('manage/competition/{competition}/programs/update-sequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.programs.sequence.update');
-    Route::post('manage/competition/{competition}/programs/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.programs.lock');
-    Route::post('manage/competition/{competition}/programs/lock-seat', [App\Http\Controllers\Manage\ProgramController::class, 'lockSeat'])->name('manage.competition.programs.lock-seat');
+    Route::post('manage/competition/{competition}/program/update-sequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.program.sequence.update');
+    Route::post('manage/competition/{competition}/program/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.program.lock');
+    Route::post('manage/competition/{competition}/program/lock-seat', [App\Http\Controllers\Manage\ProgramController::class, 'lockSeat'])->name('manage.competition.program.lock-seat');
     Route::post('manage/competition/{competition}/programAthlete/{programAthlete}/weight-pass', [App\Http\Controllers\Manage\AthleteController::class, 'fail'])->name('manage.competition.programAthlete.weight-fail');
     Route::post('manage/competition/{competition}/athletes/weights-lock', [App\Http\Controllers\Manage\AthleteController::class, 'Weightslock'])->name('manage.competition.athletes.weights.lock');
     Route::post('manage/competition/{competition}/athletes/import', [App\Http\Controllers\Manage\AthleteController::class, 'import'])->name('manage.competition.athletes.import');

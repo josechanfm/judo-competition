@@ -18,6 +18,25 @@ class CompetitionSeeder extends Seeder
     public function run(): void
     {
         
+        $competition=Competition::create([
+            'date_start' => '2024-04-15',
+            'date_end' => '2024-04-16',
+            'country' => '澳門',
+            'name' => '第二十四屆學界柔道比賽',
+            'name_secondary' => '24th Compeonato Escolar de Judo',
+            'scale' => '本地賽',
+            'days' => ["2024-04-15","2024-04-16"],
+            'remark' => '',
+            'mat_number' => 2,
+            'section_number' => 3,
+            'token' => 'abc123',
+            'is_cancelled' => 0,
+            'status' => 0
+        ]);
+        
+        $athletes=Athlete::factory(1)->count(200)->create(['competition_id' => $competition->id, 'team_id' => 1]);
+        $athleteId=0;
+
         $programs=[
             [
                 'sequence' => 1,
@@ -82,23 +101,6 @@ class CompetitionSeeder extends Seeder
             ]
         ];
 
-        $competition=Competition::create([
-            'date_start' => '2024-04-15',
-            'date_end' => '2024-04-16',
-            'country' => '澳門',
-            'name' => '第二十四屆學界柔道比賽',
-            'name_secondary' => '24th Compeonato Escolar de Judo',
-            'scale' => '本地賽',
-            'days' => '["2024-04-15","2024-04-16"]',
-            'remark' => '',
-            'mat_number' => 2,
-            'section_number' => 3,
-            'token' => 'abc123',
-            'is_cancelled' => 0,
-            'status' => 0
-        ]);
-        $athletes=Athlete::factory(1)->count(200)->create(['competition_id' => $competition->id, 'team_id' => 1]);
-        $athleteId=0;
         $gameType=GameType::find(1);
         $competition->competition_type()->create($gameType->toArray());
         $gameCategories=$gameType->categories;
@@ -108,7 +110,9 @@ class CompetitionSeeder extends Seeder
             $competitionCategory=$competition->categories()->create($c);
             foreach($programs as $program){
                 $pro=$competitionCategory->programs()->create($program);
-                $pro->programAthletes()->create($athletes[$athleteId++]);
+                for($i=0;$i<$program['chart_size'];$i++){
+                    $pro->athletes()->attach([$athletes[$athleteId++]->id]);
+                }
             }
         }
         

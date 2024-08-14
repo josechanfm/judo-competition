@@ -86,7 +86,7 @@ class DrawService
     private function getAthletes(): array
     {
         return $this->program
-            ->programAthletes()
+            ->programsAthletes()
             ->with('athlete.team')
             ->get()
             ->toArray();

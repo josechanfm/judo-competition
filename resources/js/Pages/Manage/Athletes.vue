@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="運動員列表" />
 
-  <ProgramLayout>
+  <ProgramLayout :competitionId="competition.id">
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">運動員列表</h2>

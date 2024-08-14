@@ -1,5 +1,29 @@
 <template>
-  <ProgramLayout>
+  <ProgramLayout :competitionId="competition.id">
+  <h3>{{ competition.name }}</h3>
+  {{ competition.categories }}
+  <a-form>
+    <a-form-item label="Category" name="category">
+      <a-radio-group v-model:value="categoryId" button-style="solid" @change="onChangeCategory">
+        <template v-for="category in competition.categories">
+          <a-radio-button :value="category.id">{{ category.name }}</a-radio-button>
+        </template>
+      </a-radio-group>
+    </a-form-item>
+    <a-form-item label="Program" name="program">
+      <a-select :options="programs" :fieldNames="{value:'id',label:'weight_code'}" @change="onChangeProgram"/>
+    </a-form-item>
+  </a-form>
+  <h3>program_category:</h3>
+  {{ program.competition_category }}
+  <h3>athletes</h3>
+  <ol>
+    <li v-for="athlete in program.athletes">{{ athlete.name_display }} {{ athlete.pivot }}</li>
+  </ol>
+  
+
+
+
     <a-page-header title="運動員過磅" class="px-6 max-w-7xl !mx-auto">
       <template #extra>
         <template v-if="competition.status >= COMPETITION_STATUS.athletes_confirmed">
@@ -85,7 +109,7 @@
           </div>
         </div>
         <a-table
-          :dataSource="programAthletes.data"
+          :dataSource="programsAthletes.data"
           :columns="columns"
           :row-class-name="
             (record, index) =>
@@ -161,7 +185,7 @@
           </template>
         </a-table>
         <!-- <a-progress
-            :steps="programAthletes.total"
+            :steps="programsAthletes.total"
             :percent="percent"
             v-if="filtered.weight_code"
           /> -->
@@ -211,7 +235,7 @@ export default {
       type: Object,
       required: true,
     },
-    programAthletes: {
+    programsAthletes: {
       type: Object,
       required: true,
     },
@@ -223,14 +247,21 @@ export default {
       type: Array,
       required: true,
     },
-    programs: {
-      type: Object,
-      required: true,
-    },
-    athletes: {
-      type: Object,
-      required: true,
-    },
+    // programs: {
+    //   type: Object,
+    //   required: true,
+    // },
+  },
+  data() {
+    return {
+      categoryId:null,
+      programs:[],
+      program:{},
+      athletes:{},
+      category: null,
+      weight: null,
+      filtered: {},
+    };
   },
   setup(props) {
     const columns = [
@@ -305,13 +336,6 @@ export default {
       );
     },
   },
-  data() {
-    return {
-      category: null,
-      weight: null,
-      filtered: {},
-    };
-  },
   watch: {
     "table.filtered.category"() {
       this.table.filtered.weight_code = this.filteredWeights[0]?.value;
@@ -319,6 +343,13 @@ export default {
     },
   },
   methods: {
+    onChangeCategory(event){
+      this.programs=this.competition.programs.filter(p=>p.competition_category_id==event.target.value);
+      console.log(event.target.value)
+    },
+    onChangeProgram(event){
+      this.program=this.competition.programs.find(p=>p.id==event)
+    }, 
     updatePassed(record, value) {
       if (record.weight === 0) {
         this.$message.error("請先輸入過磅重量");

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('gender');
             $table->integer('team_id');
             // unique athlete identifier, from jua_membership system
-            $table->string('membership_id')->nullable();
+            $table->string('member_id')->nullable();
             $table->timestamps();
         });
     }

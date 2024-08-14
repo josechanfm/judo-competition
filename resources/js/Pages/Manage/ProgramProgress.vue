@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Dashboard" />
 
-  <ProgramLayout>
+  <ProgramLayout :competitionId="competition.id">
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
@@ -214,6 +214,7 @@ export default {
           mat.sequence = 1;
           return true;
         }
+        console.log(this.competition.programs_bouts);
         var tmpBout = this.competition.bouts.find(
           (b) =>
             b.section == this.currentSection.id &&

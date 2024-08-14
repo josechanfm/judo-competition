@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Dashboard" />
 
-  <ProgramLayout>
+  <ProgramLayout :competitionId="competition.id">
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
@@ -66,12 +66,12 @@
                     <a-button
                       :href="
                         route('manage.competition.programs.show', [
-                          record.competition_id,
+                          record.competition_category.competition_id,
                           record.id,
                         ])
-                      "
-                      >View</a-button
-                    >
+                      ">
+                      View
+                    </a-button>
                   </template>
                   <template v-if="column.dataIndex === 'athletes'">
                     <span>{{ record.athletes_count }}</span>
@@ -660,7 +660,7 @@ export default {
         }
       });
       this.$inertia.post(
-        route("manage.competition.programs.sequence.update", this.competition.id),
+        route("manage.competition.program.sequence.update", this.competition.id),
         programs,
         {
           onSuccess: (page) => {
@@ -712,7 +712,7 @@ export default {
     },
     confirmProgramArrangement() {
       this.$inertia.post(
-        route("manage.competition.programs.lock", this.competition),
+        route("manage.competition.program.lock", this.competition),
         null,
         {
           preserveScroll: true,

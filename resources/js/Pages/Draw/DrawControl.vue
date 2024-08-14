@@ -1,5 +1,5 @@
 <template>
-  <ProgramLayout>
+  <ProgramLayout :competitionId="competition.id">
     <a-page-header title="抽籤">
       <template #extra>
         <a-button type="link" v-if="competition.status > COMPETITION_STATUS.seat_locked">
@@ -488,7 +488,7 @@ export default {
     },
     lockSeat() {
       this.$inertia.post(
-        route("manage.competition.programs.lock-seat", [this.competition.id])
+        route("manage.competition.program.lock-seat", [this.competition.id])
       );
     },
   },

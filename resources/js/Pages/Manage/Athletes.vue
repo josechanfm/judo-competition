@@ -55,6 +55,12 @@
               <template v-if="column.dataIndex === 'operation'">
                 <a-button @click="onEditRecord(record)">Edit</a-button>
               </template>
+              <template v-else-if="column.dataIndex === 'team'">
+                {{record.team.name}}
+              </template>
+              <template v-else-if="column.dataIndex === 'program'">
+                  <span v-for="program in record.programs">{{ program.weight_code }}</span>
+              </template>
               <template v-else>
                 {{ record[column.dataIndex] }}
               </template>
@@ -203,14 +209,18 @@ export default {
       },
       columns: [
         {
+          title: "Team",
+          dataIndex: "team",
+        },{
           title: "Name",
-          dataIndex: "name_zh",
-        },
-        {
+          dataIndex: "name_display",
+        },{
           title: "Gender",
           dataIndex: "gender",
-        },
-        {
+        },{
+          title: "Program",
+          dataIndex: "program",
+        },{
           title: "Operation",
           dataIndex: "operation",
         },

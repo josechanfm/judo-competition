@@ -22,7 +22,6 @@ class ProgramController extends Controller
     {
         //$competition->categories;
         // $program=Program::find(1);
-        // dd($program);
         return Inertia::render('Manage/Programs', [
             'programs' => $competition->programs()
                 //->with('competitionCategory')
@@ -112,8 +111,9 @@ class ProgramController extends Controller
         // $program=Program::find(1);
         // dd($program->gen_bouts);
         $competition->programsAthletes;
-        dd($competition);
         $competition->programsBouts;
+        $competition->bouts=$competition->bouts()->get();
+        
         //$competition->programs;
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
@@ -154,7 +154,9 @@ class ProgramController extends Controller
     public function lock(Competition $competition)
     {
         // remove previously generated bouts
-        $competition->bouts()->delete();
+        // $competition->programsBouts;
+        // dd($competition);
+        //$competition->bouts()->delete();
         // TODO: generate bouts
         $competition->generateBouts();
 

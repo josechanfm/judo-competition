@@ -28,6 +28,7 @@ class AthleteController extends Controller
         $competition->athletes;
         $programs = $competition->programs;
         $teams = $competition->teams;
+        
         return Inertia::render('Manage/Athletes', [
             'competition' => $competition,
             'programs' => $programs,
@@ -166,64 +167,20 @@ class AthleteController extends Controller
 
     public function Weights(Request $request, Competition $competition)
     {
-        // dd($competition->days);
         $competition->categories;
-        $competition->programs;
         $competition->programsAthletes;
         return Inertia::render('Manage/Weights', [
             'competition' => $competition,
-            // 'programs' => $competition->programs,
-            // 'programsAthletes'=>$competition->programsAthletes,
-            // 'programsAthletes' => QueryBuilder::for($competition->programsAthletes())
-            //     ->allowedFilters([
-            //         AllowedFilter::exact('category', 'program.category_id'),
-            //         AllowedFilter::exact('weight_code', 'program.weight_code'),
-            //         AllowedFilter::exact('date', 'program.date')->default($competition?->days[0] ?? ''),
-            //         AllowedFilter::custom('name', new class implements Filter
-            //         {
-            //             public function __invoke($query, $value, string $property)
-            //             {
-            //                 $query->whereHas('athlete', function ($query) use ($value) {
-            //                     $query->where('name', 'like', "%$value%")
-            //                         ->orWhere('name_secondary', 'like', "%$value%")
-            //                         ->orWhere('id', $value);
-            //                 });
-            //             }
-            //         }),
-            //     ])
-            //     ->with(['athlete.team', 'program'])
-            //     ->paginate(
-            //         $request->input('per_page', 10)
-            //     ),
-            // 'athletes' => QueryBuilder::for($competition->programsAthletes())->allowedFilters([
-            //     AllowedFilter::exact('category', 'program.category_id'),
-            //     AllowedFilter::exact('weight_code', 'program.weight_code'),
-            //     AllowedFilter::exact('date', 'program.date')->default($competition->days[0])
-            // ])->get(),
-            'categories' => $competition->programs->unique(fn ($program) => $program->competitionCategory->id)->pluck('competitionCategory'),
-            'weights' => $competition->programs->unique(fn ($program) => $program->weight_code)->pluck('weight_code'),
         ]);
     }
-    public function pass(Request $request, Competition $competition, ProgramAthlete $programAthlete)
+    public function weightChecked(Request $request, Competition $competition, ProgramAthlete $programAthlete)
     {
         $programAthlete->weight = $request->weight;
         $programAthlete->is_weight_passed = 1;
-        // $programAthlete->confirmed = true;
         $programAthlete->save();
-
         return redirect()->back();
     }
 
-    public function fail(Request $request, Competition $competition, ProgramAthlete $programAthlete)
-    {
-
-        $programAthlete->weight = $request->weight; 
-        $programAthlete->is_weight_passed = 0;
-        // $programAthlete->confirmed = true;
-        $programAthlete->save();
-
-        return redirect()->back();
-    }
 
     public function Weightslock(Competition $competition, Request $request)
     {

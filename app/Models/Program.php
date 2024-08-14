@@ -34,10 +34,7 @@ class Program extends Model
     ];
 
     protected $fillable = ['competition_category_id', 'sequence', 'date', 'weight_code', 'mat', 'section', 'contest_system', 'chart_size', 'duration', 'status'];
-    protected $appends = [
-        'duration_formatted',
-        'athletes',
-    ];
+    protected $appends = ['duration_formatted'];
 
     protected $with = [
         'competitionCategory'

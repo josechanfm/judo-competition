@@ -8,7 +8,7 @@
   >
     <tr>
       <td v-if="showTableSeq" class="seq">1</td>
-      <td class="playerBox">{{ bouts[0] }}</td>
+      <td class="playerBox"></td>
       <td class="firstColumn" rowspan="2">
         <table class="innerTable">
           <tr>

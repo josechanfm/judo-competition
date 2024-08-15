@@ -1,17 +1,19 @@
 <template>
-  <inertia-head title="Dashboard" />
+  <inertia-head title="賽事管理" />
 
   <AdminLayout>
     <template #header>
       <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">賽事管理</h2>
       </div>
     </template>
     <div class="py-12 mx-8">
       <div class="mb-8 flex justify-between">
         <div class="text-xl font-bold">賽事管理</div>
         <div>
-          <a-button type="primary" @click="onCreateRecord">創建新的賽事</a-button>
+          <inertia-link :href="route('manage.competitions.create')"
+            ><a-button type="primary">創建新的賽事</a-button>
+          </inertia-link>
         </div>
       </div>
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">

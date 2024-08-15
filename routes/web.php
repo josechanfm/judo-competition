@@ -56,6 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/competition/{competition}/chart_pdf', [App\Http\Controllers\Manage\ProgramController::class, 'chartPdf'])->name('manage.competition.chartPdf');
     Route::post('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'joinAthlete'])->name('manage.program.joinAthlete');
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
+
+    Route::get('manage/print/{competition}/programs',[App\Http\Controllers\Manage\PrinterController::class,'programs'])->name('manage.printer.programs');
+    Route::get('manage/print/html_to_pdf',[App\Http\Controllers\Manage\PrinterController::class,'htmlToPdf']);
 });
 
 

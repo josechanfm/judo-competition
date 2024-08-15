@@ -21,7 +21,7 @@
             <a-statistic title="Programs" :value="program.bouts.length" />
           </a-card>
           <a-card class="shadow-lg">
-            <a-statistic title="Atheles" :value="program.athletes.length" />
+            <a-statistic title="Atheles" :value="program.athletes?program.athletes.length:0"/>
           </a-card>
         </div>
         <div class="grid grid-cols-4 gap-12">
@@ -29,10 +29,12 @@
             <a-card class="w-full" v-if="program.contest_system">
               <template #title><div class="font-normal">上線表</div></template>
               <component
+                v-if="program.bouts.length>0"
                 :is="tournamentTable"
                 :contestSystem="program.contest_system"
                 :bouts="bouts"
-            /></a-card>
+              />
+            </a-card>
             <div class="py-2 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
               <div class="flex font-bold text-lg mb-2 justify-between">
                 <div>運動員名單</div>
@@ -174,7 +176,7 @@ export default {
       athleteColumns: [
         {
           title: "Name",
-          dataIndex: "name_zh",
+          dataIndex: "name_display",
         },
         {
           title: "Gender",

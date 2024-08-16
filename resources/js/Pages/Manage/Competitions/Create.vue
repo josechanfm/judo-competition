@@ -11,227 +11,276 @@
       <div class="mb-8 flex justify-between">
         <div class="text-xl font-bold">賽事創建</div>
       </div>
-      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-2">
-        <div class="bg-gray-500">
-          <div class=""></div>
+      <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex">
+        <div class="border-r-2 border-gray-300 shrink-0 py-2 px-2">
+          <div class="flex flex-col font-bold text-lg gap-2">
+            <div>
+              <a-button
+                type="text"
+                class="text-lg font-bold flex items-center py-4"
+                :class="setting_index == 0 ? 'bg-gray-300' : ''"
+                @click="changeSettingIndex(0)"
+                >基礎設定</a-button
+              >
+            </div>
+            <div>
+              <a-button
+                type="text"
+                class="text-lg font-bold flex items-center py-4"
+                :class="setting_index == 1 ? 'bg-gray-300' : ''"
+                @click="changeSettingIndex(1)"
+                >組別設定</a-button
+              >
+            </div>
+            <div>
+              <a-button
+                type="text"
+                class="text-lg font-bold flex items-center py-4"
+                :class="setting_index == 2 ? 'bg-gray-300' : ''"
+                @click="changeSettingIndex(2)"
+                >賽事類型</a-button
+              >
+            </div>
+            <div>
+              <a-button
+                type="text"
+                class="text-lg font-bold flex items-center py-4"
+                :class="setting_index == 3 ? 'bg-gray-300' : ''"
+                @click="changeSettingIndex(3)"
+                >語言設定</a-button
+              >
+            </div>
+          </div>
         </div>
-        <a-form
-          name="ModalForm"
-          ref="formRef"
-          :model="modal.data"
-          layout="vertical"
-          autocomplete="off"
-          :rules="rules"
-          :validate-messages="validateMessages"
-        >
-          <div class="flex flex-col">
-            <div class="flex justify-between gap-3">
-              <div class="w-full" v-if="modal.title == 'Create'">
-                <a-form-item label="Type" name="game_type_id">
-                  <a-select
-                    v-model:value="modal.data.game_type_id"
-                    show-search
-                    :options="gameTypes"
-                    :fieldNames="{ value: 'id', label: 'name' }"
-                  />
-                </a-form-item>
-              </div>
-              <div class="w-full">
-                <a-form-item label="Country" name="country">
-                  <a-select
-                    v-model:value="modal.data.country"
-                    show-search
-                    :options="countries"
-                    :fieldNames="{ value: 'name', label: 'name' }"
-                  />
-                </a-form-item>
-              </div>
-              <div class="w-full">
-                <a-form-item label="scale" name="scale">
-                  <a-input v-model:value="modal.data.scale" />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="flex justify-between gap-3">
-              <div class="w-full">
-                <a-form-item label="Name" name="name">
-                  <a-input v-model:value="modal.data.name" />
-                </a-form-item>
-              </div>
-              <div class="w-full">
-                <a-form-item label="Name (Foreign)" name="name_secondary">
-                  <a-input v-model:value="modal.data.name_secondary" />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="flex justify-between gap-3">
-              <div class="w-full">
-                <a-form-item label="Start Date" name="date_start">
-                  <a-date-picker
-                    v-model:value="modal.data.date_start"
-                    :format="dateFormat"
-                    :valueFormat="dateFormat"
-                  />
-                </a-form-item>
-              </div>
-              <div class="w-full">
-                <a-form-item label="End Date" name="date_end">
-                  <a-date-picker
-                    v-model:value="modal.data.date_end"
-                    :format="dateFormat"
-                    :disabled-date="endDateDisabled"
-                    :valueFormat="dateFormat"
-                  />
-                </a-form-item>
-              </div>
-              <div class="w-full">
-                <a-form-item label="Mat Number" name="mat_number">
-                  <a-input-number
-                    v-model:value="modal.data.mat_number"
-                    style="width: 150px"
-                    :min="1"
-                  />
-                </a-form-item>
-              </div>
-              <div class="w-full">
-                <a-form-item label="Section Number" name="section_number">
-                  <a-input-number
-                    v-model:value="modal.data.section_number"
-                    style="width: 150px"
-                    :min="1"
-                  />
-                </a-form-item>
-              </div>
-            </div>
-            <div class="flex justify-between gap-3">
-              <div class="w-full">
-                <a-form-item label="Days" name="days">
-                  <div class="flex gap-3 mb-2">
-                    <a-date-picker
-                      v-model:value="tmpContestTime"
-                      :disabled-date="disabledDate"
-                      value-format="YYYY-MM-DD"
+        <div class="w-full p-4">
+          <a-form
+            name="ModalForm"
+            ref="formRef"
+            :model="modal.data"
+            layout="vertical"
+            autocomplete="off"
+            :rules="rules"
+            :validate-messages="validateMessages"
+          >
+            <div class="flex flex-col">
+              <div class="flex flex-col" v-if="setting_index == 0">
+                <div class="">
+                  <a-form-item label="賽事類型" name="game_type_id">
+                    <a-select
+                      type="select"
+                      v-model:value="modal.data.game_type_id"
+                      show-search
+                      :options="gameTypes"
+                      :fieldNames="{ value: 'id', label: 'name' }"
                     />
-                    <a-button @click="addTimeToForm">新增</a-button>
+                  </a-form-item>
+                </div>
+                <div class="flex justify-between gap-3">
+                  <div class="w-full">
+                    <a-form-item label="賽事名稱" name="name">
+                      <a-input type="input" v-model:value="modal.data.name" />
+                    </a-form-item>
+                  </div>
+                </div>
+                <div class="">
+                  <a-form-item label="國家" name="country">
+                    <a-select
+                      v-model:value="modal.data.country"
+                      show-search
+                      :options="countries"
+                      :fieldNames="{ value: 'name', label: 'name' }"
+                    />
+                  </a-form-item>
+                </div>
+                <div class="">
+                  <a-form-item label="城市" name="city">
+                    <a-input class="" type="input" v-model:value="modal.data.scale" />
+                  </a-form-item>
+                </div>
+
+                <div class="flex justify-between gap-3">
+                  <div class="w-full">
+                    <a-form-item label="Start Date" name="date_start">
+                      <a-date-picker
+                        v-model:value="modal.data.date_start"
+                        :format="dateFormat"
+                        :valueFormat="dateFormat"
+                      />
+                    </a-form-item>
+                  </div>
+                  <div class="w-full">
+                    <a-form-item label="End Date" name="date_end">
+                      <a-date-picker
+                        v-model:value="modal.data.date_end"
+                        :format="dateFormat"
+                        :disabled-date="endDateDisabled"
+                        :valueFormat="dateFormat"
+                      />
+                    </a-form-item>
+                  </div>
+                  <div class="w-full">
+                    <a-form-item label="Mat Number" name="mat_number">
+                      <a-input-number
+                        v-model:value="modal.data.mat_number"
+                        style="width: 150px"
+                        :min="1"
+                      />
+                    </a-form-item>
+                  </div>
+                  <div class="w-full">
+                    <a-form-item label="Section Number" name="section_number">
+                      <a-input-number
+                        v-model:value="modal.data.section_number"
+                        style="width: 150px"
+                        defaultValue="1"
+                        :min="1"
+                      />
+                    </a-form-item>
+                  </div>
+                  <div class="w-full">
+                    <a-form-item label="Referee Number" name="referee_number">
+                      <a-input-number
+                        v-model:vlaue="modal.data.referee_number"
+                        style="width: 150px"
+                        defaultValue="1"
+                        :min="1"
+                      >
+                      </a-input-number>
+                    </a-form-item>
+                  </div>
+                </div>
+                <div class="">
+                  <a-form-item label="Remark" name="remark">
+                    <a-textarea v-model:value="modal.data.remark" :rows="5" />
+                  </a-form-item>
+                </div>
+              </div>
+              <div class="flex flex-col" v-else-if="setting_index == 1"></div>
+              <div class="flex justify-between gap-3">
+                <!-- <div class="w-full">
+                  <a-form-item label="Days" name="days">
+                    <div class="flex gap-3 mb-2">
+                      <a-date-picker
+                        v-model:value="tmpContestTime"
+                        :disabled-date="disabledDate"
+                        value-format="YYYY-MM-DD"
+                      />
+                      <a-button @click="addTimeToForm">新增</a-button>
+                    </div>
+                    <div
+                      class="rounded shadow border p-2 w-72 flex items-center mb-2"
+                      v-for="time in modal.data.days"
+                      :key="time"
+                    >
+                      <div class="flex-1 font-bold">{{ time }}</div>
+                      <div>
+                        <a-button type="link" danger @click="removeTimeFromForm(time)"
+                          >移除</a-button
+                        >
+                      </div>
+                    </div>
+                  </a-form-item>
+                </div> -->
+                <div class="w-full flex flex-col" v-if="modal.title == 'Edit'">
+                  <div class="">
+                    <a-form-item
+                      label="Competition Name"
+                      :name="['competition_type', 'name_secondary']"
+                      :rules="[
+                        {
+                          required: true,
+                          message: 'Competition Name is required!',
+                        },
+                      ]"
+                    >
+                      <a-input v-model:value="modal.data.competition_type.name"></a-input>
+                    </a-form-item>
                   </div>
                   <div
-                    class="rounded shadow border p-2 w-72 flex items-center mb-2"
-                    v-for="time in modal.data.days"
-                    :key="time"
-                  >
-                    <div class="flex-1 font-bold">{{ time }}</div>
-                    <div>
-                      <a-button type="link" danger @click="removeTimeFromForm(time)"
-                        >移除</a-button
-                      >
-                    </div>
-                  </div>
-                </a-form-item>
-              </div>
-              <div class="w-full flex flex-col" v-if="modal.title == 'Edit'">
-                <div class="">
-                  <a-form-item
-                    label="Competition Name"
-                    :name="['competition_type', 'name_secondary']"
-                    :rules="[
-                      {
-                        required: true,
-                        message: 'Competition Name is required!',
-                      },
-                    ]"
-                  >
-                    <a-input v-model:value="modal.data.competition_type.name"></a-input>
-                  </a-form-item>
-                </div>
-                <div
-                  class=""
-                  v-if="modal.data?.competition_type?.is_language_secondary_enabled == 1"
-                >
-                  <a-form-item
-                    label="Competition Name (Foreign)"
-                    :name="['competition_type', 'name_secondary']"
-                    :rules="[
-                      {
-                        required: true,
-                        message: 'Competition Name (Foreign) is required!',
-                      },
-                    ]"
-                  >
-                    <a-input
-                      v-model:value="modal.data.competition_type.name_secondary"
-                    ></a-input>
-                  </a-form-item>
-                </div>
-              </div>
-              <div class="w-full flex flex-col" v-if="modal.title == 'Edit'">
-                <div class="">
-                  <a-form-item
-                    label="Competition Language"
-                    :name="['competition_type', 'language']"
-                    :rules="[
-                      { required: true, message: 'Competition Language is required!' },
-                    ]"
-                  >
-                    <a-select
-                      v-model:value="modal.data.competition_type.language"
-                      :options="selectLanguage"
-                      :fieldNames="{ value: 'value', label: 'name' }"
-                    ></a-select>
-                  </a-form-item>
-                </div>
-                <div
-                  class=""
-                  v-if="modal.data?.competition_type?.is_language_secondary_enabled == 1"
-                >
-                  <a-form-item
-                    label="Competition Language (Foreign)"
-                    :name="['competition_type', 'language_secondary']"
-                    :rules="[
-                      {
-                        required: true,
-                        message: 'Competition Language (Foreign) is required!',
-                      },
-                    ]"
-                  >
-                    <a-select
-                      v-model:value="modal.data.competition_type.language_secondary"
-                      :options="selectLanguage"
-                      :fieldNames="{ value: 'value', label: 'name' }"
-                    ></a-select>
-                  </a-form-item>
-                </div>
-              </div>
-              <div class="w-1/2" v-if="modal.title == 'Edit'">
-                <a-form-item
-                  label="開啓第二語言"
-                  name="competition_type_is_language_secondary_enabled"
-                >
-                  <a-switch
-                    v-model:checked="
-                      modal.data.competition_type.is_language_secondary_enabled
+                    class=""
+                    v-if="
+                      modal.data?.competition_type?.is_language_secondary_enabled == 1
                     "
-                    :unCheckedValue="0"
-                    :checkedValue="1"
-                  />
+                  >
+                    <a-form-item
+                      label="Competition Name (Foreign)"
+                      :name="['competition_type', 'name_secondary']"
+                      :rules="[
+                        {
+                          required: true,
+                          message: 'Competition Name (Foreign) is required!',
+                        },
+                      ]"
+                    >
+                      <a-input
+                        v-model:value="modal.data.competition_type.name_secondary"
+                      ></a-input>
+                    </a-form-item>
+                  </div>
+                </div>
+                <div class="w-full flex flex-col" v-if="modal.title == 'Edit'">
+                  <div class="">
+                    <a-form-item
+                      label="Competition Language"
+                      :name="['competition_type', 'language']"
+                      :rules="[
+                        { required: true, message: 'Competition Language is required!' },
+                      ]"
+                    >
+                      <a-select
+                        v-model:value="modal.data.competition_type.language"
+                        :options="selectLanguage"
+                        :fieldNames="{ value: 'value', label: 'name' }"
+                      ></a-select>
+                    </a-form-item>
+                  </div>
+                  <div
+                    class=""
+                    v-if="
+                      modal.data?.competition_type?.is_language_secondary_enabled == 1
+                    "
+                  >
+                    <a-form-item
+                      label="Competition Language (Foreign)"
+                      :name="['competition_type', 'language_secondary']"
+                      :rules="[
+                        {
+                          required: true,
+                          message: 'Competition Language (Foreign) is required!',
+                        },
+                      ]"
+                    >
+                      <a-select
+                        v-model:value="modal.data.competition_type.language_secondary"
+                        :options="selectLanguage"
+                        :fieldNames="{ value: 'value', label: 'name' }"
+                      ></a-select>
+                    </a-form-item>
+                  </div>
+                </div>
+                <div class="w-1/2" v-if="modal.title == 'Edit'">
+                  <a-form-item
+                    label="開啓第二語言"
+                    name="competition_type_is_language_secondary_enabled"
+                  >
+                    <a-switch
+                      v-model:checked="
+                        modal.data.competition_type.is_language_secondary_enabled
+                      "
+                      :unCheckedValue="0"
+                      :checkedValue="1"
+                    />
+                  </a-form-item>
+                </div>
+              </div>
+              <div class="flex justify-end h-full">
+                <a-form-item>
+                  <a-button class="text-right" @click="onCreate">Create</a-button>
                 </a-form-item>
               </div>
             </div>
-            <a-form-item label="Remark" name="remark">
-              <a-textarea v-model:value="modal.data.remark" :rows="5" />
-            </a-form-item>
-            <a-form-item>
-              <a-button v-if="modal.mode == 'CREATE'" type="primary" @click="onCreate"
-                >Create</a-button
-              >
-              <a-button v-if="modal.mode == 'EDIT'" type="primary" @click="onUpdate"
-                >Update</a-button
-              >
-              <a-button style="margin-left: 10px" @click="this.modal.isOpen = false"
-                >Close</a-button
-              >
-            </a-form-item>
-          </div>
-        </a-form>
+          </a-form>
+        </div>
       </div>
     </div>
   </AdminLayout>
@@ -245,12 +294,13 @@ export default {
   components: {
     AdminLayout,
   },
-  props: ["countries", "gameTypes", "competitions", "languages"],
+  props: ["countries", "gameTypes", "languages"],
   data() {
     return {
       dateFormat: "YYYY-MM-DD",
       disabledDate: null,
       tmpContestTime: null,
+      setting_index: 0,
       modal: {
         isOpen: false,
         mode: null,
@@ -418,6 +468,9 @@ export default {
         .catch((error) => {
           console.log("error", error);
         });
+    },
+    changeSettingIndex(index) {
+      this.setting_index = index;
     },
   },
 };

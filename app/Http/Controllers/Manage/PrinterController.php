@@ -4,46 +4,180 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use TCPDF;
 
 class PrinterController extends Controller
 {
     public function htmlToPdf(){
-        $data='<h3>Hellow World</h3>';
-        $mpdf = new \Mpdf\Mpdf();
-        $mpdf->AddPage();
-        $style = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => '10,20,5,10', 'phase' => 10, 'color' => array(255, 0, 0));
-        $style2 = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 0, 0));
-        $style3 = array('width' => 1, 'cap' => 'round', 'join' => 'round', 'dash' => '2,10', 'color' => array(255, 0, 0));
-        $style4 = array('L' => 0,
-                        'T' => array('width' => 0.25, 'cap' => 'butt', 'join' => 'miter', 'dash' => '20,10', 'phase' => 10, 'color' => array(100, 100, 255)),
-                        'R' => array('width' => 0.50, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => array(50, 50, 127)),
-                        'B' => array('width' => 0.75, 'cap' => 'square', 'join' => 'miter', 'dash' => '30,10,5,10'));
-        $style5 = array('width' => 0.25, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 64, 128));
-        $style6 = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => '10,10', 'color' => array(0, 128, 0));
-        $style7 = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 128, 0));
+        $players=[
+            [
+                'white'=>['name_display'=>'White player 1'],
+                'blue'=>['name_display'=>'Blue player 2'],
+            ],[
+                'white'=>['name_display'=>'White player 3'],
+                'blue'=>['name_display'=>'Blue player 4'],
+            ],[
+                'white'=>['name_display'=>'White player 5'],
+                'blue'=>['name_display'=>'Blue player 6'],
+            ],[
+                'white'=>['name_display'=>'White player 7'],
+                'blue'=>['name_display'=>'Blue player 8'],
+            ],            [
+                'white'=>['name_display'=>'White player 9'],
+                'blue'=>['name_display'=>'Blue player 10'],
+            ],[
+                'white'=>['name_display'=>'White player 11'],
+                'blue'=>['name_display'=>'Blue player 12'],
+            ],[
+                'white'=>['name_display'=>'White player 13'],
+                'blue'=>['name_display'=>'Blue player 14'],
+            ],[
+                'white'=>['name_display'=>'White player 15'],
+                'blue'=>['name_display'=>'Blue player 16'],
+            ]
+        ];
+        $winners=[
+            [1,1,1,1,1,1,1,1],
+            [1,1,1,1],
+            [1,1],
+            [1]
+        ];
 
-        // Rect
-        $mpdf->Text(100, 4, 'Rectangle examples');
-        $mpdf->Rect(100, 10, 40, 20, 'DF', $style4, array(220, 220, 200));
-        $mpdf->Rect(145, 10, 40, 20, 'D', array('all' => $style3));
+        $pdf = new TCPDF();
+        $pdf->AddPage();
+       
+        //$players=count($players);
+        $startX=20;
+        $startY=10;
+        $boxW=45;
+        $boxH=12;
+        $arcW=15;
+        $boxGap=2;
 
-        // Rounded rectangle
-        $mpdf->Text(5, 249, 'Rounded rectangle examples');
-        //$mpdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
-        $mpdf->RoundedRect(5, 255, 40, 30, 3.50, '1111', 'DF');
-        $mpdf->RoundedRect(50, 255, 40, 30, 6.50, '1000');
-        $mpdf->RoundedRect(95, 255, 40, 30, 10.0, '1111', null, $style6);
-        $mpdf->RoundedRect(140, 255, 40, 30, 8.0, '0101', 'DF', $style6, array(200, 200, 200));
-
-        $mpdf->Output('myfile.pdf', 'I');
-
+        $this->fullArcs($pdf,$startX, $startY, $arcW, $boxW, $boxH, $players);
+        $this->winnerArcs($pdf,$startX, $startY, $arcW, $boxW, $boxH, $winners);
+        $pdf->Output('myfile.pdf', 'I');
     }
-    function _Arc($x1, $y1, $x2, $y2, $x3, $y3)
-    {
-        $h = $this->h;
-        $this->_out(sprintf('%.2F %.2F %.2F %.2F %.2F %.2F c ', $x1*$this->k, ($h-$y1)*$this->k,
-            $x2*$this->k, ($h-$y2)*$this->k, $x3*$this->k, ($h-$y3)*$this->k));
+
+    private function fullArcs($pdf, $x, $y, $w, $boxW, $boxH, $players){
+        /* box padding, arc line */
+        $playerCount=count($players);
+        $boxGap=2;
+        $boxX=$x;
+        $boxY=$y;
+        $padding=2;
+        /* player box */
+        for($i=0;$i<$playerCount;$i++){
+            $this->boxPlayers($pdf, $boxX, $boxY, $boxW, $boxH, $players[$i]);
+            $boxY+=$boxGap+$boxH;
+        }
+
+        /* player box padding arc line */
+        $l=$boxW+0; //padding space on left
+        $px=$x+$l; //starting point of $x axis
+        $py=$y+($boxH/4); //starting point of $y axis
+        $pW=2; //width of arch shape
+        $h=$boxH / 2; //height of arch shape
+        $pGap= $h*2+$boxGap; //$h +$boxH+$boxGap; //gap betwee each arch in vertical alignment
+        for($i=0;$i<$playerCount;$i++){
+            //$this->arcWinner($pdf, $px, $py, $pW, $h, $players[$i]);
+            $this->arcLine($pdf,$px, $py, $pW, $h);
+            $py+=$pGap;
+        }
+
+        /* arch line */        
+        $ax=$x+$boxW+$padding;
+        $ah=$boxH+$boxGap;
+        $ay=$y+($boxH/2);
+        $round=strlen((string)decbin($playerCount))-1;
+        $cnt=$playerCount/2;
+        
+        for($i=1;$i<=($round);$i++){
+            $arcGap=$ah *2; //gap betwee each arch in vertical alignment
+            for($j=0;$j<$cnt;$j++){
+                $this->arcLine($pdf,$ax, $ay, $w, $ah);
+                $ay+=$arcGap;
+            }
+            $ax+=$w;
+            $ay=$y+$ah-$boxGap;
+            $ah+=$ah;
+            $cnt/=2;
+        }
     }
+    private function boxPlayers($pdf, $x, $y, $w, $h, $players=['white'=>['name_display'=>'white'],'blue'=>['name_display'=>'blue']]){
+        $style = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(0, 0, 0));
+        $r=2.0;
+        $pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
+        $pdf->RoundedRect($x-$h, $y, $h, $h, $h/2, '0011', 'D');
+        $pdf->RoundedRect($x, $y, $w, $h, $r, '1100', 'D');
+        $pdf->Line($x, $y+($h/2), $x+$w, $y+($h/2), $style);
+        $pdf->Text($x, $y, $players['white']['name_display']);
+        $pdf->Text($x, $y+($h/2), $players['blue']['name_display']);
+    }
+    private function arcLine($pdf, $x, $y, $w, $h){
+        $style = array('L' => 0,
+                        'T' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => array(50, 50, 127)),
+                        'R' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => array(50, 50, 127)),
+                        'B' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => array(50, 50, 127)));
+        $pdf->Rect($x, $y, $w, $h, 'D', $style );
+    }
+
+    private function winnerArcs($pdf, $startX, $startY, $arcW, $boxW, $boxH, $winners){
+        $style = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(255, 0, 0));
+        $round=count($winners);
+        $padding=2;
+        $boxGap=2;
+        $x1=$startX+$boxW+$padding;
+        $x2=$startX+$boxW+$arcW+$padding;
+        $startY=$startY+($boxH/4);
+        //$y2=$startY+($boxH/4);
+        for($i=0;$i<$round;$i++){
+            if($i==0){
+                $y=$startY+($boxH/4);
+            }else{
+                //$startY=$startY+($boxH/4)+($boxH/2);
+            }
+            $cnt=count($winners[$i]);
+            for($j=0;$j<$cnt;$j++){
+                if($winners[$i][$j]==1){
+                    $pdf->text($x1, $y,$winners[$i][$j]);
+                    $pdf->Line($x1, $y, $x2, $y, $style);
+                }else if($winners[$i][$j]==2){
+                    //$pdf->text($x1, $y,$winners[$i][$j]);
+                    //$pdf->Line($x1, $y+($boxH/2), $x2, $y+($boxH/2), $style);
+                }
+                $y+=($boxH+$boxGap);
+            }
+            $startY=$startY+($boxH/4)+($boxH/2);
+            $x1+=$arcW;
+            //$x2+=$x1+$arcW;
+        }
+    }
+
+    
+    private function arcWinner($pdf, $x1, $y1, $w, $h, $winner='',$firstRound=false){
+        $style = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(255, 0, 0));
+        $pdf->text($x1,$y1, $w);
+        if($firstRound){
+            if($winner==1){
+                //$pdf->Line($x1, $y1, $x1+$w, $y1, $style);
+    
+            }else if($winner==2){
+                //$pdf->Line($x1, $y1+$h, $x1+$w, $y1+$h, $style);
+            }
+        }
+        if($winner==1){
+            $pdf->Line($x1, $y1-($h/2), $x1+5, $y1+($h/2), $style);
+            $pdf->Line($x1, $y1, $x1+$w, $y1, $style);
+            
+            //$pdf->Line($x2+$w, $y1, $x+($w*2), $y+($h/2), $style);
+   
+        }else if($winner==2){
+            //$pdf->Line($x1+$w, $y1+$w, 100, 200, $style);
+            //$pdf->Line($x+$w, $y+($h/2), $x+$w, $y+($h/2), $style);
+        }
+    }
+
     public function programs(){
         $rows=[
             [

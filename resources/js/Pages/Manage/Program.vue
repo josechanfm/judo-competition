@@ -106,7 +106,7 @@ export default {
     Tournament32,
     Tournament64,
   },
-  props: ["competition","program", "athletes"],
+  props: ["competition", "program", "athletes"],
   data() {
     return {
       masterSequence: false,

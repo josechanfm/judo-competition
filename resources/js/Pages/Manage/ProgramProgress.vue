@@ -50,12 +50,12 @@
               <a-typography-title :level="3">
                 <span v-if="currentSection.mats[mat].bout.white == 0">---</span
                 ><span v-else>{{
-                  currentSection.mats[mat].bout.white_player.name_display
+                  currentSection.mats[mat].bout.white_player?.name_display
                 }}</span>
                 vs
                 <span v-if="currentSection.mats[mat].bout.white == 0">---</span
                 ><span v-else>{{
-                  currentSection.mats[mat].bout.blue_player.name_display
+                  currentSection.mats[mat].bout.blue_player?.name_display
                 }}</span>
               </a-typography-title>
             </template>
@@ -102,9 +102,9 @@
                             <td class="py-4 w-10">{{ bout.in_program_sequence }}</td>
                             <td class="py-4 w-10">{{ bout.queue }}</td>
                             <td class="py-4 w-10">
-                              {{ bout.white_player.name_display }}
+                              {{ bout.white_player?.name_display }}
                             </td>
-                            <td class="py-4 w-10">{{ bout.blue_player.name_display }}</td>
+                            <td class="py-4 w-10">{{ bout.blue_player?.name_display }}</td>
                           </tr>
                         </template>
                       </tbody>

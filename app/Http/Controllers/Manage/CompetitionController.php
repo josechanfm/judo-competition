@@ -22,7 +22,7 @@ class CompetitionController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Manage/Competitions', [
+        return Inertia::render('Manage/Competitions/Index', [
             'countries' => Country::all(),
             'gameTypes' => GameType::all(),
             'competitions' => Competition::with('competition_type')->get(),
@@ -36,6 +36,11 @@ class CompetitionController extends Controller
     public function create()
     {
         //
+        return Inertia::render('Manage/Competitions/Create', [
+            'countries' => Country::all(),
+            'gameTypes' => GameType::all(),
+            'languages' => Config::item('languages'),
+        ]);
     }
 
     /**
@@ -103,9 +108,7 @@ class CompetitionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Competition $competition)
-    {
-    }
+    public function show(Competition $competition) {}
 
     /**
      * Show the form for editing the specified resource.

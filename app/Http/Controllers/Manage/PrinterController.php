@@ -37,8 +37,8 @@ class PrinterController extends Controller
             ]
         ];
         $winners=[
-            [1,1,1,1,1,1,1,1],
-            [1,1,1,1],
+            [1,2,1,2,1,1,1,1],
+            [1,2,1,2],
             [1,1],
             [1]
         ];
@@ -47,8 +47,8 @@ class PrinterController extends Controller
         $pdf->AddPage();
        
         //$players=count($players);
-        $startX=20;
-        $startY=10;
+        $startX=20; //starting X axis of the drawing area
+        $startY=10; //starting Y axis of the drawing area
         $boxW=45;
         $boxH=12;
         $arcW=15;
@@ -99,7 +99,7 @@ class PrinterController extends Controller
                 $ay+=$arcGap;
             }
             $ax+=$w;
-            $ay=$y+$ah-$boxGap;
+            $ay=$y+$ah-$boxGap+1;
             $ah+=$ah;
             $cnt/=2;
         }
@@ -127,55 +127,52 @@ class PrinterController extends Controller
         $round=count($winners);
         $padding=2;
         $boxGap=2;
-        $x1=$startX+$boxW+$padding;
-        $x2=$startX+$boxW+$arcW+$padding;
-        $startY=$startY+($boxH/4);
-        //$y2=$startY+($boxH/4);
-        for($i=0;$i<$round;$i++){
-            if($i==0){
-                $y=$startY+($boxH/4);
-            }else{
-                $startY=$startY+($boxH/4)+($boxH/2);
+        $x=$startX+$boxW+$padding;
+        $y=$startY+$boxH/2;
+        $w=$arcW;
+        $h=($boxH/4);
+        $g=$boxH+$boxGap;
+        $firstRoundCount=count($winners[0]);
+        
+        $ty=$y;
+        for($i=0;$i<$firstRoundCount;$i++){
+            $pdf->text($x,$ty,$winners[0][$i]);
+            if($winners[0][$i]==1){
+                $pdf->Line($x-$padding, $ty-($boxH/4), $x, $ty-($boxH/4), $style);
+            }else if($winners[0][$i]==2){
+                $pdf->Line($x-$padding, $ty+($boxH/4), $x, $ty+($boxH/4), $style);
             }
-            $cnt=count($winners[$i]);
-            for($j=0;$j<$cnt;$j++){
-                if($winners[$i][$j]==1){
-                    $pdf->text($x1, $y,$winners[$i][$j]);
-                    $pdf->Line($x1, $y, $x2, $y, $style);
-                }else if($winners[$i][$j]==2){
-                    //$pdf->text($x1, $y,$winners[$i][$j]);
-                    //$pdf->Line($x1, $y+($boxH/2), $x2, $y+($boxH/2), $style);
-                }
-                $y+=($boxH+$boxGap);
-            }
-            $x1+=$arcW;
-            //$x2+=$x1+$arcW;
+            $ty+=$boxH+$boxGap;
         }
-    }
 
-    
-    private function arcWinner($pdf, $x1, $y1, $w, $h, $winner='',$firstRound=false){
-        $style = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(255, 0, 0));
-        $pdf->text($x1,$y1, $w);
-        if($firstRound){
-            if($winner==1){
-                //$pdf->Line($x1, $y1, $x1+$w, $y1, $style);
-    
-            }else if($winner==2){
-                //$pdf->Line($x1, $y1+$h, $x1+$w, $y1+$h, $style);
-            }
-        }
-        if($winner==1){
-            $pdf->Line($x1, $y1-($h/2), $x1+5, $y1+($h/2), $style);
-            $pdf->Line($x1, $y1, $x1+$w, $y1, $style);
-            
-            //$pdf->Line($x2+$w, $y1, $x+($w*2), $y+($h/2), $style);
-   
-        }else if($winner==2){
-            //$pdf->Line($x1+$w, $y1+$w, 100, 200, $style);
-            //$pdf->Line($x+$w, $y+($h/2), $x+$w, $y+($h/2), $style);
+        for($i=0;$i<$round;$i++){
+            $this->arcWinner($pdf, $x, $y, $w, $h, $g, $winners[$i]);
+            $h=$g/2;
+            $x+=$arcW;
+            $y=$startY+$g-$boxGap+1;
+            $g+=$g;
+               
         }
     }
+    
+    private function arcWinner($pdf, $x, $y, $w, $h, $g, $winners){
+        $style = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(255, 0, 0));
+        $cnt=count($winners);
+        for($j=0;$j<$cnt;$j++){
+            if($winners[$j]==1){
+                //$pdf->text($x, $y,$winners[$j]);
+                $pdf->Line($x, $y, $x+$w, $y, $style);
+                $pdf->Line($x, $y-$h, $x, $y, $style);
+            }else if($winners[$j]==2){
+                $pdf->Line($x, $y, $x+$w, $y, $style);
+                $pdf->Line($x, $y, $x, $y+$h, $style);
+                //$pdf->text($x1, $y,$winners[$i][$j]);
+                //$pdf->Line($x, $y-$h, $x, $y, $style);
+            }
+            //$x+=5;
+            $y+=$g;
+        }
+}
 
     public function programs(){
         $rows=[

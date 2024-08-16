@@ -135,7 +135,7 @@ class PrinterController extends Controller
             if($i==0){
                 $y=$startY+($boxH/4);
             }else{
-                //$startY=$startY+($boxH/4)+($boxH/2);
+                $startY=$startY+($boxH/4)+($boxH/2);
             }
             $cnt=count($winners[$i]);
             for($j=0;$j<$cnt;$j++){
@@ -148,7 +148,6 @@ class PrinterController extends Controller
                 }
                 $y+=($boxH+$boxGap);
             }
-            $startY=$startY+($boxH/4)+($boxH/2);
             $x1+=$arcW;
             //$x2+=$x1+$arcW;
         }

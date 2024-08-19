@@ -38,7 +38,7 @@ class CompetitionController extends Controller
         //
         return Inertia::render('Manage/Competitions/Create', [
             'countries' => Country::all(),
-            'gameTypes' => GameType::all(),
+            'gameTypes' => GameType::with('categories')->get(),
             'languages' => Config::item('languages'),
         ]);
     }

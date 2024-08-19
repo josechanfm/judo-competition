@@ -123,6 +123,7 @@
                       <a-input-number
                         v-model:value="modal.data.mat_number"
                         style="width: 150px"
+                        defaultValue="1"
                         :min="1"
                       />
                     </a-form-item>
@@ -155,7 +156,50 @@
                   </a-form-item>
                 </div>
               </div>
-              <div class="flex flex-col" v-else-if="setting_index == 1"></div>
+              <div class="flex flex-col" v-else-if="setting_index == 1">
+                <div class="">
+                  <a-form-item label="類型" name="type">
+                    <a-radio-group v-model:value="modal.data.type">
+                      <a-radio :value="1">Individual</a-radio>
+                      <a-radio :value="2">Teams</a-radio>
+                    </a-radio-group>
+                  </a-form-item>
+                </div>
+                <div class="">
+                  <a-form-item label="年齡組別" name="age_group">
+                    <a-radio-group v-model:value="modal.data.age_group">
+                      <a-radio :value="1">Seniors</a-radio>
+                      <a-radio :value="2">U23</a-radio>
+                      <a-radio :value="3">Juniors</a-radio>
+                      <a-radio :value="4">Cadets</a-radio>
+                      <a-radio :value="5">IBSA</a-radio>
+                      <a-radio :value="6">EYOF</a-radio>
+                      <a-radio :value="7">Others</a-radio>
+                    </a-radio-group>
+                  </a-form-item>
+                </div>
+                <div class="">
+                  <a-form-item label="性別" name="gender">
+                    <a-radio-group v-model:value="modal.data.gender">
+                      <a-radio :value="1">male & female</a-radio>
+                      <a-radio :value="2">male</a-radio>
+                      <a-radio :value="3">female</a-radio>
+                    </a-radio-group>
+                  </a-form-item>
+                </div>
+                <div class="">
+                  <a-form-item label="男性組別" name="categories_male">
+                    <div class="" v-for="category in gameTypes[0].categories">
+                      <div class="">
+                        {{ category.weights.includes('MW') }}
+                      </div>
+                    </div>
+                  </a-form-item>
+                </div>
+                <div class="">
+                  <a-form-item label="女性組別" name="categories_female"> </a-form-item>
+                </div>
+              </div>
               <div class="flex justify-between gap-3">
                 <!-- <div class="w-full">
                   <a-form-item label="Days" name="days">

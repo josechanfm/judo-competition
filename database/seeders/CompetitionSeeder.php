@@ -31,7 +31,19 @@ class CompetitionSeeder extends Seeder
             'section_number' => 1,
             'token' => 'abc123',
             'is_cancelled' => 0,
-            'status' => 0
+            'status' => 0,
+            'system'=>'Q',
+            'seeding'=>2,
+            'small_system'=>[
+                ["2"=>"true"],
+                ["3"=>"true"],
+                ["4"=>"true"],
+                ["5"=>"true"]
+                ],
+            'type'=>'I',
+            'gender'=>2,
+            'game_category_id'=>1,
+            
         ]);
         
         $athletes=Athlete::factory(1)->count(200)->create(['competition_id' => $competition->id, 'team_id' => 1]);

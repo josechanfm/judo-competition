@@ -26,11 +26,11 @@ return new class extends Migration
             $table->unsignedTinyInteger('section_number')->default(1);
             $table->string('token');
             $table->unsignedSmallInteger('status');
-            $table->char('system',1);
-            $table->char('seeding',1);
-            $table->char('small_system');
+            $table->char('system',1); //Quarter | Full | KO
+            $table->tinyInteger('seeding');
+            $table->string('small_system');
             $table->char('type'); //individual | teams
-            $table->char('gender'); //male & female | male | female
+            $table->tinyInteger('gender'); //2=male & female | 1=male | 0=female
             $table->foreignId('game_category_id'); //age group in IJF
             $table->boolean('is_cancelled');
             $table->timestamps();

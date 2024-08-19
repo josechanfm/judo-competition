@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('weight_code');
             $table->integer('mat');
             $table->integer('section');
-            $table->string('contest_system');
+            $table->string('contest_system'); //
             $table->unsignedTinyInteger('chart_size');
             $table->integer('duration');
             $table->unsignedSmallInteger('status')->default(0);

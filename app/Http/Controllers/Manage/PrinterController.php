@@ -12,8 +12,8 @@ class PrinterController extends Controller
     protected $startX=20;
     protected $startY=10;
     protected $boxW=45;
-    protected $boxH=12;
-    protected $boxGap=8; //vertical gap space between each player box
+    protected $boxH=8;
+    protected $boxGap=2; //vertical gap space between each player box
     protected $repechageBoxGap=4;
     protected $arcW=15;
     protected $arcWFirst=6;
@@ -33,7 +33,31 @@ class PrinterController extends Controller
             ],[
                 'white'=>['name_display'=>'White player 7'],
                 'blue'=>['name_display'=>'Blue player 8'],
-            ],            [
+            ],[
+                'white'=>['name_display'=>'White player 9'],
+                'blue'=>['name_display'=>'Blue player 10'],
+            ],[
+                'white'=>['name_display'=>'White player 11'],
+                'blue'=>['name_display'=>'Blue player 12'],
+            ],[
+                'white'=>['name_display'=>'White player 13'],
+                'blue'=>['name_display'=>'Blue player 14'],
+            ],[
+                'white'=>['name_display'=>'White player 15'],
+                'blue'=>['name_display'=>'Blue player 16'],
+            ],[
+                'white'=>['name_display'=>'White player 1'],
+                'blue'=>['name_display'=>'Blue player 2'],
+            ],[
+                'white'=>['name_display'=>'White player 3'],
+                'blue'=>['name_display'=>'Blue player 4'],
+            ],[
+                'white'=>['name_display'=>'White player 5'],
+                'blue'=>['name_display'=>'Blue player 6'],
+            ],[
+                'white'=>['name_display'=>'White player 7'],
+                'blue'=>['name_display'=>'Blue player 8'],
+            ],[
                 'white'=>['name_display'=>'White player 9'],
                 'blue'=>['name_display'=>'Blue player 10'],
             ],[
@@ -48,6 +72,7 @@ class PrinterController extends Controller
             ]
         ];
         $winners=[
+            [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
             [1,2,1,2,1,2,1,2],
             [0,0,0,0],
             [0,0],
@@ -199,17 +224,6 @@ class PrinterController extends Controller
             $this->pdf->Line($x1, $y1, $x2, $y1, $style);
             $y1=$y+$boxGap+($this->boxH/2)+$h+($boxGap*4)+($this->boxH/4);
         }
-        /*
-        $x1=$this->startX+$this->boxW;
-        $y1=$y+$boxGap+($this->boxH/2)+$h+($boxGap*4)+($this->boxH/4);
-        $h=$this->boxH/2+$boxGap+$this->boxH/4;
-        $this->arcLine($this->pdf, $x1, $y1, $arcW, $h);
-        $x1+=$this->arcW;
-        $x2=$x1+$this->arcW;
-        $y1+=$boxGap+($this->boxH/4);
-        $this->pdf->Line($x1, $y1, $x2, $y1, $style);
-        */
-
     }
     private function repechageWinnerLine($totalPlayers, $winners){
         $style = array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(255, 0, 0));

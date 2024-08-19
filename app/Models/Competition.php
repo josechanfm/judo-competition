@@ -17,6 +17,7 @@ class Competition extends Model implements HasMedia
     protected $casts = [
         'days' => 'json',
         'is_language_secondary_enabled' => 'boolean',
+        'small_system'=>'json'
     ];
     public function programs()
     {

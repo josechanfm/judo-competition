@@ -54,7 +54,12 @@ class CompetitionController extends Controller
             'country' => '',
             // TODO: add filtering
             'scale' => '',
+            'system' => '',
+            'small_system' => '',
+            'gender' => '',
+            'seeding' => '',
             'name_secondary' => '',
+            'type' => '',
             'date_start' => 'required',
             'date_end' => 'required',
             'mat_number' => 'required',

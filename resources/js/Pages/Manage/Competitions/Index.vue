@@ -12,7 +12,7 @@
         <div class="text-xl font-bold">賽事管理</div>
         <div>
           <inertia-link :href="route('manage.competitions.create')"
-            ><a-button type="primary">創建新的賽事</a-button>
+            ><a-button class="bg-white">創建新的賽事</a-button>
           </inertia-link>
         </div>
       </div>

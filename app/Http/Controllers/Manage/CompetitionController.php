@@ -90,7 +90,20 @@ class CompetitionController extends Controller
             unset($gc['id']);
             $seq = 1;
             $competitionCategory = CompetitionCategory::create([...$gc, 'competition_id' => $competition->id]);
-            foreach ($competitionCategory->weights as $w) {
+
+            if ($competition->gender == 0) {
+                $filtered = array_filter($competitionCategory->weights, function ($weight) {
+                    return strpos($weight, "FW") !== false;
+                });
+            } else if ($competition->gender == 1) {
+                $filtered = array_filter($competitionCategory->weights, function ($weight) {
+                    return strpos($weight, "MW") !== false;
+                });
+            } else {
+                $filtered = $competitionCategory->weights;
+            }
+            
+            foreach ($filtered as $w) {
                 Program::create([
                     'competition_id' => $competition->id,
                     'competition_category_id' => $competitionCategory->id,

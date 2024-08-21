@@ -56,7 +56,7 @@
           <a-form
             name="ModalForm"
             ref="formRef"
-            :model="create_competition"
+            :model="competition"
             layout="vertical"
             autocomplete="off"
             :rules="rules"
@@ -66,27 +66,20 @@
               <div class="flex flex-col" v-if="setting_index == 0">
                 <div class="">
                   <a-form-item label="賽事類型" name="game_type_id">
-                    <a-select
-                      @change="changeGameType"
-                      type="select"
-                      v-model:value="create_competition.game_type_id"
-                      show-search
-                      :options="gameTypes"
-                      :fieldNames="{ value: 'id', label: 'name' }"
-                    />
+                    {{ competition.competition_type.name }}
                   </a-form-item>
                 </div>
                 <div class="flex justify-between gap-3">
                   <div class="w-full">
                     <a-form-item label="賽事名稱" name="name">
-                      <a-input type="input" v-model:value="create_competition.name" />
+                      <a-input type="input" v-model:value="competition.name" />
                     </a-form-item>
                   </div>
                 </div>
                 <div class="">
                   <a-form-item label="國家" name="country">
                     <a-select
-                      v-model:value="create_competition.country"
+                      v-model:value="competition.country"
                       show-search
                       :options="countries"
                       :fieldNames="{ value: 'name', label: 'name' }"
@@ -95,11 +88,7 @@
                 </div>
                 <div class="">
                   <a-form-item label="城市" name="city">
-                    <a-input
-                      class=""
-                      type="input"
-                      v-model:value="create_competition.scale"
-                    />
+                    <a-input class="" type="input" v-model:value="competition.scale" />
                   </a-form-item>
                 </div>
 
@@ -107,7 +96,7 @@
                   <div class="w-full">
                     <a-form-item label="Start Date" name="date_start">
                       <a-date-picker
-                        v-model:value="create_competition.date_start"
+                        v-model:value="competition.date_start"
                         :format="dateFormat"
                         :valueFormat="dateFormat"
                       />
@@ -116,7 +105,7 @@
                   <div class="w-full">
                     <a-form-item label="End Date" name="date_end">
                       <a-date-picker
-                        v-model:value="create_competition.date_end"
+                        v-model:value="competition.date_end"
                         :format="dateFormat"
                         :disabled-date="endDateDisabled"
                         :valueFormat="dateFormat"
@@ -126,7 +115,7 @@
                   <div class="w-full">
                     <a-form-item label="Mat Number" name="mat_number">
                       <a-input-number
-                        v-model:value="create_competition.mat_number"
+                        v-model:value="competition.mat_number"
                         style="width: 150px"
                         :min="1"
                       />
@@ -135,7 +124,7 @@
                   <div class="w-full">
                     <a-form-item label="Section Number" name="section_number">
                       <a-input-number
-                        v-model:value="create_competition.section_number"
+                        v-model:value="competition.section_number"
                         style="width: 150px"
                         :min="1"
                       />
@@ -144,7 +133,7 @@
                   <div class="w-full">
                     <a-form-item label="Referee Number" name="referee_number">
                       <a-input-number
-                        v-model:vlaue="create_competition.referee_number"
+                        v-model:vlaue="competition.referee_number"
                         style="width: 150px"
                         defaultValue="1"
                         :min="1"
@@ -157,7 +146,7 @@
                   <a-form-item label="Days" name="days">
                     <div
                       class="rounded shadow border p-2 w-72 flex items-center mb-2"
-                      v-for="time in create_competition.days"
+                      v-for="time in competition.days"
                       :key="time"
                     >
                       <div class="flex-1 font-bold">{{ time }}</div>
@@ -170,9 +159,7 @@
                   </a-form-item>
                   <div class="flex gap-3 mb-2">
                     <a-date-picker
-                      :disabled="
-                        !create_competition.date_start || !create_competition.date_end
-                      "
+                      :disabled="!competition.date_start || !competition.date_end"
                       v-model:value="tmpContestTime"
                       :disabled-date="disabledDate"
                       value-format="YYYY-MM-DD"
@@ -182,15 +169,15 @@
                 </div>
                 <div class="">
                   <a-form-item label="Remark" name="remark">
-                    <a-textarea v-model:value="create_competition.remark" :rows="5" />
+                    <a-textarea v-model:value="competition.remark" :rows="5" />
                   </a-form-item>
                 </div>
               </div>
               <div class="flex flex-col" v-else-if="setting_index == 1">
-                <div class="" v-if="create_competition.game_type_id != null">
+                <div class="">
                   <div class="">
                     <a-form-item label="類型" name="type">
-                      <a-radio-group v-model:value="create_competition.type">
+                      <a-radio-group v-model:value="competition.type">
                         <a-radio value="individual">Individual</a-radio>
                         <a-radio value="teams">Teams</a-radio>
                       </a-radio-group>
@@ -198,23 +185,18 @@
                   </div>
                   <div class="">
                     <a-form-item label="性別" name="gender">
-                      <a-radio-group v-model:value="create_competition.gender">
+                      <a-radio-group v-model:value="competition.gender">
                         <a-radio :value="2">male & female</a-radio>
                         <a-radio :value="1">male</a-radio>
                         <a-radio :value="0">female</a-radio>
                       </a-radio-group>
                     </a-form-item>
                   </div>
-                  <div
-                    class=""
-                    v-if="
-                      create_competition.gender == 1 || create_competition.gender == 2
-                    "
-                  >
+                  <div class="" v-if="competition.gender == 1 || competition.gender == 2">
                     <a-form-item label="男性組別" name="categories_male">
                       <div
                         class=""
-                        v-for="category in create_competition.competition_type.categories"
+                        v-for="category in competition_categories"
                         :key="category.id"
                       >
                         <div class="">
@@ -237,16 +219,11 @@
                       </div>
                     </a-form-item>
                   </div>
-                  <div
-                    class=""
-                    v-if="
-                      create_competition.gender == 0 || create_competition.gender == 2
-                    "
-                  >
+                  <div class="" v-if="competition.gender == 0 || competition.gender == 2">
                     <a-form-item label="女性組別" name="categories_female">
                       <div
                         class=""
-                        v-for="category in create_competition.competition_type.categories"
+                        v-for="category in gameTypes[0].categories"
                         :key="category.id"
                       >
                         <div class="">
@@ -270,14 +247,11 @@
                     </a-form-item>
                   </div>
                 </div>
-                <div class="text-center font-bold text-2xl pt-12" v-else>
-                  請先在基礎設定中選擇賽事類型
-                </div>
               </div>
               <div class="" v-if="setting_index == 2">
                 <div class="">
                   <a-form-item label="Competition System" name="system">
-                    <a-radio-group v-model:value="create_competition.system">
+                    <a-radio-group v-model:value="competition.system">
                       <a-radio value="q">Quarter</a-radio>
                       <a-radio value="f">Full</a-radio>
                       <a-radio value="k">KO</a-radio>
@@ -286,7 +260,7 @@
                 </div>
                 <div class="">
                   <a-form-item label="Seeding" name="seeding">
-                    <a-radio-group v-model:value="create_competition.seeding">
+                    <a-radio-group v-model:value="competition.seeding">
                       <a-radio :value="8">8 players</a-radio>
                       <a-radio :value="4">4 players</a-radio>
                       <a-radio :value="0">no player</a-radio>
@@ -297,27 +271,27 @@
                   <a-form-item label="5人以下">
                     <div class="flex gap-3">
                       <div class="">2 players</div>
-                      <a-radio-group v-model:value="create_competition.small_system[2]">
+                      <a-radio-group v-model:value="competition.small_system[2]">
                         <a-radio :value="false">one Final</a-radio>
                       </a-radio-group>
                     </div>
                     <div class="flex gap-3">
                       <div class="">3 players</div>
-                      <a-radio-group v-model:value="create_competition.small_system[3]">
+                      <a-radio-group v-model:value="competition.small_system[3]">
                         <a-radio :value="false">Round Robin</a-radio>
                         <a-radio :value="true">Semi-Finals + Final</a-radio>
                       </a-radio-group>
                     </div>
                     <div class="flex gap-3">
                       <div class="">4 players</div>
-                      <a-radio-group v-model:value="create_competition.small_system[4]">
+                      <a-radio-group v-model:value="competition.small_system[4]">
                         <a-radio :value="false">Round Robin</a-radio>
                         <a-radio :value="true">Semi-Finals + one Bronze + Final</a-radio>
                       </a-radio-group>
                     </div>
                     <div class="flex gap-3">
                       <div class="">5 players</div>
-                      <a-radio-group v-model:value="create_competition.small_system[5]">
+                      <a-radio-group v-model:value="competition.small_system[5]">
                         <a-radio :value="false">Round Robin</a-radio>
                         <a-radio :value="true"
                           >Pool with 2 and pool with 3 - best each in Final, second in one
@@ -330,13 +304,10 @@
               </div>
               <div class="" v-if="setting_index == 3">
                 <div class="">
-                  <a-form-item
-                    label="開啓第二語言"
-                    :name="['competition_type', 'is_language_secondary_enabled']"
-                  >
+                  <a-form-item label="開啓第二語言" name="is_language_secondary_enabled">
                     <a-switch
                       v-model:checked="
-                        create_competition.competition_type.is_language_secondary_enabled
+                        competition.competition_type.is_language_secondary_enabled
                       "
                       :unCheckedValue="0"
                       :checkedValue="1"
@@ -347,14 +318,13 @@
                   <div class="w-full flex flex-col">
                     <div class="w-full">
                       <a-form-item label="賽事名稱" name="name">
-                        <a-input type="input" v-model:value="create_competition.name" />
+                        <a-input type="input" v-model:value="competition.name" />
                       </a-form-item>
                     </div>
                     <div
                       class=""
                       v-if="
-                        create_competition.competition_type
-                          .is_language_secondary_enabled == 1
+                        competition.competition_type.is_language_secondary_enabled == 1
                       "
                     >
                       <a-form-item
@@ -363,7 +333,7 @@
                       >
                         <a-input
                           type="input"
-                          v-model:value="create_competition.name_secondary"
+                          v-model:value="competition.name_secondary"
                         ></a-input>
                       </a-form-item>
                     </div>
@@ -381,7 +351,7 @@
                         ]"
                       >
                         <a-select
-                          v-model:value="create_competition.competition_type.language"
+                          v-model:value="competition.competition_type.language"
                           :options="selectLanguage"
                           :fieldNames="{ value: 'value', label: 'name' }"
                         ></a-select>
@@ -390,8 +360,7 @@
                     <div
                       class=""
                       v-if="
-                        create_competition.competition_type
-                          .is_language_secondary_enabled == 1
+                        competition.competition_type.is_language_secondary_enabled == 1
                       "
                     >
                       <a-form-item
@@ -405,9 +374,7 @@
                         ]"
                       >
                         <a-select
-                          v-model:value="
-                            create_competition.competition_type.language_secondary
-                          "
+                          v-model:value="competition.competition_type.language_secondary"
                           :options="selectLanguage"
                           :fieldNames="{ value: 'value', label: 'name' }"
                         ></a-select>
@@ -419,7 +386,7 @@
 
               <div class="flex justify-end h-full">
                 <a-form-item>
-                  <a-button class="text-right" @click="onCreate">Create</a-button>
+                  <a-button class="text-right" @click="onUpdate">Update</a-button>
                 </a-form-item>
               </div>
             </div>
@@ -438,30 +405,13 @@ export default {
   components: {
     AdminLayout,
   },
-  props: ["countries", "gameTypes", "languages"],
+  props: ["competition", "competition_categories", "countries", "gameTypes", "languages"],
   data() {
     return {
       dateFormat: "YYYY-MM-DD",
       disabledDate: null,
       tmpContestTime: null,
       setting_index: 0,
-      create_competition: {
-        system: "q",
-        type: "individual",
-        mat_number: 1,
-        section_number: 1,
-        referee_number: 1,
-        gender: 2,
-        days: [],
-        seeding: 8,
-        language: "en",
-        small_system: {
-          2: false,
-          3: false,
-          4: false,
-          5: false,
-        },
-      },
       columns: [
         {
           title: "Name",
@@ -497,7 +447,6 @@ export default {
         },
       ],
       rules: {
-        competition_type_id: { required: true },
         country: { required: true },
         name: { required: true },
         name_secondary: { required: true },
@@ -505,6 +454,8 @@ export default {
         date_end: { required: true },
         days: { required: true },
         mat_number: { required: true },
+        language: { required: true },
+        language_secondary: { required: true },
         section_number: { required: true },
       },
       validateMessages: {
@@ -524,8 +475,8 @@ export default {
       return this.languages.map((x) => {
         console.log(x);
         if (
-          x.value == this.create_competition?.language ||
-          x.value == this.create_competition?.language_secondary
+          x.value == this.competition.competition_type.language ||
+          x.value == this.competition.competition_type.language_secondary
         ) {
           return { ...x, disabled: true };
         } else {
@@ -536,62 +487,50 @@ export default {
   },
   created() {
     this.disabledDate = (current) => {
-      if (!this.create_competition.date_start && !this.create_competition.date_end) {
+      if (!this.competition.date_start && !this.competition.date_end) {
         return false;
       }
       return (
-        current < moment(this.create_competition.date_start).valueOf() ||
-        current > moment(this.create_competition.date_end).valueOf()
+        current < moment(this.competition.date_start).valueOf() ||
+        current > moment(this.competition.date_end).valueOf()
       );
     };
     this.endDateDisabled = (current) => {
-      if (!this.create_competition.date_start) {
+      if (!this.competition.date_start) {
         return false;
       }
-      return current < moment(this.create_competition.date_start).valueOf();
+      return current < moment(this.competition.date_start).valueOf();
     };
   },
   methods: {
     addTimeToForm() {
       // should be unique
-      if (
-        this.create_competition.days.includes(this.tmpContestTime) ||
-        !this.tmpContestTime
-      ) {
+      if (this.competition.days.includes(this.tmpContestTime) || !this.tmpContestTime) {
         return;
       }
 
-      this.create_competition.days.push(this.tmpContestTime);
+      this.competition.days.push(this.tmpContestTime);
     },
     removeTimeFromForm(time) {
-      this.create_competition.days = this.create_competition.days.filter(
-        (t) => t !== time
-      );
+      this.competition.days = this.competition.days.filter((t) => t !== time);
     },
-    changeGameType(value) {
-      this.create_competition.competition_type = this.gameTypes.find(
-        (x) => x.id == value
-      );
-      console.log(this.create_competition.competition_type);
-    },
-    onCreate() {
+    onUpdate() {
       this.$refs.formRef
         .validateFields()
         .then(() => {
-          this.$inertia.post(
-            route("manage.competitions.store"),
-            this.create_competition,
+          this.$inertia.put(
+            route("manage.competitions.update", this.competition.id),
+            this.competition,
             {
               onSuccess: (page) => {
-                this.create_competition = {};
+                this.competition = {};
               },
               onError: (err) => {
                 console.log(err);
               },
             }
           );
-
-          console.log("values", this.create_competition, this.create_competition);
+          console.log("values", this.competition, this.competition);
         })
         .catch((error) => {
           console.log("error", error);

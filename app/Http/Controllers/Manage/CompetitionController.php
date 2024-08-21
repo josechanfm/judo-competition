@@ -56,6 +56,7 @@ class CompetitionController extends Controller
             'scale' => '',
             'system' => '',
             'small_system' => '',
+            'competition_type' => '',
             'gender' => '',
             'seeding' => '',
             'name_secondary' => '',
@@ -73,7 +74,7 @@ class CompetitionController extends Controller
             'competition.language_secondary' => 'required_if:competition_is_language_secondary_enabled,true'
         ]);
         $token = Str::random(12);
-        $gameType = GameType::where('id', $validated['game_type_id'])->first()->toArray();
+        $competition_type = $validated['competition_type'];
         $gameCategories = GameCategory::where('game_type_id', $validated['game_type_id'])->get()->toArray();
         // dd(value_column($gameType));
         unset($validated['game_type_id']);
@@ -83,7 +84,7 @@ class CompetitionController extends Controller
             'status' => 0,
             'is_cancelled' => 0,
         ]);
-        CompetitionType::create([...$gameType, 'competition_id' => $competition->id]);
+        CompetitionType::create([...$competition_type, 'competition_id' => $competition->id]);
         foreach ($gameCategories as $gc) {
             // dd($gc);
             unset($gc['game_type_id']);
@@ -102,7 +103,7 @@ class CompetitionController extends Controller
             } else {
                 $filtered = $competitionCategory->weights;
             }
-            
+
             foreach ($filtered as $w) {
                 Program::create([
                     'competition_id' => $competition->id,
@@ -120,7 +121,7 @@ class CompetitionController extends Controller
                 $seq++;
             }
         }
-        return redirect()->back();
+        return redirect()->route('manage.competitions.index');
     }
 
     /**
@@ -133,7 +134,14 @@ class CompetitionController extends Controller
      */
     public function edit(Competition $competition)
     {
-        return response()->json($competition);
+        $competition->competition_type;
+        return Inertia::render('Manage/Competitions/Edit', [
+            'competition' => $competition,
+            'competition_categories' => CompetitionCategory::where('competition_id', $competition->id)->get(),
+            'countries' => Country::all(),
+            'gameTypes' => GameType::with('categories')->get(),
+            'languages' => Config::item('languages'),
+        ]);
     }
 
     /**
@@ -146,7 +154,12 @@ class CompetitionController extends Controller
             'country' => '',
             // TODO: add filtering
             'scale' => '',
+            'system' => '',
+            'small_system' => '',
+            'gender' => '',
+            'seeding' => '',
             'name_secondary' => '',
+            'type' => '',
             'date_start' => 'required',
             'date_end' => 'required',
             'mat_number' => 'required',
@@ -163,7 +176,7 @@ class CompetitionController extends Controller
         unset($validated['competition_type']);
         $competition->update($validated);
 
-        return redirect()->back();
+        return redirect()->route('manage.competitions.index');
     }
 
     /**

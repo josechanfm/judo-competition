@@ -30,7 +30,7 @@ class PrinterController extends Controller
     private function players4(){
         $players=[
             [
-                'white'=>['name_display'=>'White player 1'],
+                'white'=>['name_display'=>'White player 1','status'=>false],
                 'blue'=>['name_display'=>'Blue player 2'],
             ],[
                 'white'=>['name_display'=>'White player 3'],
@@ -46,13 +46,11 @@ class PrinterController extends Controller
                 'white'=>['name_display'=>'White player r1'],
                 'blue'=>['name_display'=>'Blue player r2'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r5'],
             ],[
                 'white'=>['name_display'=>'White player r3'],
                 'blue'=>['name_display'=>'Blue player r4'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r6'],
             ]
         ];
@@ -102,13 +100,11 @@ class PrinterController extends Controller
                 'white'=>['name_display'=>'White player r1'],
                 'blue'=>['name_display'=>'Blue player r2'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r5'],
             ],[
                 'white'=>['name_display'=>'White player r3'],
                 'blue'=>['name_display'=>'Blue player r4'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r6'],
             ]
         ];
@@ -172,13 +168,11 @@ class PrinterController extends Controller
                 'white'=>['name_display'=>'White player r1'],
                 'blue'=>['name_display'=>'Blue player r2'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r5'],
             ],[
                 'white'=>['name_display'=>'White player r3'],
                 'blue'=>['name_display'=>'Blue player r4'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r6'],
             ]
         ];
@@ -267,13 +261,11 @@ class PrinterController extends Controller
                 'white'=>['name_display'=>'White player r1'],
                 'blue'=>['name_display'=>'Blue player r2'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r5'],
             ],[
                 'white'=>['name_display'=>'White player r3'],
                 'blue'=>['name_display'=>'Blue player r4'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r6'],
             ]
         ];
@@ -412,13 +404,11 @@ class PrinterController extends Controller
                 'white'=>['name_display'=>'White player r1'],
                 'blue'=>['name_display'=>'Blue player r2'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r5'],
             ],[
                 'white'=>['name_display'=>'White player r3'],
                 'blue'=>['name_display'=>'Blue player r4'],
             ],[
-                'white'=>['name_display'=>'White player --'],
                 'blue'=>['name_display'=>'Blue player r6'],
             ]
         ];

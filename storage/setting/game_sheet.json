@@ -1,0 +1,72 @@
+{
+    "4": {
+        "startX": 25,
+        "startY": 35,
+        "boxW": 60,
+        "boxH": 20,
+        "boxGap": 6,
+        "arcW": 20,
+        "arcWFirst": 4,
+        "repechageDistance": 15,
+        "repechageBoxGap": 6,
+        "repechageSectionGap": 10,
+        "circleSize": 3,
+        "playerFontSize": 14
+    },
+    "8": {
+        "startX": 25,
+        "startY": 35,
+        "boxW": 60,
+        "boxH": 20,
+        "boxGap": 6,
+        "arcW": 20,
+        "arcWFirst": 4,
+        "repechageDistance": 15,
+        "repechageBoxGap": 2,
+        "repechageSectionGap": 5,
+        "circleSize": 3,
+        "playerFontSize": 14
+    },
+    "16": {
+        "startX": 25,
+        "startY": 35,
+        "boxW": 60,
+        "boxH": 15,
+        "boxGap": 6,
+        "arcW": 20,
+        "arcWFirst": 4,
+        "repechageDistance": 10,
+        "repechageBoxGap": 2,
+        "repechageSectionGap": 5,
+        "circleSize": 3,
+        "playerFontSize": 12
+    },
+    "32": {
+        "startX": 25,
+        "startY": 35,
+        "boxW": 60,
+        "boxH": 10,
+        "boxGap": 2,
+        "arcW": 20,
+        "arcWFirst": 4,
+        "repechageDistance": 5,
+        "repechageBoxGap": 2,
+        "repechageSectionGap": 5,
+        "circleSize": 3,
+        "playerFontSize": 10
+    },
+    "64": {
+        "startX": 25,
+        "startY": 23,
+        "boxW": 55,
+        "boxH": 6.4,
+        "boxGap": 1,
+        "arcW": 20,
+        "arcWFirst": 4,
+        "repechageDistance": 3,
+        "repechageBoxGap": 1,
+        "repechageSectionGap": 1,
+        "circleSize": 2,
+        "playerFontSize": 8
+    }
+}

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\SheetTournamentService;
+use App\Services\SheetTournamentQuarterService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,10 +20,10 @@ class TournamentController extends Controller
         // if(File::exists($filePath)){
             $settings = File::json($filePath);
         //};
-        $this->gameSheet=new SheetTournamentService($settings);
+        $this->gameSheet=new SheetTournamentQuarterService($settings);
         //$this->gameSheet->setTitles('Main Title','sub title');
         $this->gameSheet->setFonts('times','cid0ct','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
-        $this->gameSheet->setRepechage(null);
+        //$this->gameSheet->setRepechage(null);
         $poolLable=[
             ['name'=>'分組 A'],
             ['name'=>'分組 B'],

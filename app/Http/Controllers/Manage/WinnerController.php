@@ -19,39 +19,36 @@ class WinnerController extends Controller
         //$this->gameSheet->setFonts('times','cid0ct','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         //$this->gameSheet->setRepechage(null);
         $winnerList=[
-            '-60kg'=>[
-                ['abbr'=>'ABC','logo'=>'myloog','Player 1'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 2'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 3'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 4'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 5'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 6'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 7'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 8'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 9'],
-            ],
-            '-66kg'=>[
-                ['abbr'=>'ABC','logo'=>'myloog','Player 1'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 2'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 3'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 4'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 5'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 6'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 7'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 8'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 9'],
-            ],
-            '-72kg'=>[
-                ['abbr'=>'ABC','logo'=>'myloog','Player 1'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 2'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 3'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 4'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 5'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 6'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 7'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 8'],
-                ['abbr'=>'ABC','logo'=>'myloog','Player 9'],
-            ]
+            ['title'=>'-60kg','winners'=>[
+                ['place'=>'1','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 1'],
+                ['place'=>'2','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 2'],
+                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 3'],
+                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 4'],
+                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 5'],
+                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 6'],
+                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 7'],
+                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 8'],
+            ]],
+            ['title'=>'-66kg','winners'=>[
+                ['place'=>'1','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 1'],
+                ['place'=>'2','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 2'],
+                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 3'],
+                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 4'],
+                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 5'],
+                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 6'],
+                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 7'],
+                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 8'],
+            ]],
+            ['title'=>'-72kg','winners'=>[
+                ['place'=>'1','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 1'],
+                ['place'=>'2','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 2'],
+                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 3'],
+                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 4'],
+                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 5'],
+                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 6'],
+                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 7'],
+                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 8'],
+            ]]
         ];
         $this->gameSheet->pdf($winnerList);
         

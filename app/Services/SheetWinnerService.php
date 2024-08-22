@@ -60,47 +60,54 @@ class SheetWinnerService{
 
     }
     public function printResult($winnerList){
-        $this->pdf->setXY($this->startX, $this->startY);
-        $html ='
-        <table cellspacing="0" cellpadding="1" border="0">
-            <tr><td>1</td><td></td><td></td><td></td></tr>
-            <tr><td>2</td><td></td><td></td><td></td></tr>
-            <tr><td>3</td><td></td><td></td><td></td></tr>
-            <tr><td>4</td><td></td><td></td><td></td></tr>
-        </table>
-        ';
+        //$this->pdf->setXY($this->startX, $this->startY);
+        $x=$this->startX;
+        $y=$this->startY;
+        $leftX=10;
+        $rightX=100;
+        for($i=0;$i<count($winnerList);$i=$i+2){
+            $this->printTable($leftX, $y, $winnerList[$i]);
+            $this->printTable($rightX, $y, $winnerList[$i]);
+            $y+=70;
+        }
+        //$this->pdf->writeHTML($html, true, false, false, false, '');
 
-
-        $html.='
+    }
+    public function printTable($x, $y, $list){
+        $htmlStyle='
         <style>
-            table tr td, table tr th{
-                border: 1 solid darkgray;
-                height: 18px;
+        table.roundedCorners { 
+            border: none ;
+            border-radius: 13px; 
+            border-spacing: 0;
             }
-            .block{
-                background-color:lightgray;
+          table.roundedCorners td, 
+          table.roundedCorners th { 
+            border: 1px solid DarkOrange;
+            padding: 10px; 
             }
-            .narrow{
-                border: none;
-                width:22px
-            }
-            .player{
-                border: none;
-                width:200px;
-            }
-            .num{
-                background-color:rgb(254,206,50);
-                width:22px;
-                text-align:center;
-            }
-            .num2{
-                background-color:rgb(245,158,51);
-                width:20px;
-                text-align:center;
+          table.roundedCorners tr:last-child > td {
+            border-bottom: none;
             }
         </style>
         ';
-        $this->pdf->writeHTML($html, true, false, false, false, '');
+
+        $html='
+        <table class="roundedCorners" >
+        <tr><th colspan="4">'.$list['title'].'</th></tr>
+        ';
+        foreach($list['winners'] as $i=>$row){
+            $html.='
+                <tr><td>'.$row['place'].'</td><td>'.$row['name'].'</td><td>'.$row['abbr'].'</td><td></td></tr>
+            ';
+        }
+        $html.='
+        </table>
+        
+        '.$htmlStyle;
+        // echo $html;
+        // die();
+        $this->pdf->writeHTMLCell(80, '', $x, $y, $html, 0, 1, 0, true, 'J', true);
 
     }
 

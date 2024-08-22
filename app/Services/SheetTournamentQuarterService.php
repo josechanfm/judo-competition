@@ -3,7 +3,7 @@ namespace App\Services;
 
 use TCPDF;
 
-class SheetTournamentService{
+class SheetTournamentQuarterService{
 
     protected $gameSetting=array(
         '4'=>array(

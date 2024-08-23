@@ -86,8 +86,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
             }
             $categoryId = $this->competition->categories->where('code', $row['category'])->first()->id ?? null;
 
-            $program = Program::where('competition_id', $this->competition->id)
-                ->where('competition_category_id', $categoryId)
+            $program = Program::where('competition_category_id', $categoryId)
                 ->where('weight_code', $row['weight_code'])
                 ->first();
 
@@ -118,9 +117,8 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     {
         return Athlete::firstOrCreate([
             'gender' => $row['gender'],
-            'name_zh' => $row['name'],
-            'name_pt' => $row['name_secondary'],
-            'name_display' => $row['name'],
+            'name' => $row['name'],
+            'name_display' => $row['name'].$row['name_secondary'],
             'competition_id' => $this->competition->id,
             'team_id' => $team->id,
         ]);
@@ -129,8 +127,6 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     private function enrollToProgram(Program $program, Athlete $athlete, Team $team,  $row)
     {
         $program->athletes()->attach($athlete->id, [
-            'competition_id' => $this->competition->id,
-            'team_id' => $team->id,
             'program_id' => $program->id,
             'athlete_id' => $athlete->id,
         ]);

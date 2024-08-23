@@ -10,7 +10,11 @@
     <div class="py-12 mx-8">
       <div class="overflow-hidden flex flex-col gap-3">
         <div class="text-right">
-          <a-button v-if="competition.status === 0" type="primary" @click="lockAthletes"
+          <a-button
+            v-if="competition.status === 0"
+            type="primary"
+            class="bg-blue-500"
+            @click="lockAthletes"
             >鎖定名單</a-button
           >
           <span v-else class="text-blue-500">名單已鎖定</span>
@@ -39,12 +43,14 @@
               <a-button
                 type="primary"
                 v-if="competition.status === 0"
+                class="bg-blue-500"
                 @click="onCreateRecord"
                 >新增運動員</a-button
               >
               <a-button
                 type="primary"
                 v-if="competition.status === 0"
+                class="bg-blue-500"
                 @click="visible = true"
                 >匯入運動員</a-button
               >
@@ -56,10 +62,12 @@
                 <a-button @click="onEditRecord(record)">Edit</a-button>
               </template>
               <template v-else-if="column.dataIndex === 'team'">
-                {{record.team.name}}
+                {{ record.team.name }}
               </template>
               <template v-else-if="column.dataIndex === 'program'">
-                  <span v-for="program in record.programs">{{ program.weight_code }}</span>
+                <span v-for="program in record.programs" :key="program.id">{{
+                  program.weight_code
+                }}</span>
               </template>
               <template v-else>
                 {{ record[column.dataIndex] }}
@@ -73,7 +81,7 @@
       v-model:open="modal.isOpen"
       width="1000px"
       :footer="null"
-      title="Basic Modal"
+      :title="modal.title"
     >
       <a-form
         name="ModalForm"
@@ -86,48 +94,72 @@
       >
         <div class="flex flex-col">
           <div class="flex justify-between gap-3">
-            <div class="w-1/3">
-              <a-form-item label="Name" name="name_zh">
-                <a-input v-model:value="modal.data.name_zh" />
+            <div class="w-1/2">
+              <a-form-item label="Name" name="name">
+                <a-input type="input" v-model:value="modal.data.name" />
               </a-form-item>
             </div>
-            <div class="w-1/3">
-              <a-form-item label="Name Pt" name="name_pt">
-                <a-input v-model:value="modal.data.name_pt" />
-              </a-form-item>
-            </div>
-            <div class="w-1/3">
+            <div class="w-1/2">
               <a-form-item label="Name display" name="name_display">
-                <a-input v-model:value="modal.data.name_display" />
+                <a-input type="input" v-model:value="modal.data.name_display" />
               </a-form-item>
             </div>
           </div>
           <div class="flex justify-between gap-3">
-            <div class="w-1/2">
+            <div class="w-1/3">
               <a-form-item label="Gender" name="gender">
                 <a-select
+                  @change="changeGender"
                   v-model:value="modal.data.gender"
                   :options="genders.map((item) => ({ value: item }))"
                 />
               </a-form-item>
             </div>
-            <div class="w-1/2">
-              <a-form-item label="Team" name="team_id">
+            <div class="w-1/3">
+              <a-form-item label="Programs" name="programs">
                 <a-select
-                  v-model:value="modal.data.team_id"
+                  v-model:value="modal.data.programs"
+                  mode="multiple"
+                  :disabled="modal.data.gender == null"
                   :options="
-                    teams.map((item) => ({ value: item.id, label: item.name_zh }))
+                    filter_programs.map((item) => ({
+                      label: item.weight_code,
+                      value: item.id,
+                    }))
                   "
-                />
+                ></a-select>
+              </a-form-item>
+            </div>
+            <div class="w-1/3">
+              <a-form-item label="Team" name="team_id">
+                <div class="flex gap-3" v-if="modal.data.new_team == false">
+                  <a-select
+                    v-model:value="modal.data.team_id"
+                    :options="teams.map((item) => ({ value: item.id, label: item.name }))"
+                  />
+                  <a-button @click="modal.data.new_team = true">New team</a-button>
+                </div>
+                <div class="flex gap-3" v-else>
+                  <a-input type="input" v-model:value="modal.data.team" />
+                  <a-button @click="modal.data.new_team = false">Old team</a-button>
+                </div>
               </a-form-item>
             </div>
           </div>
           <div class="text-right">
             <a-form-item>
-              <a-button v-if="modal.mode == 'CREATE'" type="primary" @click="onCreate"
+              <a-button
+                v-if="modal.mode == 'CREATE'"
+                class="bg-blue-500"
+                type="primary"
+                @click="onCreate"
                 >創建</a-button
               >
-              <a-button v-if="modal.mode == 'EDIT'" type="primary" @click="onUpdate"
+              <a-button
+                v-if="modal.mode == 'EDIT'"
+                class="bg-blue-500"
+                type="primary"
+                @click="onUpdate"
                 >確定</a-button
               >
               <a-button style="margin-left: 10px" @click="this.modal.isOpen = false"
@@ -201,6 +233,7 @@ export default {
   data() {
     return {
       dateFormat: "YYYY-MM-DD",
+      filter_programs: [],
       modal: {
         isOpen: false,
         mode: null,
@@ -211,16 +244,20 @@ export default {
         {
           title: "Team",
           dataIndex: "team",
-        },{
+        },
+        {
           title: "Name",
           dataIndex: "name_display",
-        },{
+        },
+        {
           title: "Gender",
           dataIndex: "gender",
-        },{
+        },
+        {
           title: "Program",
           dataIndex: "program",
-        },{
+        },
+        {
           title: "Operation",
           dataIndex: "operation",
         },
@@ -249,20 +286,24 @@ export default {
     };
   },
   created() {
-    console.log(this.competition);
+    this.filter_programs = this.programs;
   },
   methods: {
     onCreateRecord() {
       this.modal.title = "Create";
-      this.modal.isOpen = true;
-      this.modal.data = {};
+      this.modal.data = {
+        new_team: false,
+      };
       this.modal.mode = "CREATE";
+      this.modal.isOpen = true;
     },
     onEditRecord(record) {
-      this.modal.isOpen = true;
       this.modal.title = "Edit";
       this.modal.mode = "EDIT";
-      this.modal.data = { ...record };
+      this.modal.data = { ...record, new_team: false };
+      this.modal.data.programs = this.modal.data.programs.map((x) => x.id);
+      this.filter_programs = this.programs.filter((x) => x.weight_code.includes(record.gender));
+      this.modal.isOpen = true;
     },
     onUpdate() {
       this.$refs.formRef
@@ -291,11 +332,9 @@ export default {
           console.log("error", error);
         });
     },
-    onEditRecord(record) {
-      this.modal.isOpen = true;
-      this.modal.title = "Edit";
-      this.modal.mode = "EDIT";
-      this.modal.data = { ...record };
+    changeGender(value) {
+      console.log(value);
+      this.filter_programs = this.programs.filter((x) => x.weight_code.includes(value));
     },
     onCreate() {
       this.$refs.formRef

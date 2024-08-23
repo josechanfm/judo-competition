@@ -18,6 +18,44 @@ import { Head } from '@inertiajs/vue3';
             <div >
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">You're logged in!</div>
+                    <table width="100%" border="1">
+                        <tr><td width="50">Size</td><td>Quater</td><td>Double</td><td>Full</td><td>Knockout</td></tr>
+                        <tr>
+                            <th>4</th>
+                            <td><a href="/manage/print/tournament_quarter?size=4" target="_blank">4 Quarter</a></td>
+                            <td><a href="/manage/print/tournament_double?size=4" target="_blank">4 Double</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>8</th>
+                            <td><a href="/manage/print/tournament_quarter?size=8" target="_blank">4 Quarter</a></td>
+                            <td><a href="/manage/print/tournament_double?size=8" target="_blank">4 Double</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>16</th>
+                            <td><a href="/manage/print/tournament_quarter?size=16" target="_blank">16 Quarter</a></td>
+                            <td><a href="/manage/print/tournament_double?size=16" target="_blank">16 Double</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>32</th>
+                            <td><a href="/manage/print/tournament_quarter?size=32" target="_blank">32 Quarter</a></td>
+                            <td><a href="/manage/print/tournament_double?size=32" target="_blank">32 Double</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th>64</th>
+                            <td><a href="/manage/print/tournament_quarter?size=64" target="_blank">64 Quarter</a></td>
+                            <td><a href="/manage/print/tournament_double?size=64" target="_blank">64 Double</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>

@@ -8,7 +8,7 @@ use App\Services\SheetTournamentQuarterService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
-class TournamentController extends Controller
+class TournamentQuarterController extends Controller
 {
     protected $gameSheet=null;
 

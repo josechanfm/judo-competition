@@ -58,7 +58,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
 
     Route::get('manage/print/{competition}/programs',[App\Http\Controllers\Manage\PrinterController::class,'programs'])->name('manage.print.programs');
-    Route::get('manage/print/tournament',[App\Http\Controllers\Manage\TournamentController::class,'printPdf']);
+    Route::get('manage/print/tournament_quarter',[App\Http\Controllers\Manage\TournamentQuarterController::class,'printPdf']);
+    Route::get('manage/print/tournament_double',[App\Http\Controllers\Manage\TournamentDoubleController::class,'printPdf']);
     Route::get('manage/print/round_robbin',[App\Http\Controllers\Manage\RoundRobbinController::class,'printPdf']);
     Route::get('manage/print/winners',[App\Http\Controllers\Manage\WinnerController::class,'printPdf']);
 });

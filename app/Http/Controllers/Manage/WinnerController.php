@@ -21,16 +21,16 @@ class WinnerController extends Controller
         $winnerList=[
             ['title'=>'-60kg','winners'=>[
                 ['place'=>'1','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 1'],
-                ['place'=>'2','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 2'],
-                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 3'],
-                ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 4'],
-                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 5'],
-                ['place'=>'5','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 6'],
-                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 7'],
-                ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 8'],
+                ['place'=>'2','abbr'=>'DEF','logo'=>'myloog','name'=>'Player 2'],
+                ['place'=>'3','abbr'=>'HIJ','logo'=>'myloog','name'=>'Player 3'],
+                ['place'=>'3','abbr'=>'KLM','logo'=>'myloog','name'=>'Player 4'],
+                ['place'=>'5','abbr'=>'OPQ','logo'=>'myloog','name'=>'Player 5'],
+                ['place'=>'5','abbr'=>'RST','logo'=>'myloog','name'=>'Player 6'],
+                ['place'=>'7','abbr'=>'UVR','logo'=>'myloog','name'=>'Player 7'],
+                ['place'=>'7','abbr'=>'STU','logo'=>'myloog','name'=>'Player 8'],
             ]],
             ['title'=>'-66kg','winners'=>[
-                ['place'=>'1','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 1'],
+                ['place'=>'1','abbr'=>'AB1','logo'=>'myloog','name'=>'Player 1'],
                 ['place'=>'2','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 2'],
                 ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 3'],
                 ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 4'],
@@ -40,7 +40,7 @@ class WinnerController extends Controller
                 ['place'=>'7','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 8'],
             ]],
             ['title'=>'-72kg','winners'=>[
-                ['place'=>'1','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 1'],
+                ['place'=>'1','abbr'=>'AB2','logo'=>'myloog','name'=>'Player 1'],
                 ['place'=>'2','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 2'],
                 ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 3'],
                 ['place'=>'3','abbr'=>'ABC','logo'=>'myloog','name'=>'Player 4'],

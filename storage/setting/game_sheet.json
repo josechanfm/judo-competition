@@ -29,7 +29,7 @@
     },
     "16": {
         "startX": 25,
-        "startY": 35,
+        "startY": 20,
         "boxW": 60,
         "boxH": 15,
         "boxGap": 6,
@@ -43,7 +43,7 @@
     },
     "32": {
         "startX": 25,
-        "startY": 35,
+        "startY": 25,
         "boxW": 60,
         "boxH": 10,
         "boxGap": 2,

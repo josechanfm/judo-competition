@@ -57,6 +57,8 @@ import { Head } from '@inertiajs/vue3';
                         </tr>
                     </table>
                 </div>
+                    <a href="/manage/print/winners">Winners</a>
+
             </div>
         </div>
     </AdminLayout>

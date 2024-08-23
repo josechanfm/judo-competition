@@ -67,15 +67,15 @@ class TournamentDoubleController extends Controller
         ];
         $repechagePlayers=[
             [
-                'white'=>['name_display'=>'White player r1'],
-                'blue'=>['name_display'=>'Blue player r2'],
+                'white'=>['name_display'=>'White player r1','from'=>'A1'],
+                'blue'=>['name_display'=>'Blue player r2','from'=>'A1'],
             ],[
-                'blue'=>['name_display'=>'Blue player r5'],
+                'blue'=>['name_display'=>'Blue player r5','from'=>'A1'],
             ],[
-                'white'=>['name_display'=>'White player r3'],
-                'blue'=>['name_display'=>'Blue player r4'],
+                'white'=>['name_display'=>'White player r3','from'=>'A1'],
+                'blue'=>['name_display'=>'Blue player r4','from'=>'A1'],
             ],[
-                'blue'=>['name_display'=>'Blue player r6'],
+                'blue'=>['name_display'=>'Blue player r6','from'=>'A1'],
             ]
         ];
         $repechageWinners=[
@@ -188,23 +188,23 @@ class TournamentDoubleController extends Controller
         $repechagePlayers=[
             [
                 [
-                    'white'=>['name_display'=>'White player (A1)r1'],
-                    'blue'=>['name_display'=>'Blue player (A2)r2'],
+                    'white'=>['name_display'=>'White player (A1)r1','from'=>'A1'],
+                    'blue'=>['name_display'=>'Blue player (A2)r2','from'=>'A2'],
                 ],[
-                    'white'=>['name_display'=>'White player (B1)r1'],
-                    'blue'=>['name_display'=>'Blue player (B2)r5'],
+                    'white'=>['name_display'=>'White player (B1)r1','from'=>'B1'],
+                    'blue'=>['name_display'=>'Blue player (B2)r5','from'=>'B2'],
                 ],[
-                    'white'=>['name_display'=>'White player (C1)r1'],
-                    'blue'=>['name_display'=>'Blue player (C2)r5'],
+                    'white'=>['name_display'=>'White player (C1)r1','from'=>'C1'],
+                    'blue'=>['name_display'=>'Blue player (C2)r5','from'=>'C2'],
                 ],[
-                    'white'=>['name_display'=>'White player (D1)r1'],
-                    'blue'=>['name_display'=>'Blue player (D2)r5'],
+                    'white'=>['name_display'=>'White player (D1)r1','from'=>'D1'],
+                    'blue'=>['name_display'=>'Blue player (D2)r5','from'=>'D2'],
                 ]
             ],
             [[],[]]
             ,[
-                ['blue'=>['name_display'=>'Blue player (18)r5']],
-                ['blue'=>['name_display'=>'Blue player (17)r5']],
+                ['blue'=>['name_display'=>'Blue player (18)r5','from'=>'18']],
+                ['blue'=>['name_display'=>'Blue player (17)r5','from'=>'19']],
             ]
         ];
 
@@ -289,15 +289,29 @@ class TournamentDoubleController extends Controller
         ];
         $repechagePlayers=[
             [
-                'white'=>['name_display'=>'White player r1'],
-                'blue'=>['name_display'=>'Blue player r2'],
+                [
+                    'white'=>['name_display'=>'White player (A1)r1','from'=>'A1'],
+                    'blue'=>['name_display'=>'Blue player (A2)r2','from'=>'A2'],
+                ],[
+                    'white'=>['name_display'=>'White player (B1)r1','from'=>'B1'],
+                    'blue'=>['name_display'=>'Blue player (B2)r5','from'=>'B2'],
+                ],[
+                    'white'=>['name_display'=>'White player (C1)r1','from'=>'C1'],
+                    'blue'=>['name_display'=>'Blue player (C2)r5','from'=>'C2'],
+                ],[
+                    'white'=>['name_display'=>'White player (D1)r1','from'=>'D1'],
+                    'blue'=>['name_display'=>'Blue player (D2)r5','from'=>'D2'],
+                ]
             ],[
-                'blue'=>['name_display'=>'Blue player r5'],
-            ],[
-                'white'=>['name_display'=>'White player r3'],
-                'blue'=>['name_display'=>'Blue player r4'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r6'],
+                ['blue'=>['name_display'=>'Blue player (18)r5','from'=>'A3']],
+                ['blue'=>['name_display'=>'Blue player (17)r5','from'=>'B3']],
+                ['blue'=>['name_display'=>'Blue player (18)r5','from'=>'C3']],
+                ['blue'=>['name_display'=>'Blue player (17)r5','from'=>'D3']],
+            ],
+            [[],[]]
+            ,[
+                ['blue'=>['name_display'=>'Blue player (18)r5','from'=>'18']],
+                ['blue'=>['name_display'=>'Blue player (17)r5','from'=>'19']],
             ]
         ];
         $repechageWinners=[

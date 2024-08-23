@@ -333,7 +333,7 @@ class SheetTournamentDoubleService{
         $x=$this->startX;
         $y=$this->startY+(($this->boxH+$this->boxGap)*$totalPlayers)-$this->boxGap+$this->repechageDistance;
         $boxGap=$this->repechageBoxGap+5;
-        $boxH=$this->boxH/2-2;
+        $boxH=$this->boxH/2;
         $boxW=$this->boxW;
         $arcW=$this->arcW+10;
 

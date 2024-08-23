@@ -49,11 +49,11 @@
         "boxGap": 2,
         "arcW": 20,
         "arcWFirst": 4,
-        "repechageDistance": 5,
+        "repechageDistance": 10,
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "playerFontSize": 10
+        "playerFontSize": 12
     },
     "64": {
         "startX": 25,

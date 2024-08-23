@@ -8,7 +8,7 @@ class SheetWinnerService{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $gender='Women';
+    protected $gender='Men';
     protected $report_title='Final Results';
 
     protected $startX=25; //面頁基點X軸

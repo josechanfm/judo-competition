@@ -28,7 +28,7 @@ class AthleteController extends Controller
         $competition->athletes;
         $programs = $competition->programs;
         $teams = $competition->teams;
-        
+
         return Inertia::render('Manage/Athletes', [
             'competition' => $competition,
             'programs' => $programs,
@@ -50,16 +50,28 @@ class AthleteController extends Controller
     public function store(Competition $competition, Request $request)
     {
         //
+        dd($request->all());
         $validated = $request->validate([
-            'name_zh' => 'required',
+            'name' => 'required',
+            'new_team' => '',
+            'programs' => '',
+            'team' => '',
             // TODO: add filtering
-            'name_pt' => '',
             'name_display' => '',
             'gender' => 'required',
-            'team_id' => 'required',
+            'team_id' => '',
         ]);
 
-        Athlete::Create([...$validated, 'competition_id' => $competition->id]);
+        if ($validated['new_team'] == true) {
+            $team = Team::create(['name' => $validated['team'], 'competition_id' => $competition->id]);
+            $validated['team_id'] = $team->id;
+        }
+
+        $athlete = Athlete::Create([...$validated, 'competition_id' => $competition->id]);
+
+        foreach ($validated['programs'] as $p) {
+            ProgramAthlete::Create(['program_id' => $p, 'athlete_id' => $athlete->id]);
+        }
 
         return redirect()->back();
     }
@@ -100,20 +112,20 @@ class AthleteController extends Controller
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls',
         ]);
-
+        
         $competition->programs()->each(function ($program) {
             $program->athletes()->detach();
         });
-
+    
         $competition->athletes()->delete();
-
+        
         // remove all athletes in programs
 
         $import = new AthletesImport($competition);
 
         $import->import(request()->file('file'));
         // dd($import->failures());
-
+        // dd('aaaa');
         return response()->json([
             'errors' => $import->failures()
         ]);
@@ -126,13 +138,19 @@ class AthleteController extends Controller
         //
         // dd($request);
         $validated = $request->validate([
-            'name_zh' => 'required',
+            'name' => 'required',
             // TODO: add filtering
-            'name_pt' => '',
             'name_display' => '',
             'gender' => 'required',
-            'team_id' => 'required',
+            'programs' => '',
+            'new_team' => '',
+            'team' => '',
+            'team.name' => 'unique:teams',
+            'team_id' => '',
         ]);
+
+        if ($validated['new_team'] == true) {
+        }
 
         $athlete->update($validated);
     }
@@ -149,7 +167,7 @@ class AthleteController extends Controller
     {
         // dd($competition->programs);
         return Inertia::render('Draw/DrawControl', [
-            'competition' => fn () => $competition,
+            'competition' => fn() => $competition,
             'programs' => $competition->programs()->get(),
         ]);
     }
@@ -157,7 +175,7 @@ class AthleteController extends Controller
     public function drawScreen(Competition $competition)
     {
         return Inertia::render('Draw/DrawScreen', [
-            'competition' => fn () => $competition,
+            'competition' => fn() => $competition,
             'draw' => [
                 'cover' => $competition->getDrawCoverUrlAttribute(),
                 'background' => $competition->getDrawBackgroundUrlAttribute(),

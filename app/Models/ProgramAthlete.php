@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProgramAthlete extends Model
 {
+    protected $fillable = [
+        'program_id',
+        'athlete_id'
+    ];
     use HasFactory;
 
     protected $table = 'program_athlete';

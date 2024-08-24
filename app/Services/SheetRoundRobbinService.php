@@ -88,6 +88,7 @@ class SheetRoundRobbinService{
     protected $boxGap=4; //運動員名牌之間距離
     protected $arcW=20; //上線曲線寛度
     protected $arcWFirst=4; //第一輪上線曲線
+    protected $repechageBoxH=5;
     protected $repechageDistance=5; //復活賽表,運動員名牌之間距離
     protected $repechageBoxGap=2; //復活賽表,運動員名牌之間距離
     protected $repechageSectionGap=5; //復活賽表, second
@@ -114,6 +115,7 @@ class SheetRoundRobbinService{
     protected $styleCircle=null;
     protected $resultColor1=array(200,200,200);
     protected $resultColor2=array(250,250,250);
+    protected $resultXY=[120,120];
 
     protected $gameRound=[
         3=>[[0,1],[0,2],[1,2]],
@@ -250,8 +252,9 @@ class SheetRoundRobbinService{
         }
     }
     private function resultBox($winnerList){
-        $x=120;
-        $y=$this->pdf->getPageHeight()/2;
+        $x=$this->resultXY[0];
+        $y=$this->resultXY[1];
+        //$y=$this->pdf->getPageHeight()/2;
         $w=45;
         $h=30;
         $r=3.50;

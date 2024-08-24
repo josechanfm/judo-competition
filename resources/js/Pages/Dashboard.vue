@@ -11,26 +11,25 @@ import { Head } from '@inertiajs/vue3';
             <div class="mx-4 py-4">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
             </div>
-            
         </template>
 
-        <div class="py-12">
+        <div class="pt-6">
             <div >
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">You're logged in!</div>
+                    <div class="p-6 text-gray-900">Tournament Game</div>
                     <table width="100%" border="1">
                         <tr><td width="50">Size</td><td>Quater</td><td>Double</td><td>Full</td><td>Knockout</td></tr>
                         <tr>
                             <th>4</th>
                             <td><a href="/manage/print/tournament_quarter?size=4" target="_blank">4 Quarter</a></td>
-                            <td><a href="/manage/print/tournament_double?size=4" target="_blank">4 Double</a></td>
+                            <td></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <th>8</th>
-                            <td><a href="/manage/print/tournament_quarter?size=8" target="_blank">4 Quarter</a></td>
-                            <td><a href="/manage/print/tournament_double?size=8" target="_blank">4 Double</a></td>
+                            <td><a href="/manage/print/tournament_quarter?size=8" target="_blank">8 Quarter</a></td>
+                            <td><a href="/manage/print/tournament_double?size=8" target="_blank">8 Double</a></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -57,8 +56,37 @@ import { Head } from '@inertiajs/vue3';
                         </tr>
                     </table>
                 </div>
+            </div>
+        </div>
+        <div class="pt-6">
+            <div >
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">Round Robbin Game</div>
+                    <table width="100%" border="1">
+                        <tr><td width="50">Size</td><td>Players</td></tr>
+                        <tr>
+                            <th>3</th>
+                            <td><a href="/manage/print/round_robbin?size=3" target="_blank">3 Players</a></td>
+                        </tr>
+                        <tr>
+                            <th>4</th>
+                            <td><a href="/manage/print/round_robbin?size=4" target="_blank">4 Players</a></td>
+                        </tr>
+                        <tr>
+                            <th>5</th>
+                            <td><a href="/manage/print/round_robbin?size=5" target="_blank">5 Players</a></td>
+                        </tr>
+                    </table>
+                </div>
                     <a href="/manage/print/winners">Winners</a>
-
+            </div>
+        </div>
+        <div class="pt-6">
+            <div >
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">Other Print Out</div>
+                    <a href="/manage/print/winners">Winners</a>
+                </div>
             </div>
         </div>
     </AdminLayout>

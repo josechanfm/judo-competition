@@ -7,11 +7,13 @@
         "boxGap": 6,
         "arcW": 20,
         "arcWFirst": 4,
+        "repechageBoxH": 5,
         "repechageDistance": 15,
         "repechageBoxGap": 6,
         "repechageSectionGap": 10,
         "circleSize": 3,
-        "playerFontSize": 14
+        "playerFontSize": 14,
+        "resultXY":[120,120]
     },
     "8": {
         "startX": 25,
@@ -21,11 +23,13 @@
         "boxGap": 6,
         "arcW": 20,
         "arcWFirst": 4,
+        "repechageBoxH": 5,
         "repechageDistance": 15,
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "playerFontSize": 14
+        "playerFontSize": 14,
+        "resultXY":[140,130]
     },
     "16": {
         "startX": 25,
@@ -35,11 +39,13 @@
         "boxGap": 6,
         "arcW": 20,
         "arcWFirst": 4,
+        "repechageBoxH": 5,
         "repechageDistance": 10,
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "playerFontSize": 12
+        "playerFontSize": 12,
+        "resultXY":[145,170]
     },
     "32": {
         "startX": 25,
@@ -49,24 +55,28 @@
         "boxGap": 2,
         "arcW": 20,
         "arcWFirst": 4,
+        "repechageBoxH": 5,
         "repechageDistance": 10,
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "playerFontSize": 12
+        "playerFontSize": 12,
+        "resultXY":[145,210]
     },
     "64": {
         "startX": 25,
-        "startY": 23,
+        "startY": 20,
         "boxW": 55,
         "boxH": 6.4,
         "boxGap": 1,
         "arcW": 20,
         "arcWFirst": 4,
-        "repechageDistance": 3,
+        "repechageBoxH": 3,
+        "repechageDistance": 0,
         "repechageBoxGap": 1,
         "repechageSectionGap": 1,
         "circleSize": 2,
-        "playerFontSize": 8
+        "playerFontSize": 8,
+        "resultXY":[150,233]
     }
 }

@@ -4,19 +4,26 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\SheetTournamentDoubleService;
+use App\Services\SheetTournamentFullService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
-class TournamentDoubleController extends Controller
+class TournamentFullController extends Controller
 {
     protected $gameSheet=null;
 
     public function printPdf(Request $request){
+        // $data = json_decode(Storage::get('setting/game_sheet.json'), true);
+        // dd($data);
+        // dd(storage_path('setting/game_sheet.json'));
         $filePath=storage_path('setting/game_tournament_double.json');
+        // if(File::exists($filePath)){
             $settings = File::json($filePath);
-        $this->gameSheet=new SheetTournamentDoubleService($settings);
+        //};
+        $this->gameSheet=new SheetTournamentFullService($settings);
+        //$this->gameSheet->setTitles('Main Title','sub title');
         $this->gameSheet->setFonts('times','cid0ct','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
+        //$this->gameSheet->setRepechage(null);
         $poolLable=[
             ['name'=>'分組 A'],
             ['name'=>'分組 B'],
@@ -24,9 +31,7 @@ class TournamentDoubleController extends Controller
             ['name'=>'分組 D']
         ];
         $this->gameSheet->setPoolLabel($poolLable);
-        if($request->winner_line){
-            $this->gameSheet->setWinnerLine(true);
-        }
+        
 
         if(empty($request->size)){
             $this->players32();
@@ -34,9 +39,9 @@ class TournamentDoubleController extends Controller
         }
         switch($request->size){
             case 4:
-                //$this->players4();
+                $this->players4();
             case 8:
-                //$this->players8();
+                $this->players8();
             case 16:
                 $this->players16();
             case 32:
@@ -144,7 +149,7 @@ class TournamentDoubleController extends Controller
             [1,2,3,4],
             [5,6],
             [7],
-            [8,9,10,11],
+            [8,9],
             [10,11],
         ];
         $winnerList=[
@@ -188,10 +193,7 @@ class TournamentDoubleController extends Controller
             [1,2,1,2,1,2,1,2],
             [2,1,2,1],
             [1,2],
-            [2],
-            [2,2,1,1],
-            [2,1],
-            [1,2]
+            [2]
         ];
         $repechagePlayers=[
             [
@@ -223,11 +225,10 @@ class TournamentDoubleController extends Controller
         $sequences=[
             [1,2,3,4,5,6,7,8],
             [9,10,11,12],
-            [17,18],
-            [23],
-            [13,14,15,16],
-            [19,20],
-            [21,22]
+            [13,14],
+            [15],
+            [16,17],
+            [18,19]
         ];
         $winnerList=[
             ['award'=>'Gold','name'=>'Place 1'],
@@ -290,15 +291,11 @@ class TournamentDoubleController extends Controller
             ]
         ];
         $winners=[
-            [0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2],
-            [0,0,1,1,2,2,2,2],
-            [0,0,2,2],
-            [1,2],
-            [1],
-            [2,2,2,2],
-            [2,2,2,2],
-            [2,2],
-            [2,2],
+            [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
+            [2,1,2,1,1,2,1,2],
+            [1,2,1,2],
+            [2,1],
+            [1]
         ];
         $repechagePlayers=[
             [
@@ -337,8 +334,6 @@ class TournamentDoubleController extends Controller
             [24,26,27,28],
             [29,30],
             [31],
-            [32,33,32,33],
-            [32,33,32,33],
             [32,33],
             [34,35]
         ];
@@ -456,12 +451,7 @@ class TournamentDoubleController extends Controller
             [2,1,2,1,1,2,1,2],
             [1,2,1,2],
             [2,1],
-            [2],
-            [2,2,1,1],
-            [2,2,1,1],
-            [2,1,1,1],
-            [2,1],
-            [2,1],
+            [2]
         ];
         $repechagePlayers=[
             [
@@ -504,13 +494,10 @@ class TournamentDoubleController extends Controller
             [33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48],
             [49,50,51,52,53,54,55,56],
             [57,58,59,60],
-            [75,76],
-            [79],
-            [61,62,63,64],
-            [65,66,67,68],
-            [69,70,71,72],
-            [73,73],
-            [77,78]
+            [61,62],
+            [63],
+            [64,65],
+            [67,66]
         ];
         $winnerList=[
             ['award'=>'Gold','name'=>'Place 1'],

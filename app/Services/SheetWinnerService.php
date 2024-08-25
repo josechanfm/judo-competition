@@ -6,6 +6,7 @@ use TCPDF;
 class SheetWinnerService{
     
     protected $pdf=null;
+    protected $gameSetting=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
     protected $gender='Men';
@@ -72,7 +73,9 @@ class SheetWinnerService{
         $this->generalFont=$generalFont;
     }
 
-    public function pdf($winnerList=[]){
+    public function pdf($gender='Man', $winnerList=[]){
+
+        $this->gender=ucfirst($gender);
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
         // set margins
@@ -87,7 +90,6 @@ class SheetWinnerService{
         $this->pdf->AddPage();
 
         $this->header();
-        
         
         $this->printResult($winnerList);
         $this->pdf->Output('myfile.pdf', 'I');

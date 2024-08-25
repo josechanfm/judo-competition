@@ -13,10 +13,7 @@ class TournamentQuarterController extends Controller
     protected $gameSheet=null;
 
     public function printPdf(Request $request){
-        // $data = json_decode(Storage::get('setting/game_sheet.json'), true);
-        // dd($data);
-        // dd(storage_path('setting/game_sheet.json'));
-        $filePath=storage_path('setting/game_sheet.json');
+        $filePath=storage_path('setting/game_tournament_quarter.json');
         // if(File::exists($filePath)){
             $settings = File::json($filePath);
         //};
@@ -30,8 +27,10 @@ class TournamentQuarterController extends Controller
             ['name'=>'分組 C'],
             ['name'=>'分組 D']
         ];
-        $this->gameSheet->setPoolLabel($poolLable);
-        
+        $this->gameSheet->setPoolLabel($poolLable);        
+        if($request->winner_line){
+            $this->gameSheet->setWinnerLine(true);
+        }
 
         if(empty($request->size)){
             $this->players32();
@@ -63,24 +62,7 @@ class TournamentQuarterController extends Controller
         ];
         $winners=[
             [1,2],
-            [2]
-        ];
-        $repechagePlayers=[
-            [
-                'white'=>['name_display'=>'White player r1'],
-                'blue'=>['name_display'=>'Blue player r2'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r5'],
-            ],[
-                'white'=>['name_display'=>'White player r3'],
-                'blue'=>['name_display'=>'Blue player r4'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r6'],
-            ]
-        ];
-        $repechageWinners=[
-            [1,2],
-            [1,2],
+            [2],
         ];
         $sequences=[
             [1,2],
@@ -94,7 +76,7 @@ class TournamentQuarterController extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $repechagePlayers, $repechageWinners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players, $winners,  $sequences, $winnerList);
 
     }
     private function players8(){
@@ -116,19 +98,23 @@ class TournamentQuarterController extends Controller
         $winners=[
             [2,1,2,1],
             [1,2],
-            [2]
+            [2],
+            [1,2],
+            [1,2]
         ];
         $repechagePlayers=[
             [
-                'white'=>['name_display'=>'White player r1'],
-                'blue'=>['name_display'=>'Blue player r2'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r5'],
-            ],[
-                'white'=>['name_display'=>'White player r3'],
-                'blue'=>['name_display'=>'Blue player r4'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r6'],
+                [
+                    'white'=>['name_display'=>'White player r1','from'=>'1'],
+                    'blue'=>['name_display'=>'Blue player r2','from'=>'2'],
+                ],[
+                    'white'=>['name_display'=>'White player r3','from'=>'3'],
+                    'blue'=>['name_display'=>'Blue player r4','from'=>'4'],
+                ]
+            ],
+            [
+                ['blue'=>['name_display'=>'Blue player r5','from'=>'7']],
+                ['blue'=>['name_display'=>'Blue player r6','from'=>'8']],
             ]
         ];
         $repechageWinners=[
@@ -137,10 +123,10 @@ class TournamentQuarterController extends Controller
         ];
         $sequences=[
             [1,2,3,4],
+            [7,8],
+            [11],
             [5,6],
-            [7],
-            [8,9],
-            [10,11],
+            [9,10]
         ];
         $winnerList=[
             ['award'=>'Gold','name'=>'Place 1'],
@@ -148,7 +134,7 @@ class TournamentQuarterController extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $repechagePlayers, $repechageWinners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players, $winners,  $sequences, $winnerList, $repechagePlayers);
        
     }
     private function players16(){
@@ -183,19 +169,23 @@ class TournamentQuarterController extends Controller
             [1,2,1,2,1,2,1,2],
             [2,1,2,1],
             [1,2],
-            [2]
+            [2],
+            [1,2],
+            [1,2]
         ];
         $repechagePlayers=[
             [
-                'white'=>['name_display'=>'White player r1'],
-                'blue'=>['name_display'=>'Blue player r2'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r5'],
-            ],[
-                'white'=>['name_display'=>'White player r3'],
-                'blue'=>['name_display'=>'Blue player r4'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r6'],
+                [
+                    'white'=>['name_display'=>'White player r1','from'=>'9'],
+                    'blue'=>['name_display'=>'Blue player r2','from'=>'10'],
+                ],[
+                    'white'=>['name_display'=>'White player r3','from'=>'11'],
+                    'blue'=>['name_display'=>'Blue player r4','from'=>'12'],
+                ]
+            ],
+            [
+                ['blue'=>['name_display'=>'Blue player r5','from'=>'15']],
+                ['blue'=>['name_display'=>'Blue player r6','from'=>'16']],
             ]
         ];
         $repechageWinners=[
@@ -205,10 +195,10 @@ class TournamentQuarterController extends Controller
         $sequences=[
             [1,2,3,4,5,6,7,8],
             [9,10,11,12],
+            [15,16],
+            [19],
             [13,14],
-            [15],
-            [16,17],
-            [18,19]
+            [17,18]
         ];
         $winnerList=[
             ['award'=>'Gold','name'=>'Place 1'],
@@ -216,7 +206,7 @@ class TournamentQuarterController extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $repechagePlayers, $repechageWinners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players, $winners, $sequences, $winnerList, $repechagePlayers);
     }
     private function players32(){
         $players=[
@@ -275,19 +265,23 @@ class TournamentQuarterController extends Controller
             [2,1,2,1,1,2,1,2],
             [1,2,1,2],
             [2,1],
-            [1]
+            [1],
+            [1,2],
+            [1,2]
         ];
         $repechagePlayers=[
             [
-                'white'=>['name_display'=>'White player r1'],
-                'blue'=>['name_display'=>'Blue player r2'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r5'],
-            ],[
-                'white'=>['name_display'=>'White player r3'],
-                'blue'=>['name_display'=>'Blue player r4'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r6'],
+                [
+                    'white'=>['name_display'=>'White player r1','from'=>'25'],
+                    'blue'=>['name_display'=>'Blue player r2','from'=>'26'],
+                ],[
+                    'white'=>['name_display'=>'White player r3','from'=>'27'],
+                    'blue'=>['name_display'=>'Blue player r4','from'=>'28'],
+                ]
+            ],
+            [
+                ['blue'=>['name_display'=>'Blue player r5','from'=>'29']],
+                ['blue'=>['name_display'=>'Blue player r6','from'=>'30']],
             ]
         ];
         $repechageWinners=[
@@ -297,11 +291,11 @@ class TournamentQuarterController extends Controller
         $sequences=[
             [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
             [17,18,19,20,21,22,23,24],
-            [24,26,27,28],
+            [25,26,27,28],
+            [31,32],
+            [35],
             [29,30],
-            [31],
-            [32,33],
-            [34,35]
+            [33,34]
         ];
         $winnerList=[
             ['award'=>'Gold','name'=>'Place 1'],
@@ -309,7 +303,7 @@ class TournamentQuarterController extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $repechagePlayers, $repechageWinners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players, $winners, $sequences, $winnerList, $repechagePlayers);
     }
     private function players64(){
         $players=[
@@ -417,19 +411,23 @@ class TournamentQuarterController extends Controller
             [2,1,2,1,1,2,1,2],
             [1,2,1,2],
             [2,1],
-            [2]
+            [2],
+            [1,2],
+            [1,2]
         ];
         $repechagePlayers=[
             [
-                'white'=>['name_display'=>'White player r1'],
-                'blue'=>['name_display'=>'Blue player r2'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r5'],
-            ],[
-                'white'=>['name_display'=>'White player r3'],
-                'blue'=>['name_display'=>'Blue player r4'],
-            ],[
-                'blue'=>['name_display'=>'Blue player r6'],
+                [
+                    'white'=>['name_display'=>'White player r1','from'=>'r1'],
+                    'blue'=>['name_display'=>'Blue player r2','from'=>'r2'],
+                ],[
+                    'white'=>['name_display'=>'White player r3','from'=>'r3'],
+                    'blue'=>['name_display'=>'Blue player r4','from'=>'r4'],
+                ]
+            ],
+            [
+                ['blue'=>['name_display'=>'Blue player r5','from'=>'13']],
+                ['blue'=>['name_display'=>'Blue player r6','from'=>'14']],
             ]
         ];
         $repechageWinners=[
@@ -452,7 +450,7 @@ class TournamentQuarterController extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $repechagePlayers, $repechageWinners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players, $winners, $sequences, $winnerList, $repechagePlayers);
         
     }
 

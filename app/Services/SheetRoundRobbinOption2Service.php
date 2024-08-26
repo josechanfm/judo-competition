@@ -80,6 +80,8 @@ class SheetRoundRobbinOption2Service{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
+    protected $logo_primary='images/jua_logo.png';
+    protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
     protected $startY=30; //面頁基點Y軸
@@ -132,6 +134,10 @@ class SheetRoundRobbinOption2Service{
         $this->styleResult2 = array('width' => 0.4, 'cap' => 'butt', 'join' => 'miter', 'dash' => '0', 'color' => array(0, 0, 0));
         $this->styleCircle = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(50, 50,127));
 
+    }
+    public function setLogos($primary=null, $secondary=null){
+        $this->logo_primary=$primary;
+        $this->logo_secondary=$secondary;
     }
 
     public function setTitles($title=null, $title_sub=null){

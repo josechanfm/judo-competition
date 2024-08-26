@@ -18,6 +18,7 @@ class SheetTournamentQuarterService{
             'repechageBoxGap'=>6,
             'repechageSectionGap'=>10,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>14
         ),
         '8'=>array(
@@ -32,6 +33,7 @@ class SheetTournamentQuarterService{
             'repechageBoxGap'=>2,
             'repechageSectionGap'=>5,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>14
         ),
         '16'=>array(
@@ -46,6 +48,7 @@ class SheetTournamentQuarterService{
             'repechageBoxGap'=>2,
             'repechageSectionGap'=>5,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>12
         ),
         '32'=>array(
@@ -60,6 +63,7 @@ class SheetTournamentQuarterService{
             'repechageBoxGap'=>2,
             'repechageSectionGap'=>5,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>10
         ),
         '64'=>array(
@@ -74,12 +78,15 @@ class SheetTournamentQuarterService{
             'repechageBoxGap'=>1,
             'repechageSectionGap'=>1,
             'circleSize'=>2,
+            'circleFontSize'=>10,
             'playerFontSize'=>8
         ),
     );
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
+    protected $logo_primary='images/jua_logo.png';
+    protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
     protected $startY=23; //面頁基點Y軸
@@ -92,6 +99,7 @@ class SheetTournamentQuarterService{
     protected $repechageBoxGap=2; //復活賽表,運動員名牌之間距離
     protected $repechageSectionGap=5; //復活賽表, second
     protected $circleSize=3;
+    protected $circleFontSize=10;
     protected $playerFontSize=10;
 
     protected $round=0;
@@ -146,6 +154,11 @@ class SheetTournamentQuarterService{
             }
         }
     }
+    public function setLogos($primary=null, $secondary=null){
+        $this->logo_primary=$primary;
+        $this->logo_secondary=$secondary;
+    }
+
     public function setTitles($title=null, $title_sub=null){
         $this->title=$title;
         $this->title_sub=$title_sub;
@@ -210,6 +223,7 @@ class SheetTournamentQuarterService{
         $this->pdf->Output('myfile.pdf', 'I');
     }
     private function boxPool($poolLable){
+        $this->pdf->setFont($this->generalFont,'',$this->playerFontSize);
         $x=$this->startX-10;
         $y=$this->startY;//+($this->boxH/4);
         $h=($this->boxH+$this->boxGap)*($this->playerCount/8)-$this->boxGap;//-($this->boxH)+($this->repechageBoxGap/2);
@@ -221,7 +235,7 @@ class SheetTournamentQuarterService{
         //$x=$this->startX-10;
         $y=$this->startY+(($this->boxH+$this->boxGap)*$this->playerCount/2)-($this->boxGap /2);
         $w=(($this->boxH+$this->boxGap)*$this->playerCount/8);
-        $this->pdf->setFont($this->playerFont,'', 12);
+        $this->pdf->setFont('times','', $this->playerFontSize);
         $this->pdf->StartTransform();
         $this->pdf->setXY($x, $y);
         $this->pdf->Rotate(90);
@@ -237,7 +251,8 @@ class SheetTournamentQuarterService{
         $h=14;
         $r=5;
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
-        $this->pdf->image('images/jua_logo.png',$x+2, $y+2, 10,10,'png');
+        $this->pdf->image($this->logo_primary,$x+2, $y+2, 10,10,'png');
+        $this->pdf->image($this->logo_secondary,$x+$w-13, $y+2, 10,10,'png');
         
         $x=25;
         $w=165;
@@ -388,7 +403,7 @@ class SheetTournamentQuarterService{
             if($x>180){
                 $this->pdf->line($x, $y, $x-$this->arcW, $y, $styleWinnerLine);
             }else{
-                $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+                $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine); //$styleWinnerLine of previours
             }
 
             $this->pdf->line($x, $y+$h/2, $x, $y, $styleArcLine);
@@ -416,9 +431,12 @@ class SheetTournamentQuarterService{
         }
 
         /* circle sequence number */
+        if(!$this->winnerLineDraw){
             $this->pdf->Ellipse($x, $y, $size, 0, 360, 0, 360, 'DF', $this->styleCircle,$this->circleColor);
             $this->pdf->setXY($x-$size, $y-$size);
-            $this->pdf->Cell($size*2, $size*2, $num, 0, 1, 'C', 0, '', 0);    
+            $this->pdf->setFont($this->generalFont,'',$this->circleFontSize);
+            $this->pdf->Cell($size*2, $size*2, $num, 0, 1, 'C', 0, '', 0);  
+        }  
     }
     private function resultBox($winnerList){
         $x=$this->resultXY[0];

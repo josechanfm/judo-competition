@@ -9,6 +9,8 @@ class SheetWinnerService{
     protected $gameSetting=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
+    protected $logo_primary='images/jua_logo.png';
+    protected $logo_secondary=null;
     protected $gender='Men';
     protected $report_title='Final Results';
 
@@ -62,7 +64,10 @@ class SheetWinnerService{
         $this->styleCircle = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(50, 50,127));
 
     }
-
+    public function setLogos($primary=null, $secondary=null){
+        $this->logo_primary=$primary;
+        $this->logo_secondary=$secondary;
+    }
     public function setTitles($title=null, $title_sub=null){
         $this->title=$title;
         $this->title_sub=$title_sub;

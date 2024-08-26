@@ -92,6 +92,7 @@ class RoundRobbinOption1Controller extends Controller
             ['name_display'=>'Blue player 2'],
             ['name_display'=>'White player 3'],
         ];
+        $repechagePlayers=[];
         $winners=[
             [2,1,2,1],
             [1,2],
@@ -108,7 +109,7 @@ class RoundRobbinOption1Controller extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players,$repechagePlayers, $winners, $sequences, $winnerList);
        
     }
     private function players4(){
@@ -119,6 +120,10 @@ class RoundRobbinOption1Controller extends Controller
             ['name_display'=>'White player 3'],
             ['name_display'=>'Blue player 4'],
         ];
+        $repechagePlayers=[
+            ['name_display'=>'Player r1'],
+            ['name_display'=>'Player r2']
+        ];
         $winners=[
             [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
             [2,1,2,1,1,2,1,2],
@@ -138,21 +143,24 @@ class RoundRobbinOption1Controller extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players, $repechagePlayers, $winners, $sequences, $winnerList);
     }
     private function players5(){
         $players=[
-            ['name_display'=>'White player 1'],
-            ['name_display'=>'Blue player 2'],
-            ['name_display'=>'White player 3'],
-            ['name_display'=>'Blue player 4'],
-            ['name_display'=>'White player 5']
+            ['name_display'=>'Player 1'],
+            ['name_display'=>'Player 2'],
+            ['name_display'=>'Player 3'],
+            ['name_display'=>'Player 4'],
+            ['name_display'=>'Player 5']
+        ];
+        $repechagePlayers=[
+            ['name_display'=>'Player r1'],
+            ['name_display'=>'Player r2']
         ];
         $winners=[
-            [1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2],
-            [2,1,2,1,1,2,1,2],
             [1,2,1,2],
-            [2,1],
+            [2],
+            [1],
             [1]
         ];
         $sequences=[
@@ -167,7 +175,7 @@ class RoundRobbinOption1Controller extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
-        $this->gameSheet->pdf($players, $winners, $sequences, $winnerList);
+        $this->gameSheet->pdf($players, $repechagePlayers, $winners, $sequences, $winnerList);
     }
 
 

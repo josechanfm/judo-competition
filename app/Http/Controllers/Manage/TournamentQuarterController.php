@@ -19,7 +19,7 @@ class TournamentQuarterController extends Controller
         //};
         $this->gameSheet=new SheetTournamentQuarterService($settings);
         //$this->gameSheet->setTitles('Main Title','sub title');
-        $this->gameSheet->setFonts('times','cid0jp','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
+        $this->gameSheet->setFonts('times','cid0ct','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         //$this->gameSheet->setRepechage(null);
         $poolLable=[
             ['name'=>'分組 A'],
@@ -27,6 +27,7 @@ class TournamentQuarterController extends Controller
             ['name'=>'分組 C'],
             ['name'=>'分組 D']
         ];
+        $this->gameSheet->setLogos('images/jua_logo.png','images/mja_logo.png');
         $this->gameSheet->setPoolLabel($poolLable);        
         if($request->winner_line){
             $this->gameSheet->setWinnerLine(true);
@@ -101,11 +102,11 @@ class TournamentQuarterController extends Controller
             ]
         ];
         $winners=[
-            [2,1,2,1],
-            [1,2],
-            [2],
-            [1,2],
-            [1,2]
+            [1,1,1,1],
+            [1,1],
+            [1],
+            [1,1],
+            [1,1]
         ];
         $repechagePlayers=[
             [
@@ -141,7 +142,7 @@ class TournamentQuarterController extends Controller
     private function players16(){
         $players=[
             [
-                'white'=>['name_display'=>'White player 1'],
+                'white'=>['name_display'=>'애정) 1'],
                 'blue'=>['name_display'=>'Blue player 2'],
             ],[
                 'white'=>['name_display'=>'White player 3'],
@@ -203,15 +204,16 @@ class TournamentQuarterController extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
+        $this->gameSheet->setFonts('times','cid0kr','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         $this->gameSheet->pdf($players, $winners, $sequences, $winnerList, $repechagePlayers);
     }
     private function players32(){
         $players=[
             [
-                'white'=>['name_display'=>'White player 1'],
-                'blue'=>['name_display'=>'Blue player 2'],
+                'white'=>['name_display'=>'João Rrodrigues 1'],
+                'blue'=>['name_display'=>'José Manuel 2'],
             ],[
-                'white'=>['name_display'=>'White player 3'],
+                'white'=>['name_display'=>'Conçeicão Herique 3'],
                 'blue'=>['name_display'=>'Blue player 4'],
             ],[
                 'white'=>['name_display'=>'White player 5'],
@@ -296,6 +298,7 @@ class TournamentQuarterController extends Controller
             ['award'=>'Brown','name'=>'Place 3'],
             ['award'=>'Brown','name'=>'Place 4'],
         ];
+        $this->gameSheet->setFonts('times','times','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         $this->gameSheet->pdf($players, $winners, $sequences, $winnerList, $repechagePlayers);
     }
     private function players64(){

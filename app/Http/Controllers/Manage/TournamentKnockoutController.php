@@ -42,14 +42,19 @@ class TournamentKnockoutController extends Controller
         switch($request->size){
             case 4:
                 $this->players4();
+                break;
             case 8:
                 $this->players8();
+                break;
             case 16:
                 $this->players16();
+                break;
             case 32:
                 $this->players32();
+                break;
             case 64:
                 $this->players64();
+                break;
         }
     }
 

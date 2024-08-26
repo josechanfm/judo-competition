@@ -61,7 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/print/tournament_quarter',[App\Http\Controllers\Manage\TournamentQuarterController::class,'printPdf']);
     Route::get('manage/print/tournament_double',[App\Http\Controllers\Manage\TournamentDoubleController::class,'printPdf']);
     Route::get('manage/print/tournament_full',[App\Http\Controllers\Manage\TournamentFullController::class,'printPdf']);
-    Route::get('manage/print/round_robbin',[App\Http\Controllers\Manage\RoundRobbinController::class,'printPdf']);
+    Route::get('manage/print/round_robbin_option1',[App\Http\Controllers\Manage\RoundRobbinOption1Controller::class,'printPdf']);
+    Route::get('manage/print/round_robbin_option2',[App\Http\Controllers\Manage\RoundRobbinOption2Controller::class,'printPdf']);
     Route::get('manage/print/tournament_knockout',[App\Http\Controllers\Manage\TournamentKnockoutController::class,'printPdf']);
     Route::get('manage/print/winners',[App\Http\Controllers\Manage\WinnerController::class,'printPdf']);
 });

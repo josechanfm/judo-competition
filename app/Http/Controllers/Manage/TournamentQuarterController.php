@@ -39,14 +39,19 @@ class TournamentQuarterController extends Controller
         switch($request->size){
             case 4:
                 $this->players4();
+                break;
             case 8:
                 $this->players8();
+                break;
             case 16:
                 $this->players16();
+                break;
             case 32:
                 $this->players32();
+                break;
             case 64:
                 $this->players64();
+                break;
         }
     }
 
@@ -117,10 +122,6 @@ class TournamentQuarterController extends Controller
                 ['blue'=>['name_display'=>'Blue player r6','from'=>'8']],
             ]
         ];
-        $repechageWinners=[
-            [1,2],
-            [1,2],
-        ];
         $sequences=[
             [1,2,3,4],
             [7,8],
@@ -187,10 +188,6 @@ class TournamentQuarterController extends Controller
                 ['blue'=>['name_display'=>'Blue player r5','from'=>'15']],
                 ['blue'=>['name_display'=>'Blue player r6','from'=>'16']],
             ]
-        ];
-        $repechageWinners=[
-            [1,2],
-            [1,2],
         ];
         $sequences=[
             [1,2,3,4,5,6,7,8],
@@ -283,10 +280,6 @@ class TournamentQuarterController extends Controller
                 ['blue'=>['name_display'=>'Blue player r5','from'=>'29']],
                 ['blue'=>['name_display'=>'Blue player r6','from'=>'30']],
             ]
-        ];
-        $repechageWinners=[
-            [1,2],
-            [1,2],
         ];
         $sequences=[
             [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
@@ -429,10 +422,6 @@ class TournamentQuarterController extends Controller
                 ['blue'=>['name_display'=>'Blue player r5','from'=>'13']],
                 ['blue'=>['name_display'=>'Blue player r6','from'=>'14']],
             ]
-        ];
-        $repechageWinners=[
-            [1,2],
-            [1,2],
         ];
         $sequences=[
             [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,24,26,27,28,29,30,31,32],

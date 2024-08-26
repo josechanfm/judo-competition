@@ -3,7 +3,7 @@ namespace App\Services;
 
 use TCPDF;
 
-class SheetRoundRobbinService{
+class SheetRoundRobbinOption1Service{
     
     protected $gameSetting=array(
         '4'=>array(
@@ -169,18 +169,46 @@ class SheetRoundRobbinService{
         $this->pdf->Output('myfile.pdf', 'I');
     }
     public function gameTable($players){
-        $this->pdf->setXY($this->startX, $this->startY);
+        $colors=[
+            'first'=>[
+                '254,206,50',
+                '245,158,51'
+            ],
+            'second'=>[
+                '93,177,61',
+                '147,193,58'
+            ]
+        ];
+        $p1=$players;
+        unset($p1[1]);
+        unset($p1[3]);
+        $x=$this->startX;
+        $y=$this->startY;
+        $this->drawTable($p1, $x, $y,$colors['first']);
+        $p2=$players;
+        unset($p2[0]);
+        unset($p2[2]);
+        unset($p2[4]);
+        $x+=50;
+        $y+=30;
+        $this->drawTable($p2, $x, $y,$colors['second']);
+
+    }
+    private function drawTable($players, $x, $y, $colors){
+
+        $this->pdf->setXY($x, $y);
+        //$this->pdf->setXY($this->startX, $this->startY);
         $cnt=count($players);
         $tbl ='
         <table cellspacing="0" cellpadding="1" border="0">
             <tr><th class="narrow"></th><th class="player"></th>';
-        for($i=0; $i<$cnt; $i++){
-            $tbl.='<th class="num">'.($i+1).'</th>';
+        foreach($players as $i=>$p){
+            $tbl.='<th class="num0">'.($i+1).'</th>';
 
         }
-        $tbl.='<th class="num2"></th><th class="num2"></th></tr>';
-        for($i=0;$i<$cnt;$i++){
-            $tbl.='<tr><td class="num">'.($i+1).'</td><td>'.$players[$i]['name_display'].'</td>';
+        $tbl.='<th class="num1"></th><th class="num1"></th></tr>';
+        foreach($players as $i=>$p){
+            $tbl.='<tr><td class="num0">'.($i+1).'</td><td>'.$players[$i]['name_display'].'</td>';
             for($j=0;$j<$cnt;$j++){
                 if($i==$j){
                     $tbl.='<td class="block"></td>';
@@ -208,23 +236,27 @@ class SheetRoundRobbinService{
                 border: none;
                 width:200px;
             }
-            .num{
-                background-color:rgb(254,206,50);
+            .num0{
+                background-color:rgb('.$colors[0].');
                 width:22px;
                 text-align:center;
             }
-            .num2{
-                background-color:rgb(245,158,51);
+            .num1{
+                background-color:rgb('.$colors[1].');
                 width:20px;
                 text-align:center;
             }
         </style>
         ';
         $this->pdf->writeHTML($tbl, true, false, false, false, '');
-
     }
 
     private function boxPlayers($players){
+        $style = array('L' => 0,
+                'T' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
+                'R' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
+                'B' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor));
+
         $x=$this->startX;
         $y=$this->startY+50;
         $h=$this->boxH/2;
@@ -234,22 +266,35 @@ class SheetRoundRobbinService{
         $lineW=30;
         $cnt=count($players);
         $game=$this->gameRound[$cnt];
-        foreach($game as $g){
+        $this->pdf->setXY($x, $y);
+        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
+        $this->pdf->RoundedRect($x, $y+$h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
             $this->pdf->setXY($x, $y);
-            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
-            $this->pdf->RoundedRect($x, $y+$h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
-            $this->pdf->setXY($x, $y);
-            $this->pdf->Cell($this->boxW, $h, $players[$g[0]]['name_display'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h, $players[$game[0][0]]['name_display'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x, $y+$h);
-            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name_display'], 0, 1, 'L', 0, '', 0);
-            $this->pdf->RoundedRect($x+$this->boxW, $y+($h/2), $gap, $h, $r, '0000', 'DF', $this->styleBoxLine, array(254,206,50));
-            $x1=$x+$this->boxW+$gap;
-            $y1=$y+($this->boxH/2);
-            $x2=$x1+$lineW;
-            $y2=$y1;
-            $this->pdf->line($x1, $y1, $x2, $y2, $this->styleBoxLine);
-            $y+=$this->boxH+$this->boxGap;
-        }
+            $this->pdf->setXY($x, $y+$h);
+            $this->pdf->Cell($this->boxW, $h, $players[$game[1][0]]['name_display'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->RoundedRect($x+$this->boxW, $y+($h/2), $gap, $h, $r, '0000', 'DF', $style, array(254,206,50));
+            $this->pdf->circle($x+$this->boxW+$gap+2, $y+($h/2)+($h/2), 2, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
+            $this->pdf->text($x+$this->boxW+$gap, $y+$h/2+1,'1');
+
+        // foreach($game as $g){
+        //     $this->pdf->setXY($x, $y);
+        //     $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
+        //     $this->pdf->RoundedRect($x, $y+$h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
+        //     $this->pdf->setXY($x, $y);
+        //     $this->pdf->Cell($this->boxW, $h, $players[$g[0]]['name_display'], 0, 1, 'L', 0, '', 0);
+        //     $this->pdf->setXY($x, $y+$h);
+        //     $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name_display'], 0, 1, 'L', 0, '', 0);
+        //     $this->pdf->RoundedRect($x+$this->boxW, $y+($h/2), $gap, $h, $r, '0000', 'DF', $style, array(254,206,50));
+        //     $this->pdf->circle($x+$this->boxW+$gap+2, $y+($h/2)+($h/2), 2, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
+        //     $x1=$x+$this->boxW+$gap;
+        //     $y1=$y+($this->boxH/2);
+        //     $x2=$x1+$lineW;
+        //     $y2=$y1;
+        //     $this->pdf->line($x1+($gap*2), $y1, $x2, $y2, $this->styleBoxLine);
+        //     $y+=$this->boxH+$this->boxGap;
+        // }
     }
     private function resultBox($winnerList){
         $x=$this->resultXY[0];

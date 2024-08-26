@@ -160,7 +160,7 @@ class SheetTournamentDoubleService{
         $this->winnerLineDraw=$winnerLineDraw;
     }
 
-    public function pdf($players=[], $winners=[], $repechagePlayers=[], $repechageWinners=[], $sequences=[], $winnerList=[],$poolLabel=null, $repechage=true){
+    public function pdf($players=[], $winners=[], $sequences=[], $winnerList=[], $repechagePlayers=[],$poolLabel=null, $repechage=true){
         if($poolLabel){
             $this->poolLable=$poolLabel;
         };
@@ -285,12 +285,12 @@ class SheetTournamentDoubleService{
             $ah+=$ah;
             $cnt/=2;
         }
-        if($ax+$this->arcW > 200){
-            $this->pdf->line($ax, $ay, $ax-$this->arcW, $ay);
-        }else{
-            $this->pdf->line($ax, $ay, $ax+$this->arcW, $ay);
+        // if($ax+$this->arcW > 200){
+        //     $this->pdf->line($ax, $ay, $ax-$this->arcW, $ay);
+        // }else{
+        //     $this->pdf->line($ax, $ay, $ax+$this->arcW, $ay);
 
-        }
+        // }
     }
 
     private function repechageDoubleChart($totalPlayers, $players, $sequences, $winners){
@@ -377,7 +377,13 @@ class SheetTournamentDoubleService{
                 $this->pdf->line($x-$arcW, $y+$h/2, $x, $y+$h/2, $styleArcLine);
             }
             $this->pdf->line($x, $y-($h/2), $x, $y, $styleWinnerLine);
-            $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+            //$this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+            if($x>180){
+                $this->pdf->line($x, $y, $x-$this->arcW, $y, $styleWinnerLine);
+            }else{
+                $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+            }
+
             $this->pdf->line($x, $y+$h/2, $x, $y, $styleArcLine);
         }else if($winner==2){
             if($first){
@@ -385,7 +391,13 @@ class SheetTournamentDoubleService{
                 $this->pdf->line($x-$arcW, $y+$h/2, $x, $y+$h/2, $styleWinnerLine);
             }            
             $this->pdf->line($x, $y+$h/2, $x, $y, $styleWinnerLine);
-            $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+            //$this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+            if($x>180){
+                $this->pdf->line($x, $y, $x-$this->arcW, $y, $styleWinnerLine);
+            }else{
+                $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+            }
+
             $this->pdf->line($x, $y, $x, $y-$h/2, $styleArcLine);
         }else{
             if($first){

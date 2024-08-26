@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\SheetRoundRobbinService;
+use App\Services\SheetRoundRobbinOption1Service;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
-class RoundRobbinController extends Controller
+class RoundRobbinOption1Controller extends Controller
 {
     protected $gameSheet=null;
 
     public function printPdf(Request $request){
         $settings=null;
-        $this->gameSheet=new SheetRoundRobbinService($settings);
+        $this->gameSheet=new SheetRoundRobbinOption1Service($settings);
         //$this->gameSheet->setTitles('Main Title','sub title');
         //$this->gameSheet->setFonts('times','cid0ct','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         //$this->gameSheet->setRepechage(null);

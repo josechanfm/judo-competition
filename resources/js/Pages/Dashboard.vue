@@ -60,7 +60,9 @@ import { Head } from '@inertiajs/vue3';
                                 <a href="/manage/print/tournament_double?size=16" target="_blank">16 Double</a>&nbsp;
                                 <a href="/manage/print/tournament_double?size=16&winner_line=true" target="_blank">(with winner line)</a>
                             </td>
-                            <td>*16 Full</td>
+                            <td>
+                                <a href="/manage/print/tournament_full?size=16" target="_blank">16 Full</a>&nbsp;
+                            </td>
                             <td>
                                 <a href="/manage/print/tournament_knockout?size=16" target="_blank">16 Knockout</a>&nbsp;
                                 <a href="/manage/print/tournament_knockout?size=16&winner_line=true" target="_blank">(with winner line)</a>
@@ -76,7 +78,9 @@ import { Head } from '@inertiajs/vue3';
                                 <a href="/manage/print/tournament_double?size=32" target="_blank">32 Double</a>&nbsp;
                                 <a href="/manage/print/tournament_double?size=32&winner_line=true" target="_blank">(with winner line)</a>
                             </td>
-                            <td>*32 Full</td>
+                            <td>
+                                <a href="/manage/print/tournament_full?size=32" target="_blank">32 Full</a>&nbsp;
+                            </td>
                             <td>
                                 <a href="/manage/print/tournament_knockout?size=32" target="_blank">32 Knockout</a>&nbsp;
                                 <a href="/manage/print/tournament_knockout?size=32&winner_line=true" target="_blank">(with winner line)</a>
@@ -111,17 +115,17 @@ import { Head } from '@inertiajs/vue3';
                         <tr>
                             <th>3</th>
                             <td>*3 Players</td>
-                            <td><a href="/manage/print/round_robbin?size=3" target="_blank">3 Players</a></td>
+                            <td><a href="/manage/print/round_robbin_option2?size=3" target="_blank">3 Players</a></td>
                         </tr>
                         <tr>
                             <th>4</th>
                             <td>*4 Players</td>
-                            <td><a href="/manage/print/round_robbin?size=4" target="_blank">4 Players</a></td>
+                            <td><a href="/manage/print/round_robbin_option2?size=4" target="_blank">4 Players</a></td>
                         </tr>
                         <tr>
                             <th>5</th>
                             <td>*5 Players</td>
-                            <td><a href="/manage/print/round_robbin?size=5" target="_blank">5 Players</a></td>
+                            <td><a href="/manage/print/round_robbin_option2?size=5" target="_blank">5 Players</a></td>
                         </tr>
                     </table>
                 </div>

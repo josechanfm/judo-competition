@@ -95,10 +95,10 @@ class SheetTournamentFullService{
     protected $circleSize=3;
     protected $playerFontSize=10;
 
-    protected $repechageMode='QUARTER'; //QUARTER, DOUBLE, FULL 
     protected $round=0;
     protected $playerCount=0;
-    
+    protected $winnerLineDraw=false;
+
     protected $titleFont='times';
     protected $playerFont='times';
     protected $generalFont='times';
@@ -106,7 +106,7 @@ class SheetTournamentFullService{
     protected $arcColor=array(50, 50, 127);
     protected $boxWhiteColor=array(240,240,255);
     protected $boxBlueColor=array(255,255,255);
-    protected $circleColor=array(240,240,240);
+    protected $circleColor=array(252,196,195);
     protected $styleWinnerLine=null;
     protected $styleArcLine=null;
     protected $styleBoxLine=null;
@@ -156,10 +156,11 @@ class SheetTournamentFullService{
         $this->playerFont=$playerFont;
         $this->generalFont=$generalFont;
     }
-    public function setRepechage($repechageMode=null){
-        $this->repechageMode=$repechageMode;
+    public function setWinnerLine($winnerLineDraw){
+        $this->winnerLineDraw=$winnerLineDraw;
     }
-    public function pdf($players=[], $winners=[], $repechagePlayers=[], $repechageWinners=[], $sequences=[], $winnerList=[],$poolLabel=null, $repechage=true){
+
+    public function pdf($players=[], $winners=[], $sequences=[], $winnerList=[], $repechageUpperPlayers=[], $repechageLowerPlayers=[] ,$poolLabel=null, $repechage=true){
         if($poolLabel){
             $this->poolLable=$poolLabel;
         };
@@ -184,7 +185,7 @@ class SheetTournamentFullService{
 
         $this->round=strlen((string)decbin($this->playerCount/2));
         
-        $this->pdf->setFont($this->titleFont, 'B                    ',$this->playerFontSize,14);
+        $this->pdf->setFont($this->titleFont, 'B',$this->playerFontSize,14);
 
         // if(preg_match("/\p{Han}+/u", $this->title) || preg_match("/\p{Han}+/u", $this->title_sub)) { // '/[^a-z\d]/i' should also work.
         //     $this->pdf->setFont('cid0ct','',$this->playerFontSize,14);
@@ -196,23 +197,18 @@ class SheetTournamentFullService{
         // $this->pdf->Cell(0, 0, $this->title_sub, 0, 1, 'C', 0, '', 0);
         //$this->pdf->text($this->startX+100, $this->pdf->getPageHeight()-10, $this->pdf->getPageHeight());
 
-        $this->mainChart($players); //主上線表包括運動員名牌和上線曲線
-        $this->winnerLine($winners);
+        $this->mainChart($players, $sequences, $winners); //主上線表包括運動員名牌和上線曲線
+        //$this->winnerLine($winners);
         if($this->playerCount>4 && $this->poolLable!=null){
             $this->boxPool($this->poolLable);
         }
-        switch ($this->repechageMode){
-            case 'QUARTER':
-                break;
-            case 'FULL';
-                break;
-            default:
-        }
-        if($this->repechageMode=='QUARTER'){
-            $this->repechageDoubleChart(count($players),$repechagePlayers); //復活賽上線表包括運動員名牌和上線曲線
-            //$this->repechageDoubleWinnerLine(count($players),$repechageWinners);
-        }
-        //$this->sequenceNumbers($sequences);
+        $uppserSequences=array_slice($sequences,$this->round,count($repechageUpperPlayers));
+        $lowerSequences=array_slice($sequences,$this->round+count($repechageUpperPlayers));
+
+        $this->repechageChart(count($players),$repechageUpperPlayers, $uppserSequences, $winners); //復活賽上線表包括運動員名牌和上線曲線
+        $this->repechageChart(count($players),$repechageLowerPlayers, $lowerSequences, $winners, 'lower'); //復活賽上線表包括運動員名牌和上線曲線
+
+        //$this->repechageDoubleWinnerLine(count($players),$repechageWinners);
         $this->resultBox($winnerList);
         $this->pdf->Output('myfile.pdf', 'I');
     }
@@ -256,7 +252,7 @@ class SheetTournamentFullService{
         $this->pdf->Cell($w, $h-($h/1.6 ), $this->title_sub, 0, 0, 'C', 0, '', 0);
     }
 
-    private function mainChart($players){
+    private function mainChart($players, $sequences,$winners){
         /* 運動員名牌 */
         $boxX=$this->startX; //box X axis, do prevent the change of startX original value,
         $boxY=$this->startY; //box Y axis, do prevent the change of the startY original value,
@@ -274,7 +270,7 @@ class SheetTournamentFullService{
         $h=$this->boxH / 2; //height of arch shape
         $pGap= $h*2+$this->boxGap; //$h +$boxH+$boxGap; //gap betwee each arch in vertical alignment
         for($i=0;$i<$this->playerCount/2;$i++){
-            $this->arcLine($px, $py, $pW, $h);
+            $this->arcLine($px, $py, $pW, $h, $sequences[0][$i], $winners[0][$i], true);
             $py+=$pGap;
         }
 
@@ -286,7 +282,7 @@ class SheetTournamentFullService{
         for($i=1;$i<=$this->round-1;$i++){
             $arcGap=$ah *2; //gap betwee each arch in vertical alignment
             for($j=0;$j<$cnt;$j++){
-                $this->arcLine($ax, $ay, $this->arcW, $ah);
+                $this->arcLine($ax, $ay, $this->arcW, $ah, $sequences[$i][$j], $winners[$i][$j]);
                 $ay+=$arcGap;
             }
             $ax+=$this->arcW;
@@ -294,199 +290,118 @@ class SheetTournamentFullService{
             $ah+=$ah;
             $cnt/=2;
         }
-        if($ax+$this->arcW > 200){
-            $this->pdf->line($ax, $ay, $ax-$this->arcW, $ay);
+        
+        if(($ax+$this->arcW) > 200){
+            $ax2=$ax-$this->arcW;
+            //$this->pdf->line($ax, $ay, $ax-$this->arcW, $ay);
         }else{
-            $this->pdf->line($ax, $ay, $ax+$this->arcW, $ay);
-
+            $ax2=$ax+$this->arcW+10;
+            //$this->pdf->line($ax, $ay, $ax+$this->arcW, $ay);
         }
+        $this->pdf->line($ax, $ay, $ax2, $ay);
+        $this->pdf->image('images/result_banner_2.png',$ax+$this->arcW/2, $ay+3, 14, 8, 'png');
+        $this->pdf->text($ax+$this->arcW/2+5, $ay+4, '1');
     }
-    private function winnerLine($winners){
-        $arcWFirst=$this->arcWFirst;
-        $boxGap=$this->boxGap;
-        $x=$this->startX+$this->boxW+$this->arcWFirst; //定最左上角X座標
-        $y=$this->startY+$this->boxH/2; //定最左上角Y座標
-        $h=($this->boxH/4);
-        $g=$this->boxH+$boxGap;
-        $boxH=$this->boxH;
-        $arcW=$this->arcW;
 
-        $firstRoundCount=count($winners[0]);
-        $ty=$y;
-        for($i=0;$i<$firstRoundCount;$i++){
-            if($winners[0][$i]==1){
-                $this->pdf->Line($x-$arcWFirst, $ty-($boxH/4), $x, $ty-($boxH/4), $this->styleWinnerLine);
-            }else if($winners[0][$i]==2){
-                $this->pdf->Line($x-$arcWFirst, $ty+($boxH/4), $x, $ty+($boxH/4), $this->styleWinnerLine);
-            }
-            $ty+=$boxH+$boxGap;
-        }
-
-        for($i=0;$i<$this->round;$i++){
-            $this->arcWinner($x, $y, $arcW, $h, $g, $winners[$i]);
-            $h=$g/2;
-            $x+=$arcW;
-            $y=$this->startY+$g-($this->boxGap/2);
-            $g+=$g;
-               
-        }
-    }
-    private function repechageDoubleChart($totalPlayers, $players){
-        $x=$this->startX;
-        $y=$this->startY+(($this->boxH+$this->boxGap)*$totalPlayers)-$this->boxGap+$this->repechageDistance;
+    private function repechageChart($totalPlayers, $players, $sequences, $winners, $range='upper'){
+        $size=$this->circleSize;
         $boxGap=$this->repechageBoxGap;
         $boxH=$this->repechageBoxH;
         $boxW=$this->boxW;
         $arcW=$this->arcW;
+        $x=$this->startX;
+       
+        if($range=='upper'){
+            $y=$this->startY+(($this->boxH+$this->boxGap)*$totalPlayers)-$this->boxGap+$this->repechageDistance;    
+            
+            $this->pdf->RoundedRect($x, $y-3, 50, 6, 1.5, '1111', 'DF', $this->styleBoxLine, $this->circleColor);
+            $this->pdf->setXY($x, $y-3);
+            $this->pdf->Cell(50, 6, 'Repechage', 0, 1, 'C', 0, '', 0);
 
-        $this->pdf->Line($x, $y, $x+110, $y, $this->styleResult1); //Repechage horizontal sperate line
-        $this->pdf->RoundedRect($x+$boxW+$this->arcWFirst+5, $y-2, 30, 6, 2, '1111', 'F', $this->styleBoxLine, array(255,255,255));
-        $this->pdf->setXY($x+$boxW+$this->arcWFirst+5, $y-2);
-        $this->pdf->setFont($this->titleFont,'',$this->playerFontSize);
-        $this->pdf->Cell(30, 4, 'Repechage', 0, 1, 'C', 0, '', 0);
+            $this->pdf->setFont('times','',10);
+            $this->pdf->setXY($x+52, $y-3);
+            $this->pdf->Cell(65, 6, ' Loser contet          will appear at         in repechage ', 1, 1, 'C', 0, '', 2);
+            $this->pdf->SetFillColor(215,230,254);
+            $this->pdf->setLineStyle($this->styleArcLine);
+            $this->pdf->setXY($x+70,$y-2 );
+            $this->pdf->cell(4, 0, 'X', 1, 1, 'C', 1, '', 0);
+            $this->pdf->circle($x+96, $y, 2, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
+            $this->pdf->setXY($x+94,$y-2 );
+            $this->pdf->cell(4, 0, 'X', 0, 1, 'C', 0, '', 0);
+
+    
+            // $this->pdf->Line($x, $y, $x+110, $y, $this->styleResult1); //Repechage horizontal sperate line
+            // $this->pdf->RoundedRect($x+$boxW+$this->arcWFirst+5, $y-2, 30, 6, 2, '1111', 'F', $this->styleBoxLine, array(255,255,255));
+            // $this->pdf->setXY($x+$boxW+$this->arcWFirst+5, $y-2);
+            // $this->pdf->setFont($this->titleFont,'',$this->playerFontSize);
+            // $this->pdf->Cell(30, 4, 'Repechage', 0, 1, 'C', 0, '', 0);
+        }else{
+            $y=$this->startY+(($this->boxH+$this->boxGap)*$totalPlayers)-$this->boxGap+$this->repechageDistance;
+            $y+=$this->repechageBoxH*8+$this->repechageSectionGap;
+        }
 
         $y+=$this->repechageDistance;
         $x1=$this->startX;
         $y1=$y;
-        $boxX=$x1;
-        $boxY=$y1;
-        
         $round=count($players);
-        //dd($players);
-        // $this->pdf->setFont($this->playerFont,'',$this->playerFontSize);
-        // /* Repechage First */
-        // for($i=0; $i<$round; $i++){
-        //     if(is_null($players[$i])) continue;
-        //     for($j=0; $j<count($players[$i]); $j++){
-        //         if(isset($players[$i][$j]) && count($players[$i][$j])==2){
-        //             //$this->boxPlayers($boxX, $boxY, $boxW, $boxH, $players[0][$i]);
-        //             //$this->pdf->cell($boxX, $boxY, $boxW, $boxH, $players[0][$i]);
-        //             $this->pdf->text($boxX-8, $boxY+2,chr(65+$j).'1');
-        //             $this->pdf->setXY($boxX+6, $boxY);
-        //             $this->pdf->Cell($boxW, $boxH/2, $players[$i][$j]['white']['name_display'], 0, 1, 'L', 0, '', 0);
-        //             $boxY+=($boxH);
-        //             $this->pdf->text($boxX-8, $boxY+2,chr(65+$j).'2');
-        //             $this->pdf->setXY($boxX+6, $boxY);
-        //             $this->pdf->Cell($boxW, $boxH/2, $players[$i][$j]['blue']['name_display'], 0, 0, 'L', 0, '', 0);
-        //             $px=$boxX+$boxW;
-        //             $py=$boxY+($boxH/4);
-        //             $pW=$this->arcWFirst;
-        //             $pH=$boxH /2;
-        //             $boxY+=($boxH/2)+$boxGap;
-        //         }
-        //     }
-        // };
-
         $x=$x1;
-        $y=$y+$boxH/2+2;
+        $y=$y;
         $x1=$x;
         $y1=$y;
         $h=$boxH;
         $w=$boxW;
-        $g=$boxGap;
-
-        for($i=0;$i<$round; $i++){
+        $round=4;
+        for($i=0;$i<6; $i++){
             if($round-2==$i ){
                 $h+=$h;
                 $ty=$y1; //暫存倒數第二個輪上線的Y1位置,用以計算最後一個的位置
             }
             if($round-1==$i){
                 $y1=$ty+$h/2;
+                $ty=$y1;
+            }
+            if($round==$i){
+                $y1=$ty+$h/2;
+                $h+=$h;
             }
             for($j=0; $j<count($players[$i]); $j++){
-                $this->arcLine($x1, $y1, $w, $h);
+                $this->arcLine($x1, $y1, $w, $h, $sequences[$i][$j] );
                 if($players[$i][$j]){
                     if(isset($players[$i][$j]['white'])){
-                        $this->pdf->text($x1-6, $y1-($boxH/2)-0.25, $players[$i][$j]['white']['from']);
+                        $this->pdf->Ellipse($x1-5+$size, $y1-($boxH/2)+2+$size/4, $size, 0, 360, 0, 360, 'DF', $this->styleCircle,$this->circleColor);
+                        $this->pdf->setXY($x1-5, $y1-($boxH/2));
+                        $this->pdf->Cell($size*2, $size*2, $players[$i][$j]['white']['from'], 0, 1, 'C', 0, '', 0);    
+                        
+                        //$this->pdf->text($x1-6, $y1-($boxH/2)-0.25, $players[$i][$j]['white']['from']);
                     }
-                    $this->pdf->text($x1-6, $y1+$h-($boxH/2)-0.25, $players[$i][$j]['blue']['from']);
+                    $this->pdf->Ellipse($x1-5+$size, $y1+$h-($boxH/2)+2+$size/4, $size, 0, 360, 0, 360, 'DF', $this->styleCircle,$this->circleColor);
+                    $this->pdf->setXY($x1-5, $y1+$h-($boxH/2));
+                    $this->pdf->Cell($size*2, $size*2, $players[$i][$j]['blue']['from'], 0, 1, 'C', 0, '', 0);    
+        
+                    //$this->pdf->text($x1-6, $y1+$h-($boxH/2)-0.25, $players[$i][$j]['blue']['from']);
                 }
-                $y1+=$h*2;
-                
+                $y1+=$h*2;                
+            }
+            if($round!=$i){
+                $y1=$y+$boxH/2+(($h/2)*$i);
+            }else{
+                $y1=$ty+$h-($h/4);
+                $h+=$boxH;
             }
             $x1+=$w;
-            $y1=$y+$boxH/2+(($h/2)*$i);
-            //$h=$boxH*2+$boxGap-$boxH/2;
-            $g-=$g;
             $w=$arcW;
         }
-
-
-    }
-    private function repechageDoubleWinnerLine($totalPlayers, $winners){
-        $x=$this->startX+$this->boxW;
-        $y=$this->startY+($this->boxH+$this->boxGap)*$totalPlayers+$this->repechageDistance+($this->boxH/4);
-        $arcW=$this->arcW;
-        $x1=$x;
-        $y1=$y;
-        $boxH=$this->boxH;
-        $boxW=$this->boxW;
-
-        for($i=0;$i<2;$i++){
-            if($winners[0][$i]==1){
-                $x1=$x;
-                $y1=$y;
-                $x2=$x1+$this->arcWFirst;
-                $y2=$y1;
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-                
-                $x1=$x2;
-                $y1=$y2;
-                $x2=$x1;
-                $y2=$y1+($boxH/4);
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-
-                $x1=$x2;
-                $y1=$y2;
-                $x2=$x1+$arcW;
-                $y2=$y1;
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-            }else if($winners[0][$i]==2){
-                $x1=$x;
-                $y1=$y+($boxH/2);
-                $x2=$x1+$this->arcWFirst;
-                $y2=$y1;
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-
-                $x1=$x2;
-                $y1=$y2;
-                $x2=$x1;
-                $y2=$y1-($boxH/4);
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-
-                $x1=$x2;
-                $y1=$y2;
-                $x2=$x1+$arcW;
-                $y2=$y1;
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-            }
-            
-
-            if($winners[1][$i]==1){
-                $x1=$x+$arcW+$this->arcWFirst;
-                $y1=$y+($boxH/4);
-                $x2=$x1;
-                $h=($boxH/2)+$this->repechageBoxGap+($boxH/4);
-                $y2=$y1+($h/2);//-($this->repechageBoxGap/2);
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-                $this->pdf->Line($x2, $y2, $x2+$this->arcW, $y2, $this->styleWinnerLine);
-            }else if($winners[1][$i]==2){
-                $x1=$x;
-                $y1=$y+$boxH+$this->repechageBoxGap;
-                $x2=$x1+$this->arcW+$this->arcWFirst;
-                $y2=$y1;
-                $this->pdf->Line($x1, $y1, $x2, $y2,$this->styleWinnerLine);
-                $x1=$x2;
-                $y1=$y2;
-                $x2=$x1;
-                $h=($boxH/4)+($boxH/2)+$this->repechageBoxGap;//-($this->repechageBoxGap/2);
-                $y2=$y1-$h/2;
-                $this->pdf->Line($x1, $y1, $x2, $y2, $this->styleWinnerLine);
-                $this->pdf->Line($x2, $y2, $x2+$this->arcW, $y2, $this->styleWinnerLine);
-
-            }
-            $y+=$boxH+$this->repechageBoxGap+($boxH/2)+$this->repechageSectionGap;
+        //$this->pdf->line($x1, $y1-$h+$boxH/2, $x1+$this->arcW, $y1-$h+$boxH/2);
+        $y1=$y1-$h-$boxH/2;
+        if($x1+$this->arcW > 180){
+            $x1-=4;
+            $this->pdf->line($x1, $y1, $x1-$this->arcW, $y1);
+        }else{
+            $this->pdf->line($x1, $y1, $x1+$this->arcW, $y1);
         }
+        $this->pdf->image('images/result_banner_2.png',$x1-$this->arcW*2+5, $y1-2, 14,8, 'png');
+        $this->pdf->text($x1-$this->arcW*2+10, $y1-1, $range=='upper'?'2':'3');
+
     }
 
     /* the following are repeated object, might change the variabled values, accordingly, not suggest to use globale variabled. */
@@ -503,78 +418,88 @@ class SheetTournamentFullService{
             $this->pdf->setXY($x, $y+$h);
             $this->pdf->Cell($this->boxW, $h, $players['blue']['name_display'], 0, 1, 'L', 0, '', 0);
     }
-    private function arcLine($x, $y, $arcW, $h){
-        $style = array('L' => 0,
-                        'T' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
-                        'R' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
-                        'B' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor));
-        $this->pdf->Rect($x, $y, $arcW, $h, 'D', $style );
-    }
-    private function arcWinner($x, $y, $arcW, $h, $g, $winners){
-        $cnt=count($winners);
-        for($j=0;$j<$cnt;$j++){
-            if($winners[$j]==1){
-                $this->pdf->Line($x, $y-$h, $x, $y, $this->styleWinnerLine);
-            }else if($winners[$j]==2){
-                $this->pdf->Line($x, $y, $x, $y+$h, $this->styleWinnerLine);
-                // $pdf->Line($x, $y, $x+$arcW, $y, $this->styleWinnerLine);
-            }
-            if($x+$arcW > 200){
-                $this->pdf->Line($x, $y, $x-$arcW, $y, $this->styleWinnerLine);
-            }else{
-                $this->pdf->Line($x, $y, $x+$arcW, $y, $this->styleWinnerLine);
-            }
-            $y+=$g;
-        }
-    }
-    private function sequenceNumbers($sequences){
-        $size=$this->circleSize;
-        $x=$this->startX+$this->boxW+$this->arcWFirst; //定最左上角X座標
-        $y=$this->startY+$this->boxH/2; //定最左上角Y座標
-        $x1=$x;
-        $y1=$y;
-        $baseY=0;
-        $step=($this->boxH+$this->boxGap);
-        $this->pdf->SetFont('times','',$this->playerFontSize);
-        for($i=0;$i<$this->round;$i++){
-            $count=count($sequences[$i]);
-            for($j=0;$j<$count;$j++){
-                $this->pdf->Ellipse($x1, $y1, $size, 0, 360, 0, 360, 'DF', $this->styleCircle,$this->circleColor);
-                $this->pdf->setXY($x1-$size, $y1-$size);
-                $this->pdf->Cell($size*2, $size*2, $sequences[$i][$j], 0, 1, 'C', 0, '', 0);
-                $y1+=$step;
-            }
-            $x1=$x+$this->arcW*($i+1);
-            $baseY=$step;
-            $y1=$y+$baseY-(($this->boxH+$this->boxGap)/2);
-            $step*=2;
-        }
+    private function arcLine($x, $y, $arcW, $h, $num=0, $winner=0, $first=false, $players=null){
+        // $size=$this->circleSize;
+        // $style = array('L' => 0,
+        //                 'T' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
+        //                 'R' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
+        //                 'B' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor));
+        // // $this->pdf->Rect($x, $y, $arcW, $h, 'D', $style );
+        // $style6 = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => '0', 'color' => array(0, 128, 0));
+        // $this->pdf->SetLineStyle($style6);
+        $x+=$arcW;
+        $y+=$h/2;
+        $styleWinnerLine=$this->winnerLineDraw?$this->styleWinnerLine:$this->styleArcLine;
+        $styleArcLine=$this->styleArcLine;
+        // for repechage, in the case of with only blue player
+        // if($players && isset($players['blue'])){
+        //     $this->pdf->line($x, $y+$h/2, $x-$this->arcW, $y+$h/2,$styleWinnerLine);
+        // }
+
         
-        if($this->repechageMode==null){
-            return true;
-        }
-        /* Repechage cicle number */
-        $x=$this->startX+$this->boxW+$this->arcWFirst;
-        $y=$this->startY+(($this->boxH+$this->boxGap)*$this->playerCount/2)+$this->repechageDistance+($this->boxH/2);
-        $x1=$x;
-        $y1=$y;
-        $baseY=0;
-        $step=($this->boxH+$this->boxGap);
-        for($i=0; $i<2; $i++){
-            for($j=0; $j<2; $j++){
-                $this->pdf->Ellipse($x1, $y1, $size, 0, 360, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
-                $this->pdf->setXY($x1-$size, $y1-$size);
-                $this->pdf->Cell($size*2, $size*2, $sequences[$i+$this->round][$j], 0, 1, 'C', 0, '', 0);
-                $y1+=$this->boxH+$this->repechageBoxGap+$this->repechageSectionGap+($this->boxH/2);
-            }
-            $h=$this->boxH/2+$this->repechageBoxGap+$this->boxH/4;
-            $y1=$y+($h/2);
-            $x1+=$this->arcW;
-        }
-    }    
+        /* winner line */
+        // if($winner==1){
+        //     if($first){
+        //         $this->pdf->line($x-$arcW, $y-$h/2, $x, $y-$h/2, $styleWinnerLine);
+        //         $this->pdf->line($x-$arcW, $y+$h/2, $x, $y+$h/2, $styleArcLine);
+        //     }
+        //     $this->pdf->line($x, $y-($h/2), $x, $y, $styleWinnerLine);
+        //     if($x>180){
+        //         $this->pdf->line($x, $y, $x-$this->arcW, $y, $styleWinnerLine);
+        //     }else{
+        //         $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+        //     }
+        //     //$this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+        //     $this->pdf->line($x, $y+$h/2, $x, $y, $styleArcLine);
+        // }else if($winner==2){
+        //     if($first){
+        //         $this->pdf->line($x-$arcW, $y-$h/2, $x, $y-$h/2, $styleArcLine);
+        //         $this->pdf->line($x-$arcW, $y+$h/2, $x, $y+$h/2, $styleWinnerLine);
+        //     }            
+        //     $this->pdf->line($x, $y+$h/2, $x, $y, $styleWinnerLine);
+        //     //$this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+        //     if($x>180){
+        //         $this->pdf->line($x, $y, $x-$this->arcW, $y, $styleWinnerLine);
+        //     }else{
+        //         $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleWinnerLine);
+        //     }
+            
+        //     $this->pdf->line($x, $y, $x, $y-$h/2, $styleArcLine);
+        // }else{
+        //     if($first){
+        //         $this->pdf->line($x-$arcW, $y-$h/2, $x, $y-$h/2, $styleArcLine);
+        //         $this->pdf->line($x-$arcW, $y+$h/2, $x, $y+$h/2, $styleArcLine);
+        //     }
+        //     $this->pdf->line($x, $y-$h/2, $x, $y+$h/2, $styleArcLine); //arc middle vertical line
+        //     // $this->pdf->setXY($x-2,$y-$h/2 );
+        //     // $this->pdf->cell(4, $h, 'a', 1, 1, 'C', 1, '', 0);
+        //     $this->pdf->line($x, $y, $x+$this->arcW, $y, $styleArcLine);
+        // }
+
+        $this->pdf->line($x-$arcW, $y-$h/2, $x, $y-$h/2, $styleArcLine);
+        $this->pdf->line($x-$arcW, $y+$h/2, $x, $y+$h/2, $styleArcLine);
+        $this->pdf->line($x, $y-$h/2, $x, $y+$h/2, $styleArcLine); //arc middle vertical line
+
+        // if($ax+$this->arcW > 200){
+        //     $this->pdf->line($ax, $ay, $ax-$this->arcW, $ay);
+        // }else{
+        //     $this->pdf->line($ax, $ay, $ax+$this->arcW, $ay);
+        // }
+
+
+        /* circle sequence number */
+        // $this->pdf->setXY($x-$size, $y-$size);
+        // $this->pdf->Cell($size*2, $size*2, $num, 0, 1, 'C', 0, '', 0);    
+        $this->pdf->SetFillColor(215,230,254);
+        $this->pdf->setLineStyle($styleArcLine);
+        $this->pdf->setXY($x-4,$y-$h/2 );
+        $this->pdf->cell(4, $h, $num, 1, 1, 'C', 1, '', 0);
+        
+    }
     private function resultBox($winnerList){
         $x=$this->resultXY[0];
         $y=$this->resultXY[1];
+
         //$y=$this->startY+($this->boxH+$this->boxGap)* ($this->playerCount/2)-$this->boxH;
         $w=45;
         $h=30;
@@ -600,10 +525,12 @@ class SheetTournamentFullService{
         $y=$y-5;
         $w=$w-10;
         $h=10;
-        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
-        $this->pdf->setXY($x, $y);
+        $this->pdf->image('images/result_banner.png', $x-5, $y-1, 45, 0, 'png');
+        //$this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
+        $this->pdf->setXY($x, $y-2);
         $this->pdf->SetFont($this->generalFont, 'B', 14);
         $this->pdf->Cell(35, 10, 'Results', 0, 1, 'C', 0, '', 0);
+
 
     }
 

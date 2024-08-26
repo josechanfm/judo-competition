@@ -120,7 +120,8 @@ class SheetTournamentQuarterService{
     ];
     protected $resultColor1=array(200,200,200);
     protected $resultColor2=array(250,250,250);
-
+    protected $resultXY=[120,120];
+    
     public function __construct($settings)
     {
         $this->gameSetting=$settings;
@@ -183,7 +184,7 @@ class SheetTournamentQuarterService{
 
         $this->round=strlen((string)decbin($this->playerCount/2));
         
-        $this->pdf->setFont($this->titleFont, 'B                    ',$this->playerFontSize,14);
+        // $this->pdf->setFont($this->titleFont, 'B',$this->playerFontSize,14);
 
         // if(preg_match("/\p{Han}+/u", $this->title) || preg_match("/\p{Han}+/u", $this->title_sub)) { // '/[^a-z\d]/i' should also work.
         //     $this->pdf->setFont('cid0ct','',$this->playerFontSize,14);
@@ -420,8 +421,10 @@ class SheetTournamentQuarterService{
             $this->pdf->Cell($size*2, $size*2, $num, 0, 1, 'C', 0, '', 0);    
     }
     private function resultBox($winnerList){
-        $x=145;
-        $y=$this->startY+($this->boxH+$this->boxGap)* ($this->playerCount/2)-$this->boxH;
+        $x=$this->resultXY[0];
+        $y=$this->resultXY[1];
+        // $x=145;
+        // $y=$this->startY+($this->boxH+$this->boxGap)* ($this->playerCount/2)-$this->boxH;
         $w=45;
         $h=30;
         $r=3.50;

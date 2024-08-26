@@ -114,17 +114,17 @@ import { Head } from '@inertiajs/vue3';
                         <tr><td width="50">Size</td><td>Players (option 1)</td><td>Players (option 2)</td></tr>
                         <tr>
                             <th>3</th>
-                            <td>*3 Players</td>
+                            <td></td>
                             <td><a href="/manage/print/round_robbin_option2?size=3" target="_blank">3 Players</a></td>
                         </tr>
                         <tr>
                             <th>4</th>
-                            <td>*4 Players</td>
+                            <td><a href="/manage/print/round_robbin_option1?size=4" target="_blank">4 Players</a></td>
                             <td><a href="/manage/print/round_robbin_option2?size=4" target="_blank">4 Players</a></td>
                         </tr>
                         <tr>
                             <th>5</th>
-                            <td>*5 Players</td>
+                            <td><a href="/manage/print/round_robbin_option1?size=5" target="_blank">5 Players</a></td>
                             <td><a href="/manage/print/round_robbin_option2?size=5" target="_blank">5 Players</a></td>
                         </tr>
                     </table>

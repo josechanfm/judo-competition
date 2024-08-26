@@ -1,5 +1,5 @@
 {
-    "4": {
+    "2": {
         "startX": 25,
         "startY": 35,
         "boxW": 60,
@@ -15,7 +15,7 @@
         "playerFontSize": 14,
         "resultXY":[120,120]
     },
-    "8": {
+    "3": {
         "startX": 25,
         "startY": 35,
         "boxW": 60,
@@ -31,12 +31,12 @@
         "playerFontSize": 14,
         "resultXY":[140,130]
     },
-    "16": {
+    "4": {
         "startX": 25,
-        "startY": 20,
+        "startY": 40,
         "boxW": 60,
-        "boxH": 15,
-        "boxGap": 6,
+        "boxH": 20,
+        "boxGap": 20,
         "arcW": 20,
         "arcWFirst": 4,
         "repechageBoxH": 5,
@@ -47,12 +47,12 @@
         "playerFontSize": 12,
         "resultXY":[145,170]
     },
-    "32": {
+    "5": {
         "startX": 25,
-        "startY": 25,
+        "startY": 40,
         "boxW": 60,
-        "boxH": 12,
-        "boxGap": 2,
+        "boxH": 18,
+        "boxGap": 5,
         "arcW": 20,
         "arcWFirst": 4,
         "repechageBoxH": 5,
@@ -61,9 +61,9 @@
         "repechageSectionGap": 5,
         "circleSize": 3,
         "playerFontSize": 12,
-        "resultXY":[135,230]
+        "resultXY":[100,220]
     },
-    "64": {
+    "6": {
         "startX": 25,
         "startY": 20,
         "boxW": 55,
@@ -72,7 +72,7 @@
         "arcW": 20,
         "arcWFirst": 4,
         "repechageBoxH": 3,
-        "repechageDistance": 0,
+        "repechageDistance": 3,
         "repechageBoxGap": 1,
         "repechageSectionGap": 1,
         "circleSize": 2,

@@ -13,7 +13,8 @@ class RoundRobbinOption2Controller extends Controller
     protected $gameSheet=null;
 
     public function printPdf(Request $request){
-        $settings=null;
+        $filePath=storage_path('setting/game_round_robbin_option2.json');
+        $settings = File::json($filePath);
         $this->gameSheet=new SheetRoundRobbinOption2Service($settings);
         //$this->gameSheet->setTitles('Main Title','sub title');
         //$this->gameSheet->setFonts('times','cid0ct','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 

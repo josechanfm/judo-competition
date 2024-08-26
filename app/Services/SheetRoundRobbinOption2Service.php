@@ -6,7 +6,7 @@ use TCPDF;
 class SheetRoundRobbinOption2Service{
     
     protected $gameSetting=array(
-        '4'=>array(
+        '2'=>array(
             'startX'=>25,
             'startY'=>35,
             'boxW'=>60, //運動員名牌高度
@@ -20,7 +20,7 @@ class SheetRoundRobbinOption2Service{
             'circleSize'=>3,
             'playerFontSize'=>14
         ),
-        '8'=>array(
+        '3'=>array(
             'startX'=>25,
             'startY'=>35,
             'boxW'=>60, //運動員名牌高度
@@ -34,7 +34,7 @@ class SheetRoundRobbinOption2Service{
             'circleSize'=>3,
             'playerFontSize'=>14
         ),
-        '16'=>array(
+        '4'=>array(
             'startX'=>25,
             'startY'=>35,
             'boxW'=>60, //運動員名牌高度
@@ -48,7 +48,7 @@ class SheetRoundRobbinOption2Service{
             'circleSize'=>3,
             'playerFontSize'=>12
         ),
-        '32'=>array(
+        '5'=>array(
             'startX'=>25,
             'startY'=>35,
             'boxW'=>60, //運動員名牌高度
@@ -62,7 +62,7 @@ class SheetRoundRobbinOption2Service{
             'circleSize'=>3,
             'playerFontSize'=>10
         ),
-        '64'=>array(
+        '6'=>array(
             'startX'=>25,
             'startY'=>23,
             'boxW'=>55, //運動員名牌高度
@@ -146,6 +146,10 @@ class SheetRoundRobbinOption2Service{
 
     public function pdf($players=[], $winners=[], $sequences=[], $winnerList=[]){
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $this->playerCount=count($players);
+        foreach($this->gameSetting[$this->playerCount] as $key=>$value){
+            $this->$key=$value;
+        }
 
         // set margins
         //$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
@@ -157,10 +161,7 @@ class SheetRoundRobbinOption2Service{
         $this->pdf->SetMargins(15,10,15);
         $this->pdf->SetAutoPageBreak(TRUE,0);
         $this->pdf->AddPage();
-
-        $this->pdf->Cell(0, 0, $this->title, 0, 1, 'C', 0, '', 0);
-        $this->pdf->Cell(0, 0, $this->title_sub, 0, 1, 'C', 0, '', 0);
-        
+        $this->header();
         
         $this->gameTable($players);
         $this->boxPlayers($players);
@@ -168,6 +169,25 @@ class SheetRoundRobbinOption2Service{
 
         $this->pdf->Output('myfile.pdf', 'I');
     }
+    public function header(){
+        $x=10;
+        $y=5;
+        $w=185;
+        $h=14;
+        $r=5;
+        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
+        $this->pdf->image('images/jua_logo.png',$x+2, $y+2, 10,10,'png');
+        
+        $x=25;
+        $w=165;
+        $this->pdf->setFont('times','B',16);
+        $this->pdf->setXY($x, $y);
+        $this->pdf->Cell($w, $h/1.6, $this->title, 0, 1, 'C', 0, '', 0);
+        $this->pdf->setFont('times','B',11);
+        $this->pdf->setXY($x, $y+($h/1.6));
+        $this->pdf->Cell($w, $h-($h/1.6 ), $this->title_sub, 0, 0, 'C', 0, '', 0);
+    }
+
     public function gameTable($players){
         $this->pdf->setXY($this->startX, $this->startY);
         $cnt=count($players);

@@ -120,7 +120,7 @@ class SheetTournamentQuarterService{
     protected $styleResult1=null;
     protected $styleResult2=null;
     protected $styleCircle=null;
-    protected $poolLable=[
+    protected $poolLabel=[
         ['name'=>'Pool A','color'=>array(243,151,0)],
         ['name'=>'Pool B','color'=>array(230,39,37)],
         ['name'=>'Pool C','color'=>array(122,184,42)],
@@ -142,15 +142,15 @@ class SheetTournamentQuarterService{
     }
     public function setPoolLabel($poolLabel=null){
         if($poolLabel==null){
-            $this->poolLable=null;
+            $this->poolLabel=null;
             return true;
         }
         foreach($poolLabel as $i=>$pool){
             if(isset($pool['name'])){
-                $poolLabel[$i]['name']=$pool['name'];
+                $this->poolLabel[$i]['name']=$pool['name'];
             }
             if(isset($pool['color'])){
-                $poolLabel[$i]['color']=$pool['color'];
+                $this->poolLabel[$i]['color']=$pool['color'];
             }
         }
     }
@@ -172,10 +172,7 @@ class SheetTournamentQuarterService{
         $this->winnerLineDraw=$winnerLineDraw;
     }
 
-    public function pdf($players=[], $winners=[],  $sequences=[], $winnerList=[], $repechagePlayers=[] ,$poolLabel=null, $repechage=true){
-        if($poolLabel){
-            $this->poolLable=$poolLabel;
-        };
+    public function pdf($players=[], $winners=[],  $sequences=[], $winnerList=[], $repechagePlayers=[], $repechage=true){
         //$this->pdf = new TCPDF();
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
@@ -189,7 +186,6 @@ class SheetTournamentQuarterService{
         $this->pdf->SetMargins(15,10,15);
         $this->pdf->SetAutoPageBreak(TRUE,0);
         $this->pdf->AddPage();
-
         $this->playerCount=count($players)*2;
         foreach($this->gameSetting[$this->playerCount] as $key=>$value){
             $this->$key=$value;
@@ -211,8 +207,8 @@ class SheetTournamentQuarterService{
 
         $this->mainChart($players, $sequences, $winners); //主上線表包括運動員名牌和上線曲線
         //$this->winnerLine($winners);
-        if($this->playerCount>4 && $this->poolLable!=null){
-            $this->boxPool($this->poolLable);
+        if($this->playerCount>4 && $this->poolLabel!=null){
+            $this->boxPool($this->poolLabel);
         }
         if($repechagePlayers){
             $this->repechageChart(count($players),$repechagePlayers,$sequences, $winners); //復活賽上線表包括運動員名牌和上線曲線
@@ -222,25 +218,25 @@ class SheetTournamentQuarterService{
         $this->resultBox($winnerList);
         $this->pdf->Output('myfile.pdf', 'I');
     }
-    private function boxPool($poolLable){
+    private function boxPool($poolLabel){
         $this->pdf->setFont($this->generalFont,'',$this->playerFontSize);
         $x=$this->startX-10;
         $y=$this->startY;//+($this->boxH/4);
         $h=($this->boxH+$this->boxGap)*($this->playerCount/8)-$this->boxGap;//-($this->boxH)+($this->repechageBoxGap/2);
         for($i=3; $i>=0; $i--){
-            $this->pdf->RoundedRect($x, $y, 6.5, $h, 3.25, '1111', 'DF',$this->styleCircle, $poolLable[$i]['color']);
+            $this->pdf->RoundedRect($x, $y, 6.5, $h, 3.25, '1111', 'DF',$this->styleCircle, $poolLabel[$i]['color']);
             $y+=($this->boxH+$this->boxGap)*($this->playerCount/8);
         }
 
         //$x=$this->startX-10;
         $y=$this->startY+(($this->boxH+$this->boxGap)*$this->playerCount/2)-($this->boxGap /2);
         $w=(($this->boxH+$this->boxGap)*$this->playerCount/8);
-        $this->pdf->setFont('times','', $this->playerFontSize);
+        $this->pdf->setFont($this->playerFont,'', $this->playerFontSize);
         $this->pdf->StartTransform();
         $this->pdf->setXY($x, $y);
         $this->pdf->Rotate(90);
         for($i=3; $i>=0; $i--){
-            $this->pdf->Cell($w,0,$poolLable[$i]['name'],0,0,'C',0,'');
+            $this->pdf->Cell($w,0,$poolLabel[$i]['name'],0,0,'C',0,'');
         }
         $this->pdf->StopTransform();
     }

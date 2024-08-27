@@ -173,10 +173,7 @@ class SheetTournamentDoubleService{
         $this->winnerLineDraw=$winnerLineDraw;
     }
 
-    public function pdf($players=[], $winners=[], $sequences=[], $winnerList=[], $repechagePlayers=[],$poolLabel=null, $repechage=true){
-        if($poolLabel){
-            $this->poolLable=$poolLabel;
-        };
+    public function pdf($players=[], $winners=[], $sequences=[], $winnerList=[], $repechagePlayers=[], $repechage=true){
         //$this->pdf = new TCPDF();
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 

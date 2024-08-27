@@ -28,7 +28,7 @@ class TournamentQuarterController extends Controller
             ['name'=>'分組 D']
         ];
         $this->gameSheet->setLogos('images/jua_logo.png','images/mja_logo.png');
-        $this->gameSheet->setPoolLabel($poolLable);        
+        $this->gameSheet->setPoolLabel($poolLable);
         if($request->winner_line){
             $this->gameSheet->setWinnerLine(true);
         }

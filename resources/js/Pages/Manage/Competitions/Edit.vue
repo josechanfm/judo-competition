@@ -268,6 +268,7 @@
                   </a-form-item>
                 </div>
                 <div>
+
                   <a-form-item label="5人以下">
                     <div class="flex gap-3">
                       <div class="">2 players</div>

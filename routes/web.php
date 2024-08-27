@@ -44,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/competition/{competition}/drawScreen', [App\Http\Controllers\Manage\AthleteController::class, 'drawScreen'])->name('manage.competition.athletes.draw-screen');
     Route::resource('manage/competition/{competition}/athletes', App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
     Route::post('manage/competition/{competition}/program/{program}/draw', [App\Http\Controllers\Manage\ProgramController::class, 'draw'])->name('manage.competition.program.draw');
+    Route::get('manage/competition/{competition}/program/{program}/athletes', [App\Http\Controllers\Manage\ProgramController::class, 'athletes'])->name('manage.competition.program.athletes');
     Route::post('manage/competition/{competition}/program/update-sequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.program.sequence.update');
     Route::post('manage/competition/{competition}/program/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.program.lock');
     Route::post('manage/competition/{competition}/program/lock-seat', [App\Http\Controllers\Manage\ProgramController::class, 'lockSeat'])->name('manage.competition.program.lock-seat');
@@ -65,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/print/round_robbin_option2',[App\Http\Controllers\Manage\RoundRobbinOption2Controller::class,'printPdf']);
     Route::get('manage/print/tournament_knockout',[App\Http\Controllers\Manage\TournamentKnockoutController::class,'printPdf']);
     Route::get('manage/print/winners',[App\Http\Controllers\Manage\WinnerController::class,'printPdf']);
+    Route::get('manage/print/game_sheet',[App\Http\Controllers\Manage\PrinterController::class,'gameSheet'])->name('name_sheet');
 });
 
 

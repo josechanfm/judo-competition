@@ -42,7 +42,7 @@ class Program extends Model
 
     public function bouts()
     {
-        return $this->hasMany(Bout::class);
+        return $this->hasMany(Bout::class)->orderBy('in_program_sequence');
     }
 
     public function category(){

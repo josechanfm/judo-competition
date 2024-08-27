@@ -11,11 +11,31 @@ class Bout extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'program_id', 'sequence', 'in_program_sequence', 'queue', 'date', 'mat', 'section', 'contest_system', 'round', 'turn', 'white', 'blue', 'white_rise_from', 'blue_rise_from', 'winner_rise_to', 'loser_rise_to', 'winner', 'white_score', 'blue_score', 'duration', 'status'
+        'program_id',
+        'sequence',
+        'in_program_sequence',
+        'queue',
+        'date',
+        'mat',
+        'section',
+        'contest_system',
+        'round',
+        'turn',
+        'white',
+        'blue',
+        'white_rise_from',
+        'blue_rise_from',
+        'winner_rise_to',
+        'loser_rise_to',
+        'winner',
+        'white_score',
+        'blue_score',
+        'duration',
+        'status'
     ];
 
     protected $appends = ['white_player', 'blue_player', 'rank', 'status_text', 'duration_formatted', 'time_formatted', 'bout_name'];
-    protected $cast=['competition_referee_ids'=>'json'];
+    protected $cast = ['competition_referee_ids' => 'json'];
 
     public const STATUS_CANCELLED = -1;
     public const STATUS_PENDING = 0;
@@ -28,7 +48,7 @@ class Bout extends Model
             //return Athlete::make(["name_display"=>"ss"]);
             return (object)["name_display" => ""];
         } else {
-            return  Athlete::find($this->white);
+            return  ProgramAthlete::find($this->white)->athlete;
         };
     }
     public function getBluePlayerAttribute()
@@ -36,7 +56,7 @@ class Bout extends Model
         if ($this->blue == 0) {
             return (object)["name_display" => ""];
         } else {
-            return  Athlete::find($this->blue);
+            return  ProgramAthlete::find($this->blue)->athlete;
         };
     }
     public function getRankAttribute()
@@ -307,7 +327,7 @@ class Bout extends Model
             return 0;
         }
 
-        if ($this->white === $programAthlete>id) {
+        if ($this->white === $programAthlete > id) {
             return $this->result->w_score;
         } else if ($this->blue === $programAthlete->id) {
             return $this->result->b_score;
@@ -626,7 +646,8 @@ class Bout extends Model
         return $this->blueRiseFrom($bout)->queue;
     }
 
-    public function referees(){
-        return CompetitionReferee::whereIn('id',$this->competition_referee_ids)->with('referee')->get();
+    public function referees()
+    {
+        return CompetitionReferee::whereIn('id', $this->competition_referee_ids)->with('referee')->get();
     }
 }

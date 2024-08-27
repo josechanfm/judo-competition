@@ -36,7 +36,7 @@
             <a-statistic title="Atheles" :value="competition.athletes.length" />
           </a-card>
         </div>
-        <div class="p-4 mb-2 shadow-lg border border-indigo-600 bg-white rounded-lg">
+        <div class="p-4 mb-2 shadow-lg bg-white rounded-lg">
           <div class="flex justify-between">
             <div class="text-xl font-bold pb-2">運動員列表</div>
             <div class="flex gap-3">
@@ -302,7 +302,9 @@ export default {
       this.modal.mode = "EDIT";
       this.modal.data = { ...record, new_team: false };
       this.modal.data.programs = this.modal.data.programs.map((x) => x.id);
-      this.filter_programs = this.programs.filter((x) => x.weight_code.includes(record.gender));
+      this.filter_programs = this.programs.filter((x) =>
+        x.weight_code.includes(record.gender)
+      );
       this.modal.isOpen = true;
     },
     onUpdate() {

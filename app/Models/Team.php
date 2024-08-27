@@ -13,7 +13,8 @@ class Team extends Model
         'competition_id',
         'name',
         'name_secondary',
-        'abbreviation'
+        'abbreviation',
+        'leader'
     ];
 
     public function athletes()

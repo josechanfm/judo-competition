@@ -48,9 +48,7 @@
           <a-menu-item key="competition.athletes.index">
             <inertia-link
               class="mx-2"
-              :href="
-                route('manage.competition.athletes.index', competitionId)
-              "
+              :href="route('manage.competition.athletes.index', competitionId)"
             >
               Athletes List
             </inertia-link>
@@ -58,12 +56,7 @@
           <a-menu-item key="competition.athletes.drawControl">
             <inertia-link
               class="mx-2"
-              :href="
-                route(
-                  'manage.competition.athletes.drawControl',
-                  competitionId
-                )
-              "
+              :href="route('manage.competition.athletes.drawControl', competitionId)"
             >
               Athletes Draw
             </inertia-link>
@@ -71,9 +64,7 @@
           <a-menu-item key="competition.athletes.weights">
             <inertia-link
               class="mx-2"
-              :href="
-                route('manage.competition.athletes.weights', competitionId)
-              "
+              :href="route('manage.competition.athletes.weights', competitionId)"
             >
               Athletes Weight
             </inertia-link>
@@ -86,6 +77,15 @@
             :href="route('manage.competition.progress', competitionId)"
           >
             Progress
+          </inertia-link>
+        </a-menu-item>
+        <a-menu-item key="competition.teams.index">
+          <flag-outlined />
+          <inertia-link
+            class="mx-2"
+            :href="route('manage.competition.teams.index', competitionId)"
+          >
+            Team
           </inertia-link>
         </a-menu-item>
       </a-menu>
@@ -124,6 +124,7 @@ import { ref } from "vue";
 import {
   MenuOutlined,
   UserOutlined,
+  FlagOutlined,
   VideoCameraOutlined,
   UploadOutlined,
   MenuUnfoldOutlined,
@@ -136,6 +137,7 @@ export default {
   components: {
     MenuOutlined,
     UserOutlined,
+    FlagOutlined,
     VideoCameraOutlined,
     UploadOutlined,
     MenuUnfoldOutlined,

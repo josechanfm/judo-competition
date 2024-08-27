@@ -15,6 +15,8 @@ class ProgramAthlete extends Model
 
     protected $table = 'program_athlete';
 
+    protected $with = ['athlete'];
+
     public function athlete()
     {
         return $this->belongsTo(Athlete::class);

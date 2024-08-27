@@ -160,10 +160,10 @@
                       {{ item.seat }}
                     </div>
                     <div v-if="item.athlete">
-                      <div>{{ item.athlete.name_zh }}</div>
-                      <div>{{ item.athlete.team.name_zh }}</div>
+                      <div>{{ item.athlete.name }}</div>
+                      <div>{{ item.athlete.team.abbreviation }}</div>
                       <div v-if="competition.is_language_secondary_enabled">
-                        {{ item.name_pt }}
+                        {{ item.name_secondary }}
                       </div>
                     </div>
                     <div v-else>輪空</div>
@@ -413,8 +413,11 @@ export default {
           ])
         )
         .then(({ data }) => {
+          console.log(
+            data.program_athletes.sort((a, b) => a.seat - b.seat).map((x) => x.athlete)
+          );
           this.program = data.program;
-          this.athletes = data.program.program_athletes.sort((a, b) => a.seat - b.seat);
+          this.athletes = data.program_athletes.sort((a, b) => a.seat - b.seat);
         });
     },
     draw() {

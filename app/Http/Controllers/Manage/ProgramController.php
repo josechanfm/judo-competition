@@ -57,11 +57,10 @@ class ProgramController extends Controller
      */
     public function show(Competition $competition, Program $program)
     {
-        // dd($program->athletes);
-        // dd($program->load(['programsAthletes.athlete', 'programsAthletes.athlete.team']));
         if (request()->wantsJson()) {
             return response()->json([
-                'program' => $program->load(['programsAthletes.athlete', 'programsAthletes.athlete.team']),
+                'program' => $program,
+                'program_athletes' => $program->programsAthletes
             ]);
         }
         return Inertia::render('Manage/Program', [
@@ -113,8 +112,8 @@ class ProgramController extends Controller
         // dd($program->gen_bouts);
         $competition->programsAthletes;
         $competition->programsBouts;
-        $competition->bouts=$competition->bouts()->get();
-        
+        $competition->bouts = $competition->bouts()->get();
+
         //$competition->programs;
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
@@ -123,8 +122,9 @@ class ProgramController extends Controller
 
     public function draw(Competition $competition, Program $program)
     {
-        $athletes = $program->draw();
 
+        $athletes = $program->draw();
+   
         $program->confirmDraw();
 
         return response()->json([

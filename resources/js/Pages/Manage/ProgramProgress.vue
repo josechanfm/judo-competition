@@ -14,12 +14,12 @@
           button-style="solid"
           @change="onSectionChange()"
         >
-          <template v-for="section in competition.section_number">
+          <template v-for="section in competition.section_number" :key="section.id">
             <a-radio-button :value="section">{{ section }}</a-radio-button>
           </template>
         </a-radio-group>
         <a-row :gutter="50">
-          <a-col :span="12" v-for="mat in competition.mat_number">
+          <a-col :span="12" v-for="mat in competition.mat_number" :key="mat">
             <p>
               Section: {{ currentSection.mats[mat].program.section }} / Mat:
               {{ currentSection.mats[mat].program.mat }}
@@ -44,7 +44,7 @@
               >+</a-button
             >
 
-            <p>Category: {{ currentSection.mats[mat].program.category_group }}</p>
+            <p>Category: {{ currentSection.mats[mat].program.competition_category.name}}</p>
             <p>Weight: {{ currentSection.mats[mat].program.weight_group }}</p>
             <template v-if="currentSection.mats[mat].bout">
               <a-typography-title :level="3">
@@ -104,7 +104,9 @@
                             <td class="py-4 w-10">
                               {{ bout.white_player?.name_display }}
                             </td>
-                            <td class="py-4 w-10">{{ bout.blue_player?.name_display }}</td>
+                            <td class="py-4 w-10">
+                              {{ bout.blue_player?.name_display }}
+                            </td>
                           </tr>
                         </template>
                       </tbody>

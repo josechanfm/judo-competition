@@ -125,13 +125,13 @@ class Program extends Model
     {
         $athletes = (new DrawService($this))->draw();
 
-
         foreach ($athletes as $athlete) {
             $this->programsAthletes()->where('id', $athlete['id'])->update([
                 'seat' => $athlete['seat'],
             ]);
         }
-        (new BoutGenerationService($this->competition))->assignAthletesToBouts($this);
+        // dd($this->competitionCategory->competition);
+        (new BoutGenerationService($this->competitionCategory->competition))->assignAthletesToBouts($this);
         $this->status = Program::STATUS_DREW;
         $this->save();
         return $athletes;

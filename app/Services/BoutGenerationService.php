@@ -279,14 +279,15 @@ class BoutGenerationService
     public function assignAthletesToBouts(Program $program): void
     {
 
-        $athletes = $program->athletes();
-
+        $athletes = $program->programsAthletes();
+        // dd($athletes);
         switch ($program->contest_system) {
             case Program::KOS:
                 $this->assignAthletesToKOS($program, $athletes);
                 break;
             case Program::RRB:
             case PROGRAM::RRBA:
+                // dd('aaa');
                 $this->assignAthletesToRRB($program, $athletes);
                 break;
             case Program::ERM:

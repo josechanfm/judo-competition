@@ -50,7 +50,7 @@ class AthleteController extends Controller
     public function store(Competition $competition, Request $request)
     {
         //
-        dd($request->all());
+        // dd($request->all());
         $validated = $request->validate([
             'name' => 'required',
             'new_team' => '',

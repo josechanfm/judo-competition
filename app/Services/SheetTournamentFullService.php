@@ -18,6 +18,7 @@ class SheetTournamentFullService{
             'repechageBoxGap'=>6,
             'repechageSectionGap'=>10,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>14
         ),
         '8'=>array(
@@ -32,6 +33,7 @@ class SheetTournamentFullService{
             'repechageBoxGap'=>2,
             'repechageSectionGap'=>5,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>14
         ),
         '16'=>array(
@@ -46,6 +48,7 @@ class SheetTournamentFullService{
             'repechageBoxGap'=>2,
             'repechageSectionGap'=>5,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>12
         ),
         '32'=>array(
@@ -60,6 +63,7 @@ class SheetTournamentFullService{
             'repechageBoxGap'=>2,
             'repechageSectionGap'=>5,
             'circleSize'=>3,
+            'circleFontSize'=>10,
             'playerFontSize'=>10
         ),
         '64'=>array(
@@ -74,12 +78,15 @@ class SheetTournamentFullService{
             'repechageBoxGap'=>1,
             'repechageSectionGap'=>1,
             'circleSize'=>2,
+            'circleFontSize'=>10,
             'playerFontSize'=>8
         ),
     );
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
+    protected $logo_primary='images/jua_logo.png';
+    protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
     protected $startY=23; //面頁基點Y軸
@@ -93,6 +100,7 @@ class SheetTournamentFullService{
     protected $repechageBoxGap=2; //復活賽表,運動員名牌之間距離
     protected $repechageSectionGap=5; //復活賽表, second
     protected $circleSize=3;
+    protected $circleFontSize=10;
     protected $playerFontSize=10;
 
     protected $round=0;
@@ -147,6 +155,11 @@ class SheetTournamentFullService{
             }
         }
     }
+    public function setLogos($primary=null, $secondary=null){
+        $this->logo_primary=$primary;
+        $this->logo_secondary=$secondary;
+    }
+
     public function setTitles($title=null, $title_sub=null){
         $this->title=$title;
         $this->title_sub=$title_sub;
@@ -224,7 +237,7 @@ class SheetTournamentFullService{
         //$x=$this->startX-10;
         $y=$this->startY+(($this->boxH+$this->boxGap)*$this->playerCount/2)-($this->boxGap /2);
         $w=(($this->boxH+$this->boxGap)*$this->playerCount/8);
-        $this->pdf->setFont($this->playerFont,'', 12);
+        $this->pdf->setFont($this->generalFont,'',$this->playerFontSize);
         $this->pdf->StartTransform();
         $this->pdf->setXY($x, $y);
         $this->pdf->Rotate(90);
@@ -490,6 +503,7 @@ class SheetTournamentFullService{
         /* circle sequence number */
         // $this->pdf->setXY($x-$size, $y-$size);
         // $this->pdf->Cell($size*2, $size*2, $num, 0, 1, 'C', 0, '', 0);    
+        $this->pdf->setFont($this->generalFont, '', $this->circleFontSize);
         $this->pdf->SetFillColor(215,230,254);
         $this->pdf->setLineStyle($styleArcLine);
         $this->pdf->setXY($x-4,$y-$h/2 );

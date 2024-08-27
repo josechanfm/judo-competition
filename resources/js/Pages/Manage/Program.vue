@@ -25,16 +25,7 @@
           </a-card>
         </div>
         <div class="grid grid-cols-4 gap-12">
-          <div class="col-span-3 flex flex-col gap-6">
-            <a-card class="w-full" v-if="program.contest_system">
-              <template #title><div class="font-normal">上線表</div></template>
-              <component
-                v-if="program.bouts.length>0"
-                :is="tournamentTable"
-                :contestSystem="program.contest_system"
-                :bouts="bouts"
-              />
-            </a-card>
+          <div class="col-span-2 flex flex-col gap-6">
             <div class="py-2 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
               <div class="flex font-bold text-lg mb-2 justify-between">
                 <div>運動員名單</div>
@@ -57,7 +48,7 @@
                   </a-popconfirm>
                 </div>
               </div>
-              <a-table :dataSource="program.athletes" :columns="athleteColumns">
+              <a-table :dataSource="athletes" :columns="athleteColumns">
                 <template #bodyCell="{ column, record }">
                   <template v-if="column.dataIndex === 'operation'">
                     <div class="space-x-2">
@@ -71,17 +62,30 @@
                       </a-popconfirm>
                     </div>
                   </template>
-                  <template v-else>
-                    {{ record[column.dataIndex] }}
+                  <template v-else-if="column.dataIndex=='is_weight_passed'">
+                    {{ record.pivot.is_weight_passed }}
+                  </template>
+                  <template v-else-if="column.dataIndex=='seed'">
+                    {{ record.pivot.seed }}
                   </template>
                 </template>
               </a-table>
             </div>
           </div>
-          <div>
+          <div class="col-span-2 flex flex-col gap-6">
             <a-card class="w-full">
               <template #title><div class="font-normal">比賽結果</div></template>
             </a-card>
+            <a-card class="w-full" v-if="program.contest_system">
+              <template #title><div class="font-normal">上線表</div></template>
+              <component
+                v-if="program.bouts.length>0"
+                :is="tournamentTable"
+                :contestSystem="program.contest_system"
+                :bouts="bouts"
+              />
+            </a-card>
+
           </div>
         </div>
       </div>
@@ -175,14 +179,18 @@ export default {
       ],
       athleteColumns: [
         {
-          title: "Name",
+          title: "Name Display",
           dataIndex: "name_display",
-        },
-        {
+        },{
           title: "Gender",
           dataIndex: "gender",
-        },
-        {
+        },{
+          title: "Weigh Passed",
+          dataIndex: "is_weight_passed",
+        },{
+          title: "Seed",
+          dataIndex: "seed",
+        },{
           title: "Operation",
           dataIndex: "operation",
         },
@@ -209,7 +217,7 @@ export default {
     this.rebuildBouts();
     this.selectAthletes = this.athletes.map(function (x) {
       return {
-        label: x.name_zh,
+        label: x.name,
         value: x.id,
       };
     });

@@ -65,7 +65,7 @@ class ProgramController extends Controller
         }
         return Inertia::render('Manage/Program', [
             'program' => $program->load(['programsAthletes.athlete', 'programsAthletes.athlete.team', 'bouts']),
-            'athletes' => $competition->athletes,
+            'athletes' => $program->athletes,
             'competition' => $competition
         ]);
     }
@@ -504,4 +504,5 @@ class ProgramController extends Controller
         });
         return redirect()->back();
     }
+
 }

@@ -7,9 +7,19 @@ use Illuminate\Http\Request;
 use App\Services\SheetTournamentService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Program;
+use App\Models\Athlete;
 
 class PrinterController extends Controller
 {
+    public function gameSheet(Request $request){
+        $program=Program::find($request->program_id);
+        //dd($program->chart_size/2);
+        $bouts=$program->bouts->toArray();
+        $players=array_slice($bouts,0,$program->chart_size/2);
+        dd($players);
+        dd($request->all());
+    }
     public function programs(){
         $rows=[
             [

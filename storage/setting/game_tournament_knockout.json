@@ -12,6 +12,7 @@
         "repechageBoxGap": 6,
         "repechageSectionGap": 10,
         "circleSize": 3,
+        "circleFontSize":10,
         "playerFontSize": 14,
         "resultXY":[120,120]
     },
@@ -28,6 +29,7 @@
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
+        "circleFontSize":10,
         "playerFontSize": 14,
         "resultXY":[140,130]
     },
@@ -44,6 +46,7 @@
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
+        "circleFontSize":10,
         "playerFontSize": 12,
         "resultXY":[145,170]
     },
@@ -59,8 +62,9 @@
         "repechageDistance": 10,
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
-        "circleSize": 3,
-        "playerFontSize": 12,
+        "circleSize": 2.5,
+        "circleFontSize":10,
+        "playerFontSize": 10,
         "resultXY":[135,230]
     },
     "64": {
@@ -76,6 +80,7 @@
         "repechageBoxGap": 1,
         "repechageSectionGap": 1,
         "circleSize": 2,
+        "circleFontSize":10,
         "playerFontSize": 8,
         "resultXY":[150,233]
     }

@@ -497,7 +497,7 @@ export default {
         },
       ],
       rules: {
-        competition_type_id: { required: true },
+        game_type_id: { required: true },
         country: { required: true },
         name: { required: true },
         name_secondary: { required: true },

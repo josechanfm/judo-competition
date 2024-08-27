@@ -7,6 +7,7 @@
         </a-button>
         <a-button
           type="primary"
+          class="bg-blue-500"
           @click="lockSeat"
           v-if="
             competition.status === COMPETITION_STATUS.program_arranged && allProgramsDrew
@@ -29,7 +30,12 @@
           v-if="!isRunning"
           target="_blank"
         >
-          <a-button type="primary" shape="round" size="large" class="!shadow-lg">
+          <a-button
+            type="primary"
+            shape="round"
+            size="large"
+            class="!shadow-lg bg-blue-500"
+          >
             <template #icon>
               <PoweroffOutlined />
             </template>
@@ -129,7 +135,9 @@
                     >
                       重新抽籤
                     </a-button>
-                    <a-button type="primary" @click="draw" v-else> 抽籤 </a-button>
+                    <a-button type="primary" class="bg-blue-500" @click="draw" v-else>
+                      抽籤
+                    </a-button>
                   </template>
                   <!-- <a
                     :href="
@@ -241,7 +249,9 @@
               <inertia-link
                 :href="route('manage.competition.programs.index', competition.id)"
               >
-                <a-button type="primary"> no schedule action </a-button>
+                <a-button type="primary" class="bg-blue-500">
+                  no schedule action
+                </a-button>
               </inertia-link>
             </template>
           </a-empty>

@@ -34,7 +34,7 @@
             下載運動員名單模板
           </a-button>
         </a>
-        <a-button type="primary" @click="handleImport" :disabled="files.length === 0"
+        <a-button type="primary" class="bg-blue-500" @click="handleImport" :disabled="files.length === 0"
           >匯入</a-button
         >
       </div>

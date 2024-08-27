@@ -9,9 +9,7 @@
           @change="onChangeCategory"
         >
           <template v-for="category in competition.categories">
-            <a-radio-button :value="category.id">{{
-              category.name
-            }}</a-radio-button>
+            <a-radio-button :value="category.id">{{ category.name }}</a-radio-button>
           </template>
         </a-radio-group>
       </a-form-item>
@@ -24,13 +22,11 @@
       </a-form-item>
     </a-form>
 
-
     <div>
       <a-button
         v-if="
-          this.athletes.find(
-            (x) => x.confirm == 0 && x.is_weight_passed == null
-          ) != undefined
+          this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null) !=
+          undefined
         "
         type="link"
       >
@@ -39,6 +35,7 @@
       <a-button
         v-else-if="this.athletes.find((x) => x.confirm == 1) == undefined"
         type="primary"
+        class="bg-blue-500"
         @click="confirmAllWeig123ht"
       >
         完成過磅
@@ -65,10 +62,7 @@
         </template>
         <template v-else-if="column.dataIndex === 'weight'">
           <div class="flex gap-3 justify-end">
-            <div
-              class="font-bold flex gap-1 items-center"
-              v-if="!record.confirmed"
-            >
+            <div class="font-bold flex gap-1 items-center" v-if="!record.confirmed">
               <a-input-number
                 v-model:value="record.pivot.weight"
                 :default-value="0"
@@ -91,7 +85,6 @@
                 <CheckOutlined />
               </template>
             </a-button>
-
           </div>
         </template>
         <template v-else>
@@ -128,19 +121,19 @@ export default {
     QuestionCircleOutlined,
   },
   props: ["competition"],
-    // programs: {
-    //   type: Object,
-    //   required: true,
-    // },
+  // programs: {
+  //   type: Object,
+  //   required: true,
+  // },
   data() {
     return {
       categoryId: null,
       programs: [],
       program: {
-        athletes:[]
+        athletes: [],
       },
       athletes: [],
-      columns:[
+      columns: [
         {
           key: "name_display",
           title: "運動員",
@@ -162,7 +155,7 @@ export default {
           dataIndex: "weight",
           align: "right",
         },
-      ]
+      ],
     };
   },
   methods: {
@@ -202,7 +195,6 @@ export default {
       );
     },
 
-    
     confirmAllWeight() {
       console.log(this.filtered.date[0]);
       Modal.confirm({

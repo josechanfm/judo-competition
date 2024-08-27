@@ -205,7 +205,11 @@
               下載運動員名單模板
             </a-button>
           </a>
-          <a-button type="primary" @click="handleImport" :disabled="files.length === 0"
+          <a-button
+            type="primary"
+            class="bg-blue-500"
+            @click="handleImport"
+            :disabled="files.length === 0"
             >匯入</a-button
           >
         </div>
@@ -305,6 +309,8 @@ export default {
       this.filter_programs = this.programs.filter((x) =>
         x.weight_code.includes(record.gender)
       );
+      console.log(record.gender);
+      console.log(this.programs);
       this.modal.isOpen = true;
     },
     onUpdate() {

@@ -32,13 +32,15 @@
       </div>
       <a-menu v-model:selectedKeys="selectedKeys" theme="light" mode="inline">
         <a-menu-item key="competition.programs.index">
-          <user-outlined />
-          <inertia-link
-            class="mx-2"
-            :href="route('manage.competition.programs.index', competitionId)"
-          >
-            Program
-          </inertia-link>
+          <div class="flex items-center">
+            <user-outlined />
+            <inertia-link
+              class="mx-2"
+              :href="route('manage.competition.programs.index', competitionId)"
+            >
+              Program
+            </inertia-link>
+          </div>
         </a-menu-item>
         <a-sub-menu key="submenu1">
           <template #icon>
@@ -71,22 +73,26 @@
           </a-menu-item>
         </a-sub-menu>
         <a-menu-item key="competition.progress">
-          <upload-outlined />
-          <inertia-link
-            class="mx-2"
-            :href="route('manage.competition.progress', competitionId)"
-          >
-            Progress
-          </inertia-link>
+          <div class="flex items-center">
+            <upload-outlined />
+            <inertia-link
+              class="mx-2"
+              :href="route('manage.competition.progress', competitionId)"
+            >
+              Progress
+            </inertia-link>
+          </div>
         </a-menu-item>
         <a-menu-item key="competition.teams.index">
-          <flag-outlined />
-          <inertia-link
-            class="mx-2"
-            :href="route('manage.competition.teams.index', competitionId)"
-          >
-            Team
-          </inertia-link>
+          <div class="flex items-center">
+            <flag-outlined />
+            <inertia-link
+              class="mx-2"
+              :href="route('manage.competition.teams.index', competitionId)"
+            >
+              Team
+            </inertia-link>
+          </div>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>

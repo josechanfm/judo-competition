@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('small_system');
             $table->char('type'); //individual | teams
             $table->tinyInteger('gender'); //2=male & female | 1=male | 0=female
-            $table->foreignId('game_category_id'); //age group in IJF
+            // $table->foreignId('game_category_id'); //age group in IJF
             $table->boolean('is_cancelled');
             $table->timestamps();
         });

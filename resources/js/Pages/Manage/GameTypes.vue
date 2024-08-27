@@ -13,6 +13,7 @@
         <div>
           <a-button
             type="primary"
+            class="bg-blue-500"
             @click="createNewGameType"
             :disabled="newGameType.isCreateing"
             >創建新的類型</a-button
@@ -72,7 +73,10 @@
           </div>
         </div>
         <div class="text-right">
-          <a-button type="primary" @click="saveCompetitionType(newGameType)"
+          <a-button
+            type="primary"
+            class="bg-blue-500"
+            @click="saveCompetitionType(newGameType)"
             >保存</a-button
           >
         </div>
@@ -250,8 +254,11 @@
             </div>
           </div>
           <div v-if="gameType.isEditing">
-            <a-button type="primary" danger>刪除</a-button>
-            <a-button type="primary" @click="saveCompetitionType(gameType)"
+            <a-button type="primary" class="bg-blue-500" danger>刪除</a-button>
+            <a-button
+              type="primary"
+              class="bg-blue-500"
+              @click="saveCompetitionType(gameType)"
               >保存</a-button
             >
           </div>

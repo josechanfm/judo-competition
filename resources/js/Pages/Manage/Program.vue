@@ -21,7 +21,10 @@
             <a-statistic title="Programs" :value="program.bouts.length" />
           </a-card>
           <a-card class="shadow-lg">
-            <a-statistic title="Atheles" :value="program.athletes?program.athletes.length:0"/>
+            <a-statistic
+              title="Atheles"
+              :value="program.athletes ? program.athletes.length : 0"
+            />
           </a-card>
         </div>
         <div class="grid grid-cols-4 gap-12">
@@ -44,7 +47,7 @@
                         :options="selectAthletes"
                       ></a-select>
                     </template>
-                    <a-button type="primary">加入運動員</a-button>
+                    <a-button type="primary" class="bg-blue-500">加入運動員</a-button>
                   </a-popconfirm>
                 </div>
               </div>
@@ -62,10 +65,10 @@
                       </a-popconfirm>
                     </div>
                   </template>
-                  <template v-else-if="column.dataIndex=='is_weight_passed'">
+                  <template v-else-if="column.dataIndex == 'is_weight_passed'">
                     {{ record.pivot.is_weight_passed }}
                   </template>
-                  <template v-else-if="column.dataIndex=='seed'">
+                  <template v-else-if="column.dataIndex == 'seed'">
                     {{ record.pivot.seed }}
                   </template>
                 </template>
@@ -79,13 +82,12 @@
             <a-card class="w-full" v-if="program.contest_system">
               <template #title><div class="font-normal">上線表</div></template>
               <component
-                v-if="program.bouts.length>0"
+                v-if="program.bouts.length > 0"
                 :is="tournamentTable"
                 :contestSystem="program.contest_system"
                 :bouts="bouts"
               />
             </a-card>
-
           </div>
         </div>
       </div>
@@ -181,16 +183,20 @@ export default {
         {
           title: "Name Display",
           dataIndex: "name_display",
-        },{
+        },
+        {
           title: "Gender",
           dataIndex: "gender",
-        },{
+        },
+        {
           title: "Weigh Passed",
           dataIndex: "is_weight_passed",
-        },{
+        },
+        {
           title: "Seed",
           dataIndex: "seed",
-        },{
+        },
+        {
           title: "Operation",
           dataIndex: "operation",
         },

@@ -14,16 +14,16 @@
             <div class="text-xl font-bold">比賽項目管理</div>
             <div class="flex items-center">
               <a-tag color="processing">
-                <template #icon>
+                <div class="flex items-center gap-1">
                   <AppstoreOutlined />
-                </template>
-                {{ competition.mat_number }} Mats
+                  {{ competition.mat_number }} Mats
+                </div>
               </a-tag>
               <a-tag color="processing">
-                <template #icon>
+                <div class="flex items-center gap-1">
                   <ScheduleOutlined />
-                </template>
-                {{ competition.section_number }} Sections
+                  {{ competition.section_number }} Sections
+                </div>
               </a-tag>
             </div>
           </div>
@@ -32,6 +32,7 @@
             <a-button
               v-else-if="competition.status === 1"
               type="primary"
+              class="bg-blue-500"
               @click="confirmProgramArrangement"
               >鎖定排序</a-button
             >
@@ -69,7 +70,8 @@
                           record.competition_category.competition_id,
                           record.id,
                         ])
-                      ">
+                      "
+                    >
                       View
                     </a-button>
                   </template>

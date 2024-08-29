@@ -1,97 +1,101 @@
 <template>
   <ProgramLayout :competitionId="competition.id">
-    <h3>{{ competition.name }}</h3>
-    <a-form>
-      <a-form-item label="Category" name="category">
-        <a-radio-group
-          v-model:value="categoryId"
-          button-style="solid"
-          @change="onChangeCategory"
-        >
-          <template v-for="category in competition.categories">
-            <a-radio-button :value="category.id">{{ category.name }}</a-radio-button>
-          </template>
-        </a-radio-group>
-      </a-form-item>
-      <a-form-item label="Program" name="program">
-        <a-select
-          :options="programs"
-          :fieldNames="{ value: 'id', label: 'weight_code' }"
-          @change="onChangeProgram"
-        />
-      </a-form-item>
-    </a-form>
-
-    <div>
-      <a-button
-        v-if="
-          this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null) !=
-          undefined
-        "
-        type="link"
-      >
-        待全部過磅
-      </a-button>
-      <a-button
-        v-else-if="this.athletes.find((x) => x.confirm == 1) == undefined"
-        type="primary"
-        class="bg-blue-500"
-        @click="confirmAllWeig123ht"
-      >
-        完成過磅
-      </a-button>
-    </div>
-    <a-table :dataSource="program.athletes" :columns="columns">
-      <template #bodyCell="{ column, record }">
-        <template v-if="column.dataIndex === 'result'">
-          <CheckCircleOutlined
-            v-if="record.is_weight_passed == 1"
-            class="!text-green-800 dark:!text-green-400"
-          />
-          <CloseCircleOutlined
-            v-else-if="record.is_weight_passed == 0"
-            class="!text-red-800 dark:!text-red-400"
-          />
-          <QuestionCircleOutlined v-else />
-        </template>
-        <template v-if="column.key === 'program'">
-          <span>
-            {{ program.weight_code }}
-            {{ program.competition_category.name }}
-          </span>
-        </template>
-        <template v-else-if="column.dataIndex === 'weight'">
-          <div class="flex gap-3 justify-end">
-            <div class="font-bold flex gap-1 items-center" v-if="!record.confirmed">
-              <a-input-number
-                v-model:value="record.pivot.weight"
-                :default-value="0"
-                name="weight"
-                :min="0"
-                :max="999"
-                :precision="2"
-                :step="0.01"
-              ></a-input-number
-              >kg
-            </div>
-            <span v-else class="font-bold"> {{ record.pivot.weight }} kg </span>
-            <a-button
-              @click="passWeight(record)"
-              name="pass"
-              shape="circle"
-              v-if="!record.confirmed"
+    <a-page-header title="Weigh-in"> </a-page-header>
+    <div class="py-12 mx-8 flex flex-col gap-3">
+      <div class="bg-white p-2 rounded-md shadow-md">
+        <div class="text-xl font-bold mb-4">Weight Choose</div>
+        <a-form>
+          <a-form-item label="Category" name="category">
+            <a-radio-group
+              v-model:value="categoryId"
+              button-style="solid"
+              @change="onChangeCategory"
             >
-              <template #icon>
-                <CheckOutlined />
+              <template v-for="category in competition.categories" :key="category">
+                <a-radio-button :value="category.id">{{ category.name }}</a-radio-button>
               </template>
-            </a-button>
-          </div>
+            </a-radio-group>
+          </a-form-item>
+          <a-form-item label="Program" name="program">
+            <a-select
+              :options="programs"
+              :fieldNames="{ value: 'id', label: 'weight_code' }"
+              @change="onChangeProgram"
+            />
+          </a-form-item>
+        </a-form>
+      </div>
+      <div>
+        <a-button
+          v-if="
+            this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null) !=
+            undefined
+          "
+          type="link"
+        >
+          待全部過磅
+        </a-button>
+        <a-button
+          v-else-if="this.athletes.find((x) => x.confirm == 1) == undefined"
+          type="primary"
+          class="bg-blue-500"
+          @click="confirmAllWeig123ht"
+        >
+          完成過磅
+        </a-button>
+      </div>
+      <a-table :dataSource="program.athletes" :columns="columns">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'result'">
+            <CheckCircleOutlined
+              v-if="record.pivot.is_weight_passed == 1"
+              class="!text-green-800 dark:!text-green-400"
+            />
+            <CloseCircleOutlined
+              v-else-if="record.pivot.is_weight_passed == 0"
+              class="!text-red-800 dark:!text-red-400"
+            />
+            <QuestionCircleOutlined v-else />
+          </template>
+          <template v-if="column.key === 'program'">
+            <span>
+              {{ program.weight_code }}
+              {{ program.competition_category.name }}
+            </span>
+          </template>
+          <template v-else-if="column.dataIndex === 'weight'">
+            <div class="flex gap-3 justify-end">
+              <div class="font-bold flex gap-1 items-center" v-if="!record.confirmed">
+                <a-input-number
+                  v-model:value="record.pivot.weight"
+                  :default-value="0"
+                  name="weight"
+                  :min="0"
+                  :max="999"
+                  :precision="2"
+                  :step="0.01"
+                ></a-input-number
+                >kg
+              </div>
+              <span v-else class="font-bold"> {{ record.pivot.weight }} kg </span>
+              <a-button
+                @click="passWeight(record)"
+                name="pass"
+                shape="circle"
+                v-if="!record.confirmed"
+              >
+                <template #icon>
+                  <CheckOutlined />
+                </template>
+              </a-button>
+            </div>
+          </template>
+          <template v-else>
+            {{ record[column.dataIndex] }}
+          </template>
         </template>
-        <template v-else>
-          {{ record[column.dataIndex] }}
-        </template>
-      </template>
-    </a-table>
+      </a-table>
+    </div>
   </ProgramLayout>
 </template>
 

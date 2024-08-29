@@ -1,17 +1,12 @@
 <template>
-  <inertia-head title="Dashboard" />
+  <inertia-head title="Competition Program" />
 
   <ProgramLayout :competitionId="competition.id">
-    <template #header>
-      <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-      </div>
-    </template>
     <div class="py-12 mx-4">
       <div class="overflow-hidden flex flex-col gap-3">
         <div class="flex justify-between">
           <div class="flex gap-3">
-            <div class="text-xl font-bold">比賽項目管理</div>
+            <div class="text-xl font-bold">Competition Program Manage</div>
             <div class="flex items-center">
               <a-tag color="processing">
                 <div class="flex items-center gap-1">

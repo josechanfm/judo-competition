@@ -80,7 +80,20 @@
               <template #title><div class="font-normal">比賽結果</div></template>
             </a-card>
             <a-card class="w-full" v-if="program.contest_system">
-              <template #title><div class="font-normal">上線表</div></template>
+              <template #title>
+                <div class="flex justify-between">
+                  <div class="font-normal">上線表</div>
+                  <div class="">
+                    <a
+                      :href="
+                        route('manage.print.tournament_quarter', { program: program.id })
+                      "
+                      target="_blank"
+                      >Print Pdf</a
+                    >
+                  </div>
+                </div></template
+              >
               <component
                 v-if="program.bouts.length > 0"
                 :is="tournamentTable"

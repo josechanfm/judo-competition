@@ -1,10 +1,10 @@
 <template>
-  <inertia-head title="運動員列表" />
+  <inertia-head title="Athletes List" />
 
   <ProgramLayout :competitionId="competition.id">
     <template #header>
       <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">運動員列表</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Athletes List</h2>
       </div>
     </template>
     <div class="py-12 mx-8">
@@ -15,9 +15,9 @@
             type="primary"
             class="bg-blue-500"
             @click="lockAthletes"
-            >鎖定名單</a-button
+            >Lock list</a-button
           >
-          <span v-else class="text-blue-500">名單已鎖定</span>
+          <span v-else class="text-blue-500">List already lock</span>
         </div>
         <div class="grid grid-cols-4 gap-12 py-4">
           <a-card class="shadow-lg">
@@ -38,21 +38,21 @@
         </div>
         <div class="p-4 mb-2 shadow-lg bg-white rounded-lg">
           <div class="flex justify-between">
-            <div class="text-xl font-bold pb-2">運動員列表</div>
+            <div class="text-xl font-bold pb-2">Athletes List</div>
             <div class="flex gap-3">
               <a-button
                 type="primary"
                 v-if="competition.status === 0"
                 class="bg-blue-500"
                 @click="onCreateRecord"
-                >新增運動員</a-button
-              >
+                >Add Athletes
+              </a-button>
               <a-button
                 type="primary"
                 v-if="competition.status === 0"
                 class="bg-blue-500"
                 @click="visible = true"
-                >匯入運動員</a-button
+                >Import Athletes</a-button
               >
             </div>
           </div>
@@ -153,24 +153,24 @@
                 class="bg-blue-500"
                 type="primary"
                 @click="onCreate"
-                >創建</a-button
+                >Create</a-button
               >
               <a-button
                 v-if="modal.mode == 'EDIT'"
                 class="bg-blue-500"
                 type="primary"
                 @click="onUpdate"
-                >確定</a-button
+                >Update</a-button
               >
               <a-button style="margin-left: 10px" @click="this.modal.isOpen = false"
-                >關閉</a-button
+                >Close</a-button
               >
             </a-form-item>
           </div>
         </div>
       </a-form>
     </a-modal>
-    <a-modal title="匯入運動員名單" v-model:open="visible">
+    <a-modal title="Import Athletes List" v-model:open="visible">
       <a-upload-dragger
         v-model:fileList="files"
         name="file"
@@ -181,15 +181,20 @@
         <p class="ant-upload-drag-icon">
           <file-excel-outlined />
         </p>
-        <p class="ant-upload-text">點擊或拖動文件到此以匯入運動員</p>
-        <p class="ant-upload-hint">支援 xlsx 文件上傳，上傳前請確認數據格式同模板相同</p>
+        <p class="ant-upload-text">Click or drag files here to import athletes</p>
+        <p class="ant-upload-hint">
+          Supports xlsx file upload. Please confirm that the data format is consistent
+          with the template before uploading.
+        </p>
       </a-upload-dragger>
 
       <div class="mt-3" v-if="imported">
         <div class="font-bold my-3 text-green-500" v-if="errors.length === 0">
-          匯入成功！
+          Import Success!
         </div>
-        <div class="font-bold my-3 text-yellow-500" v-else>部分資料未導入</div>
+        <div class="font-bold my-3 text-yellow-500" v-else>
+          Some information are not import
+        </div>
         <p v-for="(error, index) in errors" :key="index" class="font-mono m-0">
           <warning-outlined class="!text-yellow-500" />
           row {{ error.row }}, {{ error.errors[0] }}
@@ -202,7 +207,7 @@
               <template #icon>
                 <DownloadOutlined />
               </template>
-              下載運動員名單模板
+              Download Athletes list template
             </a-button>
           </a>
           <a-button
@@ -210,7 +215,7 @@
             class="bg-blue-500"
             @click="handleImport"
             :disabled="files.length === 0"
-            >匯入</a-button
+            >Import</a-button
           >
         </div>
       </template>
@@ -383,7 +388,7 @@ export default {
           }
         )
         .then(({ data }) => {
-          this.$message.success("匯入成功");
+          this.$message.success("Import Success");
           this.files = [];
           this.errors = data.errors;
           this.imported = true;
@@ -391,7 +396,7 @@ export default {
           this.$emit("imported");
         })
         .catch(() => {
-          this.$message.error("匯入失敗");
+          this.$message.error("Import Error");
         });
     },
     lockAthletes() {

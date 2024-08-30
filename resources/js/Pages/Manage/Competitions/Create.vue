@@ -1,15 +1,10 @@
 <template>
-  <inertia-head title="Dashboard" />
+  <inertia-head title="Competition Create" />
 
   <AdminLayout>
-    <template #header>
-      <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-      </div>
-    </template>
     <div class="py-12 mx-8">
       <div class="mb-8 flex justify-between">
-        <div class="text-xl font-bold">賽事創建</div>
+        <div class="text-xl font-bold">Competition Create</div>
       </div>
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex">
         <div class="border-r-2 border-gray-300 shrink-0 py-2 px-2">
@@ -17,37 +12,37 @@
             <div>
               <a-button
                 type="text"
-                class="text-lg font-bold flex items-center py-4"
+                class="text-base font-bold flex items-center py-4"
                 :class="setting_index == 0 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(0)"
-                >基礎設定</a-button
+                >Basie information</a-button
               >
             </div>
             <div>
               <a-button
                 type="text"
-                class="text-lg font-bold flex items-center py-4"
+                class="text-base font-bold flex items-center py-4"
                 :class="setting_index == 1 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(1)"
-                >組別設定</a-button
+                >Category Setting</a-button
               >
             </div>
             <div>
               <a-button
                 type="text"
-                class="text-lg font-bold flex items-center py-4"
+                class="text-base font-bold flex items-center py-4"
                 :class="setting_index == 2 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(2)"
-                >比賽設定</a-button
+                >System Setting</a-button
               >
             </div>
             <div>
               <a-button
                 type="text"
-                class="text-lg font-bold flex items-center py-4"
+                class="text-base font-bold flex items-center py-4"
                 :class="setting_index == 3 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(3)"
-                >語言設定</a-button
+                >Language Setting</a-button
               >
             </div>
           </div>
@@ -65,7 +60,7 @@
             <div class="flex flex-col">
               <div class="flex flex-col" v-if="setting_index == 0">
                 <div class="">
-                  <a-form-item label="賽事類型" name="game_type_id">
+                  <a-form-item label="Competition Type" name="game_type_id">
                     <a-select
                       @change="changeGameType"
                       type="select"
@@ -78,13 +73,13 @@
                 </div>
                 <div class="flex justify-between gap-3">
                   <div class="w-full">
-                    <a-form-item label="賽事名稱" name="name">
+                    <a-form-item label="Competition Name" name="name">
                       <a-input type="input" v-model:value="create_competition.name" />
                     </a-form-item>
                   </div>
                 </div>
                 <div class="">
-                  <a-form-item label="國家" name="country">
+                  <a-form-item label="Country" name="country">
                     <a-select
                       v-model:value="create_competition.country"
                       show-search
@@ -94,7 +89,7 @@
                   </a-form-item>
                 </div>
                 <div class="">
-                  <a-form-item label="城市" name="city">
+                  <a-form-item label="City" name="city">
                     <a-input
                       class=""
                       type="input"
@@ -163,7 +158,7 @@
                       <div class="flex-1 font-bold">{{ time }}</div>
                       <div>
                         <a-button type="link" danger @click="removeTimeFromForm(time)"
-                          >移除</a-button
+                          >Remove</a-button
                         >
                       </div>
                     </div>
@@ -177,7 +172,7 @@
                       :disabled-date="disabledDate"
                       value-format="YYYY-MM-DD"
                     />
-                    <a-button @click="addTimeToForm">新增</a-button>
+                    <a-button @click="addTimeToForm">Add</a-button>
                   </div>
                 </div>
                 <div class="">
@@ -189,7 +184,7 @@
               <div class="flex flex-col" v-else-if="setting_index == 1">
                 <div class="" v-if="create_competition.game_type_id != null">
                   <div class="">
-                    <a-form-item label="類型" name="type">
+                    <a-form-item label="Type" name="type">
                       <a-radio-group v-model:value="create_competition.type">
                         <a-radio value="individual">Individual</a-radio>
                         <a-radio value="teams">Teams</a-radio>
@@ -197,7 +192,7 @@
                     </a-form-item>
                   </div>
                   <div class="">
-                    <a-form-item label="性別" name="gender">
+                    <a-form-item label="Gender" name="gender">
                       <a-radio-group v-model:value="create_competition.gender">
                         <a-radio :value="2">male & female</a-radio>
                         <a-radio :value="1">male</a-radio>
@@ -211,7 +206,7 @@
                       create_competition.gender == 1 || create_competition.gender == 2
                     "
                   >
-                    <a-form-item label="男性組別" name="categories_male">
+                    <a-form-item label="Male Categories" name="categories_male">
                       <div
                         class=""
                         v-for="category in create_competition.competition_type.categories"
@@ -243,7 +238,7 @@
                       create_competition.gender == 0 || create_competition.gender == 2
                     "
                   >
-                    <a-form-item label="女性組別" name="categories_female">
+                    <a-form-item label="Female Categories" name="categories_female">
                       <div
                         class=""
                         v-for="category in create_competition.competition_type.categories"
@@ -270,9 +265,6 @@
                     </a-form-item>
                   </div>
                 </div>
-                <div class="text-center font-bold text-2xl pt-12" v-else>
-                  請先在基礎設定中選擇賽事類型
-                </div>
               </div>
               <div class="" v-if="setting_index == 2">
                 <div class="">
@@ -294,7 +286,7 @@
                   </a-form-item>
                 </div>
                 <div>
-                  <a-form-item label="5人以下">
+                  <a-form-item label="Less than 5 people">
                     <div class="flex gap-3">
                       <div class="">2 players</div>
                       <a-radio-group v-model:value="create_competition.small_system[2]">
@@ -331,7 +323,7 @@
               <div class="" v-if="setting_index == 3">
                 <div class="">
                   <a-form-item
-                    label="開啓第二語言"
+                    label="Open language secondary"
                     :name="['competition_type', 'is_language_secondary_enabled']"
                   >
                     <a-switch
@@ -346,7 +338,7 @@
                 <div class="flex justify-between gap-3">
                   <div class="w-full flex flex-col">
                     <div class="w-full">
-                      <a-form-item label="賽事名稱" name="name">
+                      <a-form-item label="Name" name="name">
                         <a-input type="input" v-model:value="create_competition.name" />
                       </a-form-item>
                     </div>
@@ -358,7 +350,7 @@
                       "
                     >
                       <a-form-item
-                        label="Competition Name (Foreign)"
+                        label="Competition Name Secondary"
                         name="name_secondary"
                       >
                         <a-input
@@ -395,12 +387,12 @@
                       "
                     >
                       <a-form-item
-                        label="Competition Language (Foreign)"
+                        label="Competition Language Secondary"
                         :name="['competition_type', 'language_secondary']"
                         :rules="[
                           {
                             required: true,
-                            message: 'Competition Language (Foreign) is required!',
+                            message: 'Competition Language Secondary is required!',
                           },
                         ]"
                       >

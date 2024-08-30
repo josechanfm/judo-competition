@@ -1,18 +1,18 @@
 <template>
-  <inertia-head title="賽事管理" />
+  <inertia-head title="Competition Manage" />
 
   <AdminLayout>
     <template #header>
       <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">賽事管理</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Competition Manage</h2>
       </div>
     </template>
     <div class="py-12 mx-8">
       <div class="mb-8 flex justify-between">
-        <div class="text-xl font-bold">賽事管理</div>
+        <div class="text-xl font-bold">Competition Manage</div>
         <div>
           <inertia-link :href="route('manage.competitions.create')"
-            ><a-button class="bg-white">創建新的賽事</a-button>
+            ><a-button class="bg-white">Create Competition</a-button>
           </inertia-link>
         </div>
       </div>
@@ -24,7 +24,7 @@
                 >Edit</a-button
               >
               <a-button :href="route('manage.competition.athletes.index', record.id)"
-                >運動員</a-button
+                >Athletes</a-button
               >
               <a-button :href="route('manage.competition.programs.index', record.id)"
                 >Manage</a-button

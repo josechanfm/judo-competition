@@ -1,28 +1,23 @@
 <template>
-  <inertia-head title="Dashboard" />
+  <inertia-head title="Game types" />
 
   <AdminLayout>
-    <template #header>
-      <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-      </div>
-    </template>
     <div class="py-12 mx-8 md:max-w-6xl xl:mx-auto">
       <div class="mb-8 flex justify-between">
-        <div class="text-xl font-bold">賽事類型設定</div>
+        <div class="text-xl font-bold">Competition types</div>
         <div>
           <a-button
             type="primary"
             class="bg-blue-500"
             @click="createNewGameType"
             :disabled="newGameType.isCreateing"
-            >創建新的類型</a-button
+            >Create competition type</a-button
           >
         </div>
       </div>
-      <a-card title="創建新的賽事類型" v-if="newGameType.isCreateing">
+      <a-card title="Create a new competition type" v-if="newGameType.isCreateing">
         <template #extra>
-          <a-button @click="newGameType.isCreateing = false">取消</a-button>
+          <a-button @click="newGameType.isCreateing = false">Cancel</a-button>
         </template>
         <div class="flex gap-6 sm:flex-row flex-col">
           <div class="w-1/2">
@@ -41,7 +36,7 @@
                   style="width: 200px"
                 ></a-select>
               </a-form-item>
-              <a-form-item label="開啓第二語言">
+              <a-form-item label="Open secondary language">
                 <a-switch
                   v-model:checked="newGameType.is_language_secondary_enabled"
                   :unCheckedValue="0"
@@ -59,15 +54,18 @@
                   style="width: 200px"
                 ></a-select>
               </a-form-item>
-              <p class="underline font-bold">類型基本信息</p>
-              <a-form-item name="name" label="類型名稱(繁體中文)">
-                <a-input v-model:value="newGameType.name"></a-input>
+              <p class="underline font-bold">Type information</p>
+              <a-form-item name="name" label="Name">
+                <a-input type="input" v-model:value="newGameType.name"></a-input>
               </a-form-item>
-              <a-form-item name="name_secondary" label="類型名稱(Portguês)">
-                <a-input v-model:value="newGameType.name_secondary"></a-input>
+              <a-form-item name="name_secondary" label="Name Secondary">
+                <a-input
+                  type="input"
+                  v-model:value="newGameType.name_secondary"
+                ></a-input>
               </a-form-item>
-              <a-form-item name="code" label="類型代號">
-                <a-input v-model:value="newGameType.code"></a-input>
+              <a-form-item name="code" label="Code">
+                <a-input type="input" v-model:value="newGameType.code"></a-input>
               </a-form-item>
             </a-form>
           </div>
@@ -77,7 +75,7 @@
             type="primary"
             class="bg-blue-500"
             @click="saveCompetitionType(newGameType)"
-            >保存</a-button
+            >Save</a-button
           >
         </div>
       </a-card>
@@ -109,7 +107,7 @@
                     {{ languages.find((l) => l.value == gameType.language).label }}
                   </p>
                 </a-form-item>
-                <a-form-item label="開啓第二語言" v-if="gameType.isEditing">
+                <a-form-item label="Open secondary language" v-if="gameType.isEditing">
                   <a-switch
                     v-model:checked="gameType.is_language_secondary_enabled"
                     :unCheckedValue="0"
@@ -138,20 +136,20 @@
                     </span>
                   </p>
                 </a-form-item>
-                <p class="underline font-bold">類型基本信息</p>
-                <a-form-item name="name" label="類型名稱(繁體中文)">
-                  <a-input v-model:value="gameType.name"></a-input>
+                <p class="underline font-bold">Type infomation</p>
+                <a-form-item name="name" label="Name">
+                  <a-input type="input" v-model:value="gameType.name"></a-input>
                 </a-form-item>
-                <a-form-item name="name_secondary" label="類型名稱(Portguês)">
-                  <a-input v-model:value="gameType.name_secondary"></a-input>
+                <a-form-item name="name_secondary" label="Name secondary">
+                  <a-input type="input" v-model:value="gameType.name_secondary"></a-input>
                 </a-form-item>
-                <a-form-item name="code" label="類型代號">
-                  <a-input v-model:value="gameType.code"></a-input>
+                <a-form-item name="code" label="Code">
+                  <a-input type="input" v-model:value="gameType.code"></a-input>
                 </a-form-item>
               </a-form>
             </div>
             <div class="flex flex-col gap-3 w-1/2">
-              <div>允許的組別及公斤</div>
+              <div>Category and Weights</div>
               <div v-for="category in gameType.categories" :key="category.id">
                 <div class="mb-2">
                   <a-tag>{{ category.code }}</a-tag>
@@ -168,21 +166,21 @@
                       @click="gameType.editCategory = null"
                       v-if="gameType.editCategory == category.id"
                     >
-                      確認
+                      Confirm
                     </a-button>
                     <a-button
                       type="link"
                       @click="gameType.editCategory = category.id"
                       v-else
                     >
-                      編輯
+                      Edit
                     </a-button>
                     <a-button
                       type="link"
                       danger
                       @click="removeCategory(gameType, category)"
                     >
-                      移除
+                      Remove
                     </a-button>
                   </template>
                 </div>
@@ -193,19 +191,22 @@
                     :class="gameType.editCategory == category.id ? 'block' : 'hidden'"
                   >
                     <div class="">
-                      <div>組別代號</div>
-                      <a-input v-model:value="category.code"></a-input>
+                      <div>Code</div>
+                      <a-input type="input" v-model:value="category.code"></a-input>
                     </div>
                     <div class="">
-                      <div>組別名稱</div>
-                      <a-input v-model:value="category.name"></a-input>
+                      <div>Name</div>
+                      <a-input type="input" v-model:value="category.name"></a-input>
                     </div>
                     <div class="">
-                      <div>組別名稱(外文)</div>
-                      <a-input v-model:value="category.name_secondary"></a-input>
+                      <div>Name Secondary</div>
+                      <a-input
+                        type="input"
+                        v-model:value="category.name_secondary"
+                      ></a-input>
                     </div>
                     <div class="">
-                      <div>項目時長</div>
+                      <div>Category duration</div>
                       <a-time-picker
                         v-model:value="category.duration"
                         format="mm:ss"
@@ -249,17 +250,17 @@
                 </div>
               </div>
               <div v-if="gameType.isEditing == true">
-                <a-button @click="addCategory(gameType)">添加組別</a-button>
+                <a-button @click="addCategory(gameType)">Add category</a-button>
               </div>
             </div>
           </div>
           <div v-if="gameType.isEditing">
-            <a-button type="primary" class="bg-blue-500" danger>刪除</a-button>
+            <a-button type="primary" class="bg-blue-500" danger>Delete</a-button>
             <a-button
               type="primary"
               class="bg-blue-500"
               @click="saveCompetitionType(gameType)"
-              >保存</a-button
+              >Save</a-button
             >
           </div>
         </a-card>

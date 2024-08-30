@@ -1,0 +1,23 @@
+First of all, you might wanna to create a new competition, including basic information, Category setting, competition system, and language setting.
+
+In the basic information, the competition type and category are the most important selections, it defined gender, category and weight for the competition, and the days field is actual competition days between the start and end date.
+The Mat number and referee number are easy to understand. but the section number is a bit complicated mostly required by the local competition, so, let's set it to 1 for now. We will show the demo on a separated video.
+
+In the category setting, you may select individual or teams, gender and the category and weight which included in the competition.
+
+In the competition system, it defined the competition type for all categories and weights as default, but you may also change the competition system of each weights, we will show the example later on.
+
+last but not least, if you need bilingual setting, the language setting allow you to select which second language that you wanna to add. if you selected the second language, the second language title is required as well.
+the language setting is mainly designed for print out format selection.
+
+
+***
+After successfully create a competition, you may go to the manage feature, it provide 2 views, one for listing all weight categories the other shows by Mat and section. you may adjust the sequence of each weight categories and date.
+
+but the athletes are not yet assign, which means we need to assign athletes to the players. to import athletes, you can get into athletes list from the competition list, either choose to input on by one or import from and excel file, the template is also available inside the import feature.
+
+If all the athletes are imported, when you go back to Manage feature, you may check athletes list of each weight category.
+
+
+
+

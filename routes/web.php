@@ -68,6 +68,8 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/print/tournament_knockout', [App\Http\Controllers\Manage\TournamentKnockoutController::class, 'printPdf']);
     Route::get('manage/print/winners', [App\Http\Controllers\Manage\WinnerController::class, 'printPdf']);
     Route::get('manage/print/game_sheet', [App\Http\Controllers\Manage\PrinterController::class, 'gameSheet'])->name('name_sheet');
+    Route::get('manage/print/program_schedule', [App\Http\Controllers\Manage\ProgramScheduleController::class, 'printPdf']);
+
 });
 
 

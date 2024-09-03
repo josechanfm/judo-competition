@@ -363,8 +363,7 @@ class SheetTournamentFullService{
         $y1=$y;
         $h=$boxH;
         $w=$boxW;
-        $round=4;
-        for($i=0;$i<6; $i++){
+        for($i=0;$i<$round; $i++){
             if($round-2==$i ){
                 $h+=$h;
                 $ty=$y1; //暫存倒數第二個輪上線的Y1位置,用以計算最後一個的位置

@@ -1,0 +1,252 @@
+{
+    "16": {
+        "players": [
+            {
+                "white" : {"name_display" : "White player 1"},
+                "blue" : {"name_display" : "Blue player 2"}
+            },{
+                "white" : {"name_display" : "White player 3"},
+                "blue" : {"name_display" : "Blue player 4"}
+            },{
+                "white" : {"name_display" : "White player 5"},
+                "blue" : {"name_display" : "Blue player 6"}
+            },{
+                "white" : {"name_display" : "White player 7"},
+                "blue" : {"name_display" : "Blue player 8"}
+            },{
+                "white" : {"name_display" : "White player 9"},
+                "blue" : {"name_display" : "Blue player 10"}
+            },{
+                "white" : {"name_display" : "White player 11"},
+                "blue" : {"name_display" : "Blue player 12"}
+            },{
+                "white" : {"name_display" : "White player 13"},
+                "blue" : {"name_display" : "Blue player 14"}
+            },{
+                "white" : {"name_display" : "White player 15"},
+                "blue" : {"name_display" : "Blue player 16"}
+            }
+        ],
+        "winners":[
+            [1,2,1,2,1,2,1,2],
+            [2,1,2,1],
+            [1,2],
+            [2],
+            [2,2],
+            [2,2],
+            [2],
+            [2],
+            [2,2],
+            [2,2],
+            [2],
+            [2]
+        ],
+        "repechageUpperPlayers":[
+            [
+                {
+                    "white":{"name_display":"White player (A1)r1","from":"1"},
+                    "blue":{"name_display":"Blue player (A2)r2","from":"2"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"3"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"4"}
+                }
+            ],[
+                {"blue":{"name_display":"Blue player","from":"10"}},
+                {"blue":{"name_display":"Blue player","from":"9"}}
+            ],[
+                null
+            ],[
+                {"blue":{"name_display":"Blue player","from":"22"}}
+            ]
+        ],
+        "repechageLowerPlayers":[
+            [
+                {
+                    "white":{"name_display":"White player (A1)r1","from":"5"},
+                    "blue":{"name_display":"Blue player (A2)r2","from":"6"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"7"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"8"}
+                }
+            ],[
+                {"blue":{"name_display":"Blue player","from":"12"}},
+                {"blue":{"name_display":"Blue player","from":"11"}}
+            ],[
+               null
+            ],[
+                {"blue":{"name_display":"Blue player","from":"21"}}
+            ]
+        ],
+        "sequences":[
+            [1,2,3,4,5,6,7,8],
+            [9,10,11,12],
+            [21,22],
+            [27],
+            [13,14],
+            [17,18],
+            [23],
+            [25],
+            [15,16],
+            [19,20],
+            [24],
+            [26]
+        ],
+        "winnerList":[
+            {"award" : "Gold", "name" : "Place 1"},
+            {"award" : "Silver", "name" : "Place 2"},
+            {"award" : "Brown", "name" : "Place 3"},
+            {"award" : "Brown", "name" : "Place 4"}
+        ]
+    },
+    "32": {
+        "players": [
+            {
+                "white" : {"name_display" : "White player 1"},
+                "blue" : {"name_display" : "Blue player 2"}
+            },{
+                "white" : {"name_display" : "White player 3"},
+                "blue" : {"name_display" : "Blue player 4"}
+            },{
+                "white" : {"name_display" : "White player 5"},
+                "blue" : {"name_display" : "Blue player 6"}
+            },{
+                "white" : {"name_display" : "White player 7"},
+                "blue" : {"name_display" : "Blue player 8"}
+            },{
+                "white" : {"name_display" : "White player 9"},
+                "blue" : {"name_display" : "Blue player 10"}
+            },{
+                "white" : {"name_display" : "White player 11"},
+                "blue" : {"name_display" : "Blue player 12"}
+            },{
+                "white" : {"name_display" : "White player 13"},
+                "blue" : {"name_display" : "Blue player 14"}
+            },{
+                "white" : {"name_display" : "White player 15"},
+                "blue" : {"name_display" : "Blue player 16"}
+            },{
+                "white" : {"name_display" : "White player 17"},
+                "blue" : {"name_display" : "Blue player 18"}
+            },{
+                "white" : {"name_display" : "White player 19"},
+                "blue" : {"name_display" : "Blue player 20"}
+            },{
+                "white" : {"name_display" : "White player 21"},
+                "blue" : {"name_display" : "Blue player 22"}
+            },{
+                "white" : {"name_display" : "White player 23"},
+                "blue" : {"name_display" : "Blue player 24"}
+            },{
+                "white" : {"name_display" : "White player 25"},
+                "blue" : {"name_display" : "Blue player 26"}
+            },{
+                "white" : {"name_display" : "White player 27"},
+                "blue" : {"name_display" : "Blue player 28"}
+            },{
+                "white" : {"name_display" : "White player 29"},
+                "blue" : {"name_display" : "Blue player 30"}
+            },{
+                "white" : {"name_display" : "White player 31"},
+                "blue" : {"name_display" : "Blue player 32"}
+            }
+        ],
+        "winners":[
+            [0,0,1,1,1,1,1,1,2,2,2,2,2,2,2,2],
+            [0,0,1,1,2,2,2,2],
+            [0,0,2,2],
+            [1,2],
+            [1],
+            [2,2,2,2],
+            [2,2,2,2],
+            [2,2],
+            [2,2]
+        ],
+        "repechageUpperPlayers":[
+            [
+                {
+                    "white":{"name_display":"White player (A1)r1","from":"5"},
+                    "blue":{"name_display":"Blue player (A2)r2","from":"6"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"7"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"8"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"1"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"2"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"3"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"4"}
+                }
+            ],[
+                {"blue":{"name_display":"Blue player","from":"17"}},
+                {"blue":{"name_display":"Blue player","from":"18"}},
+                {"blue":{"name_display":"Blue player","from":"19"}},
+                {"blue":{"name_display":"Blue player","from":"20"}}
+            ],[
+                null, null
+            ],[
+                {"blue":{"name_display":"Blue player","from":"42"}},
+                {"blue":{"name_display":"Blue player","from":"41"}}
+            ],[
+            null
+            ],[
+                {"blue":{"name_display":"Blue player","from":"54"}}
+            ]
+        ],
+        "repechageLowerPlayers":[
+            [
+                {
+                    "white":{"name_display":"White player (A1)r1","from":"13"},
+                    "blue":{"name_display":"Blue player (A2)r2","from":"14"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"15"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"16"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"9"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"10"}
+                },{
+                    "white":{"name_display":"White player (B1)r1","from":"11"},
+                    "blue":{"name_display":"Blue player (B2)r5","from":"12"}
+                }
+            ],[
+                {"blue":{"name_display":"Blue player","from":"21"}},
+                {"blue":{"name_display":"Blue player","from":"22"}},
+                {"blue":{"name_display":"Blue player","from":"23"}},
+                {"blue":{"name_display":"Blue player","from":"24"}}
+            ],[
+                null, null
+            ],[
+                {"blue":{"name_display":"Blue player","from":"44"}},
+                {"blue":{"name_display":"Blue player","from":"43"}}
+            ],[
+            null
+            ],[
+                {"blue":{"name_display":"Blue player","from":"53"}}
+            ]
+        ],
+        "sequences":[
+            [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+            [17,18,19,20,21,22,23,24],
+            [24,26,27,28],
+            [29,30],
+            [31],
+            [26,26,27,28],
+            [33,34,35,36],
+            [45,46],
+            [49,50],
+            [55],
+            [57],
+            [29,30,31,32],
+            [37,38,39,40],
+            [47,48],
+            [51,52],
+            [56],
+            [58]
+        ],
+        "winnerList":[
+            {"award" : "Gold", "name" : "Place 1"},
+            {"award" : "Silver", "name" : "Place 2"},
+            {"award" : "Brown", "name" : "Place 3"},
+            {"award" : "Brown", "name" : "Place 4"}
+        ]
+    }
+}

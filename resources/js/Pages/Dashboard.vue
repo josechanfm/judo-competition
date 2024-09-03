@@ -63,14 +63,6 @@ import { Head } from "@inertiajs/vue3";
                 </a>
               </td>
               <td>
-                <a href="/manage/print/tournament_double?size=8" target="_blank"
-                  >8 Double</a
-                >&nbsp;
-                <a
-                  href="/manage/print/tournament_double?size=8&winner_line=true"
-                  target="_blank"
-                  >(with winner line)</a
-                >
               </td>
               <td></td>
               <td>

@@ -58,11 +58,7 @@ class TournamentQuarterController extends Controller
         } else {
             $repechagePlayers = null;
         }
-        // dd($repechagePlayers);
-
-        // dd($players);
         $filePath = storage_path('setting/game_tournament_quarter.json');
-        // if(File::exists($filePath)){
         $settings = File::json($filePath);
 
         $dummyPath = storage_path('setting/game_tournament_quarter_dataset.json');

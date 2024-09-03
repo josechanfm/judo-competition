@@ -173,8 +173,8 @@
                   <div class="">
                     <a-form-item label="Type" name="type">
                       <a-radio-group v-model:value="competition.type">
-                        <a-radio value="individual">Individual</a-radio>
-                        <a-radio value="teams">Teams</a-radio>
+                        <a-radio value="i">Individual</a-radio>
+                        <a-radio value="t">Teams</a-radio>
                       </a-radio-group>
                     </a-form-item>
                   </div>

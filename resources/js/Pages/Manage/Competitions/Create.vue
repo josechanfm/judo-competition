@@ -186,8 +186,8 @@
                   <div class="">
                     <a-form-item label="Type" name="type">
                       <a-radio-group v-model:value="create_competition.type">
-                        <a-radio value="individual">Individual</a-radio>
-                        <a-radio value="teams">Teams</a-radio>
+                        <a-radio value="I">Individual</a-radio>
+                        <a-radio value="T">Teams</a-radio>
                       </a-radio-group>
                     </a-form-item>
                   </div>
@@ -270,9 +270,9 @@
                 <div class="">
                   <a-form-item label="Competition System" name="system">
                     <a-radio-group v-model:value="create_competition.system">
-                      <a-radio value="q">Quarter</a-radio>
-                      <a-radio value="f">Full</a-radio>
-                      <a-radio value="k">KO</a-radio>
+                      <a-radio value="Q">Quarter</a-radio>
+                      <a-radio value="F">Full</a-radio>
+                      <a-radio value="K">KO</a-radio>
                     </a-radio-group>
                   </a-form-item>
                 </div>

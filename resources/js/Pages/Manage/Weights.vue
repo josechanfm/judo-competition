@@ -33,15 +33,15 @@
           "
           type="link"
         >
-          待全部過磅
+          Wait all weigh-in
         </a-button>
         <a-button
           v-else-if="this.athletes.find((x) => x.confirm == 1) == undefined"
           type="primary"
           class="bg-blue-500"
-          @click="confirmAllWeig123ht"
+          @click="confirmAllWeight"
         >
-          完成過磅
+          Finish weigh-in
         </a-button>
       </div>
       <a-table :dataSource="program.athletes" :columns="columns">

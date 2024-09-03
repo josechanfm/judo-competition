@@ -2,109 +2,108 @@
   <inertia-head title="Dashboard" />
 
   <ProgramLayout :competitionId="competition.id">
-    <template #header>
-      <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-      </div>
-    </template>
-    <div class="flex pt-4">
-      <div class="h-[90vh] resizable overflow-x-hidden">
-        <div class="bg-white px-2">
-          <div class="font-bold text-2xl py-2">Competition Progress</div>
-          <a-radio-group
-            v-model:value="currentSection.id"
-            button-style="solid"
-            @change="onSectionChange()"
-          >
-            <template v-for="section in competition.section_number" :key="section.id">
-              <a-radio-button :value="section">{{ section }}</a-radio-button>
-            </template>
-          </a-radio-group>
-          <div class="grid gap-6" :class="'grid-cols-' + competition.mat_number">
-            <div v-for="mat in competition.mat_number" :key="mat">
-              <p>
-                Section: {{ currentSection.mats[mat].program.section }} / Mat:
-                {{ currentSection.mats[mat].program.mat }}
-              </p>
-              <a-button
-                @click="
-                  currentSection.mats[mat].sequence--;
-                  onMatChange();
-                "
-                >-</a-button
-              >
-              <a-input
-                type="input"
-                v-model:value="currentSection.mats[mat].sequence"
-                @change="onMatChange()"
-                style="width: 80px; text-align: center"
-              />
-              <a-button
-                @click="
-                  currentSection.mats[mat].sequence++;
-                  onMatChange();
-                "
-                >+</a-button
-              >
-
-              <p>
-                Category: {{ currentSection.mats[mat].program.competition_category.name }}
-              </p>
-              <p>Weight: {{ currentSection.mats[mat].program.weight_code }}</p>
-              <template v-if="currentSection.mats[mat].bout">
-                <a-typography-title :level="3">
-                  <span v-if="currentSection.mats[mat].bout.white == 0">---</span
-                  ><span v-else>{{
-                    currentSection.mats[mat].bout.white_player?.name_display
-                  }}</span>
-                  vs
-                  <span v-if="currentSection.mats[mat].bout.white == 0">---</span
-                  ><span v-else>{{
-                    currentSection.mats[mat].bout.blue_player?.name_display
-                  }}</span>
-                </a-typography-title>
+    <a-page-header title="Competition Progress"> </a-page-header>
+    <template v-if="competition.status >= 2">
+      <div class="flex pt-4">
+        <div class="h-[90vh] resizable overflow-x-hidden">
+          <div class="bg-white px-2">
+            <div class="font-bold text-2xl py-2">Competition Progress</div>
+            <a-radio-group
+              v-model:value="currentSection.id"
+              button-style="solid"
+              @change="onSectionChange()"
+            >
+              <template v-for="section in competition.section_number" :key="section.id">
+                <a-radio-button :value="section">{{ section }}</a-radio-button>
               </template>
-              <div>
-                <div class="flex flex-col">
-                  <div class="overflow-x-auto">
-                    <div class="inline-block min-w-full">
-                      <div class="overflow-hidden">
-                        <table class="min-w-full text-center text-sm font-light">
-                          <thead
-                            class="border-b bg-white font-medium dark:border-neutral-500 dark:bg-neutral-600"
-                          >
-                            <tr>
-                              <th class="py-4 w-10">Program</th>
-                              <th class="py-4 w-10">Sequence</th>
-                              <th class="py-4 w-10">In Program</th>
-                              <th class="py-4 w-10">Queue</th>
-                              <th class="py-4 w-10">White</th>
-                              <th class="py-4 w-10">Blue</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <template v-for="bout in competition.bouts">
-                              <tr
-                                :key="bout.id"
-                                v-if="bout.mat == mat && bout.section == selectSection"
-                                class="border-b dark:border-neutral-500 dark:bg-neutral-600 odd:bg-neutral-100"
-                              >
-                                <td class="py-4 w-10">{{ bout.program_id }}</td>
-                                <td class="py-4 w-10">{{ bout.sequence }}</td>
-                                <td class="py-4 w-10">
-                                  {{ bout.in_program_sequence }}
-                                </td>
-                                <td class="py-4 w-10">{{ bout.queue }}</td>
-                                <td class="py-4 w-10">
-                                  {{ bout.white_player?.name_display }}
-                                </td>
-                                <td class="py-4 w-10">
-                                  {{ bout.blue_player?.name_display }}
-                                </td>
+            </a-radio-group>
+            <div class="grid gap-6" :class="'grid-cols-' + competition.mat_number">
+              <div v-for="mat in competition.mat_number" :key="mat">
+                <p>
+                  Section: {{ currentSection.mats[mat].program.section }} / Mat:
+                  {{ currentSection.mats[mat].program.mat }}
+                </p>
+                <a-button
+                  @click="
+                    currentSection.mats[mat].sequence--;
+                    onMatChange();
+                  "
+                  >-</a-button
+                >
+                <a-input
+                  type="input"
+                  v-model:value="currentSection.mats[mat].sequence"
+                  @change="onMatChange()"
+                  style="width: 80px; text-align: center"
+                />
+                <a-button
+                  @click="
+                    currentSection.mats[mat].sequence++;
+                    onMatChange();
+                  "
+                  >+</a-button
+                >
+
+                <p>
+                  Category:
+                  {{ currentSection.mats[mat].program.competition_category.name }}
+                </p>
+                <p>Weight: {{ currentSection.mats[mat].program.weight_code }}</p>
+                <template v-if="currentSection.mats[mat].bout">
+                  <a-typography-title :level="3">
+                    <span v-if="currentSection.mats[mat].bout.white == 0">---</span
+                    ><span v-else>{{
+                      currentSection.mats[mat].bout.white_player?.name_display
+                    }}</span>
+                    vs
+                    <span v-if="currentSection.mats[mat].bout.white == 0">---</span
+                    ><span v-else>{{
+                      currentSection.mats[mat].bout.blue_player?.name_display
+                    }}</span>
+                  </a-typography-title>
+                </template>
+                <div>
+                  <div class="flex flex-col">
+                    <div class="overflow-x-auto">
+                      <div class="inline-block min-w-full">
+                        <div class="overflow-hidden">
+                          <table class="min-w-full text-center text-sm font-light">
+                            <thead
+                              class="border-b bg-white font-medium dark:border-neutral-500 dark:bg-neutral-600"
+                            >
+                              <tr>
+                                <th class="py-4 w-10">Program</th>
+                                <th class="py-4 w-10">Sequence</th>
+                                <th class="py-4 w-10">In Program</th>
+                                <th class="py-4 w-10">Queue</th>
+                                <th class="py-4 w-10">White</th>
+                                <th class="py-4 w-10">Blue</th>
                               </tr>
-                            </template>
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              <template v-for="bout in competition.bouts">
+                                <tr
+                                  :key="bout.id"
+                                  v-if="bout.mat == mat && bout.section == selectSection"
+                                  class="border-b dark:border-neutral-500 dark:bg-neutral-600 odd:bg-neutral-100"
+                                >
+                                  <td class="py-4 w-10">{{ bout.program_id }}</td>
+                                  <td class="py-4 w-10">{{ bout.sequence }}</td>
+                                  <td class="py-4 w-10">
+                                    {{ bout.in_program_sequence }}
+                                  </td>
+                                  <td class="py-4 w-10">{{ bout.queue }}</td>
+                                  <td class="py-4 w-10">
+                                    {{ bout.white_player?.name_display }}
+                                  </td>
+                                  <td class="py-4 w-10">
+                                    {{ bout.blue_player?.name_display }}
+                                  </td>
+                                </tr>
+                              </template>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -113,9 +112,28 @@
             </div>
           </div>
         </div>
+        <div class="bg-gray-200 p-4 grow">Resize this div</div>
       </div>
-      <div class="bg-gray-200 p-4 grow">Resize this div</div>
-    </div>
+    </template>
+    <template v-else>
+      <div class="p-6">
+        <a-card>
+          <a-empty>
+            <template #description>
+              <h3 class="font-bold text-lg">no schedule</h3>
+              <p>no schedule hint</p>
+              <inertia-link
+                :href="route('manage.competition.programs.index', competition.id)"
+              >
+                <a-button type="primary" class="bg-blue-500">
+                  no schedule action
+                </a-button>
+              </inertia-link>
+            </template>
+          </a-empty>
+        </a-card>
+      </div>
+    </template>
   </ProgramLayout>
 </template>
 <style>

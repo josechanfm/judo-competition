@@ -45,17 +45,13 @@ class Program extends Model
         return $this->hasMany(Bout::class)->orderBy('in_program_sequence');
     }
 
-    public function category(){
-        return $this->belongsTo(CompetitionCategory::class);
-    }
-
     public function competition()
     {
-        return $this->category->competition();
+        return $this->competitionCategory->competition();
     }
     public function athletes()
     {
-        return $this->belongsToMany(Athlete::class,'program_athlete')->withPivot(['seed','seat','weight','is_weight_passed','rank','score','confirm']);
+        return $this->belongsToMany(Athlete::class, 'program_athlete')->withPivot(['seed', 'seat', 'weight', 'is_weight_passed', 'rank', 'score', 'confirm']);
     }
 
     public function programsAthletes()
@@ -109,14 +105,37 @@ class Program extends Model
         $athletesCount = $this->athletes()->count();
 
         // convert to rrb if athlete count < 8
-        if ($athletesCount < 6) {
-            $this->contest_system = self::RRB;
+        if ($this->competition->system == 'Q') {
+            $this->contest_system = self::ERM;
         }
 
-        if ($athletesCount > 32) {
+        if ($athletesCount == 2) {
             $this->contest_system = self::KOS;
         }
 
+        if ($athletesCount == 3) {
+            if ($this->competition->small_system[3] == false) {
+                $this->contest_system = self::RRB;
+            } else {
+                $this->contest_system = self::KOS;
+            }
+        }
+        if ($athletesCount == 4) {
+            if ($this->competition->small_system[4] == false) {
+                $this->contest_system = self::RRB;
+            } else {
+                $this->contest_system = self::ERM;
+            }
+        }
+
+        if ($athletesCount == 5) {
+            if ($this->competition->small_system[5] == false) {
+                $this->contest_system = self::RRB;
+            } else {
+                $this->contest_system = self::RRBA;
+            }
+        }
+        // dd($this->contest_system);
         $this->updateChartSize();
         $this->save();
     }

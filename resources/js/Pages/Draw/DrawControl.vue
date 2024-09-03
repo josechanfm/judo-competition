@@ -1,6 +1,6 @@
 <template>
   <ProgramLayout :competitionId="competition.id">
-    <a-page-header title="抽籤">
+    <a-page-header title="Draw">
       <template #extra>
         <a-button type="link" v-if="competition.status > COMPETITION_STATUS.seat_locked">
           lock
@@ -79,7 +79,7 @@
       </div>
 
       <div class="p-6 flex flex-col lg:flex-row gap-4">
-        <div class="w-full lg:w-96">
+        <div class="w-full">
           <a-card
             :active-tab-key="activeGender"
             :tab-list="genderTabList"
@@ -100,9 +100,11 @@
                       @click="activeProgramId = item.id"
                       :data-status="item.status"
                     >
-                      <a-tag v-if="item.status > 0" color="success">已抽籤</a-tag>
-                      <a-tag v-else color="processing">待抽籤</a-tag>
-                      {{ item.weight_code }}
+                      <div class="flex">
+                        <a-tag v-if="item.status > 0" color="success">已抽籤</a-tag>
+                        <a-tag v-else color="processing">待抽籤</a-tag>
+                        {{ item.weight_code }}
+                      </div>
                     </a-list-item>
                   </template>
                 </a-list>
@@ -111,7 +113,7 @@
           </a-card>
         </div>
 
-        <div class="flex-1">
+        <div class="shrink-0 w-2/3 flex items-center justify-center">
           <a-empty v-if="!activeProgramId">
             <template #description>
               <h3 class="text-lg text-slate-500 font-bold">尚未選擇組別</h3>
@@ -514,6 +516,9 @@ export default {
   @apply grid-cols-1;
   @apply lg:grid-cols-4;
   @apply gap-3;
+}
+.ant-tabs-nav-list {
+  @apply w-16;
 }
 
 .control-button {

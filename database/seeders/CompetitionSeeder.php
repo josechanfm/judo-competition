@@ -33,12 +33,12 @@ class CompetitionSeeder extends Seeder
             'is_cancelled' => 0,
             'status' => 0,
             'system' => 'Q',
-            'seeding' => 2,
+            'seeding' => 4,
             'small_system' => [
-                ["2" => "true"],
-                ["3" => "true"],
-                ["4" => "true"],
-                ["5" => "true"]
+                2 => false,
+                3 => true,
+                4 => false,
+                5 => true
             ],
             'type' => 'I',
             'gender' => 2,
@@ -46,7 +46,7 @@ class CompetitionSeeder extends Seeder
 
         ]);
 
-        $athletes = Athlete::factory(1)->count(200)->create(['competition_id' => $competition->id, 'team_id' => 1]);
+        $athletes = Athlete::factory(1)->count(640)->create(['competition_id' => $competition->id, 'team_id' => 1]);
         $athleteId = 0;
 
         $programs = [

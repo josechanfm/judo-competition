@@ -2,42 +2,41 @@
   <inertia-head title="Competition Program" />
 
   <ProgramLayout :competitionId="competition.id">
-    <div class="py-12 mx-4">
+    <a-page-header title="Competition Program Manage">
+      <template #tags>
+        <a-tag color="processing">
+          <div class="flex items-center gap-1">
+            <AppstoreOutlined />
+            {{ competition.mat_number }} Mats
+          </div>
+        </a-tag>
+        <a-tag color="processing">
+          <div class="flex items-center gap-1">
+            <ScheduleOutlined />
+            {{ competition.section_number }} Sections
+          </div>
+        </a-tag>
+      </template>
+      <template #extra>
+        <span v-if="competition.status < 1">Unlocked list of athletes</span>
+        <a-button
+          v-else-if="competition.status === 1"
+          type="primary"
+          class="bg-blue-500"
+          @click="confirmProgramArrangement"
+          >Lock sequence</a-button
+        >
+        <span v-else class="text-blue-500">Sequence already Lock</span>
+      </template>
+    </a-page-header>
+    <div class="mx-6">
       <div class="overflow-hidden flex flex-col gap-3">
-        <div class="flex justify-between">
-          <div class="flex gap-3">
-            <div class="text-xl font-bold">Competition Program Manage</div>
-            <div class="flex items-center">
-              <a-tag color="processing">
-                <div class="flex items-center gap-1">
-                  <AppstoreOutlined />
-                  {{ competition.mat_number }} Mats
-                </div>
-              </a-tag>
-              <a-tag color="processing">
-                <div class="flex items-center gap-1">
-                  <ScheduleOutlined />
-                  {{ competition.section_number }} Sections
-                </div>
-              </a-tag>
-            </div>
-          </div>
-          <div>
-            <span v-if="competition.status < 1">未鎖定運動員名單</span>
-            <a-button
-              v-else-if="competition.status === 1"
-              type="primary"
-              class="bg-blue-500"
-              @click="confirmProgramArrangement"
-              >鎖定排序</a-button
-            >
-            <span v-else class="text-blue-500">排序已鎖定</span>
-          </div>
-        </div>
         <div class="flex w-full gap-6">
           <div class="flex flex-1 flex-col">
             <div class="flex justify-between">
-              <div class="text-xl font-bold mt-6 mb-2">共 {{ programs.length }} 項目</div>
+              <div class="text-xl font-bold mt-6 mb-2">
+                Totol {{ programs.length }} Programs
+              </div>
               <a-radio-group option-type="button" v-model:value="view">
                 <a-radio-button value="list">
                   <UnorderedListOutlined />
@@ -49,15 +48,36 @@
             </div>
             <div v-if="view === 'list'" class="my-2 shadow-lg bg-white rounded-lg">
               <div class="pb-2 mx-4 mt-2 flex justify-between">
-                <div class="text-xl font-bold">全部組別</div>
+                <div class="text-xl font-bold">All Categories</div>
                 <div class="">
                   <a-button type="link">
-                    <template #icon> <DownloadOutlined /> </template>匯出pdf</a-button
+                    <div class="flex items-center gap-2">
+                      <DownloadOutlined />Print pdf
+                    </div></a-button
                   >
+                  <!-- <a-button
+                    v-if="edit == false"
+                    type="link"
+                    @click="
+                      () => {
+                        this.edit = true;
+                      }
+                    "
+                  >
+                    <div class="flex items-center gap-2"><EditOutlined />Edit</div>
+                  </a-button>
+                  <a-button v-if="edit == true" type="link" @click="this.savePrograms">
+                    <div class="flex items-center gap-2">
+                      <SaveOutlined /> Edit
+                    </div></a-button
+                  > -->
                 </div>
               </div>
               <a-table :dataSource="programs" :columns="columns">
                 <template #bodyCell="{ column, record }">
+                  <template v-if="column.dataIndex === 'category_group'">
+                    {{ record.competition_category.name }}
+                  </template>
                   <template v-if="column.dataIndex === 'operation'">
                     <a-button
                       :href="
@@ -72,6 +92,11 @@
                   </template>
                   <template v-if="column.dataIndex === 'athletes'">
                     <span>{{ record.athletes_count }}</span>
+                  </template>
+                  <template v-if="column.dataIndex === 'contest_system'">
+                    <template v-if="edit == false">
+                      {{ record.contest_system }}
+                    </template>
                   </template>
                   <template v-else>
                     {{ record[column.dataIndex] }}
@@ -88,11 +113,11 @@
                   <div v-if="!editDraggable">
                     <div v-if="!multipleMove">
                       <a-button type="link" @click="multipleMove = !multipleMove"
-                        >批量移動(場地/時段)</a-button
+                        >Batch move(mat/section)</a-button
                       >
                     </div>
                     <div v-else class="flex gap-2 items-center pl-4">
-                      <span> 將 {{ selectedPrograms.length }} 項移動至： </span>
+                      <span> Move {{ selectedPrograms.length }} items to: </span>
                       <a-select class="w-32" v-model:value="batchMoveForm.day" name="day">
                         <a-select-option
                           v-for="day in competition.days"
@@ -112,7 +137,7 @@
                           :id="`opt-section-${section}`"
                           :key="section"
                           :value="section"
-                          >時段 {{ section }}
+                          >Section {{ section }}
                         </a-select-option>
                       </a-select>
                       <a-select class="w-24" v-model:value="batchMoveForm.mat" name="mat">
@@ -121,11 +146,11 @@
                           :id="`opt-mat-${mat}`"
                           :key="mat"
                           :value="mat"
-                          >場地 {{ mat }}
+                          >Mat {{ mat }}
                         </a-select-option>
                       </a-select>
-                      <a-button @click="batchMovePrograms">移動並保存</a-button>
-                      <a-button @click="cancelMovePrograms">取消</a-button>
+                      <a-button @click="batchMovePrograms">Move and save</a-button>
+                      <a-button @click="cancelMovePrograms">Cancel</a-button>
                     </div>
                   </div>
                 </div>
@@ -135,22 +160,22 @@
                       type="link"
                       v-if="!editDraggable"
                       @click="editDraggable = !editDraggable"
-                      >編輯</a-button
+                      >Edit</a-button
                     >
                     <template v-else>
-                      <a-button type="link" @click="saveDrag">保存</a-button>
-                      <a-button type="link" @click="cancelDrag">取消</a-button>
+                      <a-button type="link" @click="saveDrag">Save</a-button>
+                      <a-button type="link" @click="cancelDrag">Cancel</a-button>
                     </template>
                   </div>
                   <a-button type="link">
-                    <template #icon> <DownloadOutlined /> </template>匯出pdf</a-button
+                    <template #icon> <DownloadOutlined /> </template>Print pdf</a-button
                   >
                 </div>
               </div>
               <div v-for="day in competition.days" class="mb-6" :key="day">
                 <div class="text-2xl font-medium mb-6">{{ day }}</div>
                 <div v-for="section in competition.section_number" :key="section">
-                  <div class="font-bold text-lg mb-3">時段 {{ section }}</div>
+                  <div class="font-bold text-lg mb-3">Section {{ section }}</div>
                   <div class="grid grid-cols-2 gap-3 mb-6">
                     <a-card
                       v-for="mat in competition.mat_number"
@@ -160,7 +185,7 @@
                       style="min-height: 300px"
                     >
                       <template #extra>
-                        {{ matSecProgramsCount(day, section, mat) }}場,
+                        {{ matSecProgramsCount(day, section, mat) }}Mat,
                         {{ matSecMaxTimeEst(day, section, mat) }}
                         <a-dropdown class="ml-3" placement="bottomRight">
                           <a-button type="text">
@@ -346,18 +371,18 @@
           </div>
           <div class="w-72 flex flex-col">
             <div class="">
-              <h3 class="font-bold text-lg mb-3">更多功能</h3>
-              <div class="flex flex-col gap-2"><a>查看對陣</a></div>
+              <h3 class="font-bold text-lg mb-3">More function</h3>
+              <div class="flex flex-col gap-2"><a>View Bouts</a></div>
             </div>
             <div class="">
-              <h3 class="font-bold text-lg mb-3">文件匯出</h3>
-              <div class="flex flex-col gap-2">
+              <h3 class="font-bold text-lg mb-3">Pritn Files</h3>
+              <!-- <div class="flex flex-col gap-2">
                 <a>比賽秩序表</a>
                 <a>各場地安排</a>
                 <a>各組別項目表</a>
                 <a>全部賽程表</a>
                 <a>全部上線表</a>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -376,9 +401,11 @@ import {
   UnorderedListOutlined,
   AppstoreOutlined,
   HolderOutlined,
+  EditOutlined,
   LockOutlined,
   ScheduleOutlined,
   EnvironmentOutlined,
+  SaveOutlined,
   DownloadOutlined,
   ClockCircleOutlined,
   MoreOutlined,
@@ -391,10 +418,12 @@ export default {
     UnorderedListOutlined,
     AppstoreOutlined,
     HolderOutlined,
+    EditOutlined,
     LockOutlined,
     ScheduleOutlined,
     EnvironmentOutlined,
     DownloadOutlined,
+    SaveOutlined,
     ClockCircleOutlined,
     MoreOutlined,
     draggable: VueDraggableNext,
@@ -407,6 +436,7 @@ export default {
       editDraggable: false,
       multipleMove: false,
       selectedPrograms: [],
+      edit: false,
       partitionedPrograms: {},
       batchMoveForm: {
         from: {

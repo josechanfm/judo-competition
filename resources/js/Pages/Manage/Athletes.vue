@@ -2,11 +2,7 @@
   <inertia-head title="Athletes List" />
 
   <ProgramLayout :competitionId="competition.id">
-    <template #header>
-      <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Athletes List</h2>
-      </div>
-    </template>
+    <a-page-header></a-page-header>
     <div class="py-12 mx-8">
       <div class="overflow-hidden flex flex-col gap-3">
         <div class="text-right">
@@ -62,7 +58,7 @@
                 <a-button @click="onEditRecord(record)">Edit</a-button>
               </template>
               <template v-else-if="column.dataIndex === 'team'">
-                {{ record.team.name }}
+                {{ record?.team?.name }}
               </template>
               <template v-else-if="column.dataIndex === 'program'">
                 <span v-for="program in record.programs" :key="program.id">{{

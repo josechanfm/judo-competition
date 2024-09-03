@@ -165,12 +165,12 @@ class Bout extends Model
 
     public function whiteAthlete()
     {
-        return $this->belongsTo(Athlete::class, 'white', 'id');
+        return $this->belongsTo(ProgramAthlete::class, 'white', 'id');
     }
 
     public function blueAthlete()
     {
-        return $this->belongsTo(Athlete::class, 'blue', 'id');
+        return $this->belongsTo(ProgramAthlete::class, 'blue', 'id');
     }
     public function result()
     {
@@ -255,13 +255,13 @@ class Bout extends Model
             return $this->blueAthlete;
         }
 
-        return $this->whiteAthlete;
+        return $this->whiteAthlete->athlete;
     }
 
     public function getLoser(): ProgramAthlete|null
     {
         if ($this->winner === $this->blue) {
-            return $this->whiteAthlete;
+            return $this->whiteAthlete->athlete;
         }
 
         return $this->blueAthlete;

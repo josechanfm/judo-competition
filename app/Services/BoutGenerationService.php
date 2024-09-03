@@ -181,36 +181,41 @@ class BoutGenerationService
         });
     }
 
+    public function weightByeBouts($bouts, $status = 0): void
+    {
+        $bouts->each(function (Bout $bout) use ($status) {
+            if ($bout->isWhiteBye() || $bout->isBlueBye()) {
+                $bout->byeRise($status);
+            }
+        });
+    }
+
     /**
      * 使所有至少有一方未過體重場次無效
      *
      * @return void
      */
-    public function invalidateWeightBouts($date): void
+    public function invalidateWeightBouts($bouts): void
     {
-        $this->getSections()->each(function (array $section) use ($date) {
-            if ($section['date'] == $date) {
-                $bouts = $this->getBoutsUnderSection(...$section);
-
-                // todo: only process outer layer
-                $bouts->where('queue', '!=', 0)->each(function (Bout $bout) {
-                    $bout->load('whiteAthlete', 'blueAthlete');
-                    if (
-                        ($bout->white > 0 && $bout->blue > 0) &&
-                        (!$bout->whiteAthlete->is_weight_passed &&
-                            !$bout->blueAthlete->is_weight_passed)
-                    ) {
-                        $bout->cancel();
-                    } else if (($bout->white > 0 && $bout->blue > 0) &&
-                        (!$bout->whiteAthlete->is_weight_passed)
-                    ) {
-                        $bout->cancel($bout->blue);
-                    } else if (($bout->white > 0 && $bout->blue > 0) &&
-                        (!$bout->blueAthlete->is_weight_passed)
-                    ) {
-                        $bout->cancel($bout->white);
-                    }
-                });
+        // todo: only process outer layer
+        $bouts->where('queue', '!=', 0)->each(function (Bout $bout) {
+            // dd($bout->load('whiteAthlete', 'blueAthlete'));
+            $bout->load('whiteAthlete', 'blueAthlete');
+            // dd($bout->blueAthlete);
+            if (
+                ($bout->white > 0 && $bout->blue > 0) &&
+                (!$bout->whiteAthlete->is_weight_passed &&
+                    !$bout->blueAthlete->is_weight_passed)
+            ) {
+                $bout->cancel();
+            } else if (($bout->white > 0 && $bout->blue > 0) &&
+                (!$bout->whiteAthlete->is_weight_passed)
+            ) {
+                $bout->cancel($bout->blue);
+            } else if (($bout->white > 0 && $bout->blue > 0) &&
+                (!$bout->blueAthlete->is_weight_passed)
+            ) {
+                $bout->cancel($bout->white);
             }
         });
     }

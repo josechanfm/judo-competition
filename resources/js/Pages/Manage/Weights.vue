@@ -1,101 +1,130 @@
 <template>
   <ProgramLayout :competitionId="competition.id">
     <a-page-header title="Weigh-in"> </a-page-header>
-    <div class="py-12 mx-8 flex flex-col gap-3">
-      <div class="bg-white p-2 rounded-md shadow-md">
-        <div class="text-xl font-bold mb-4">Weight Choose</div>
-        <a-form>
-          <a-form-item label="Category" name="category">
-            <a-radio-group
-              v-model:value="categoryId"
-              button-style="solid"
-              @change="onChangeCategory"
-            >
-              <template v-for="category in competition.categories" :key="category">
-                <a-radio-button :value="category.id">{{ category.name }}</a-radio-button>
-              </template>
-            </a-radio-group>
-          </a-form-item>
-          <a-form-item label="Program" name="program">
-            <a-select
-              :options="programs"
-              :fieldNames="{ value: 'id', label: 'weight_code' }"
-              @change="onChangeProgram"
-            />
-          </a-form-item>
-        </a-form>
-      </div>
-      <div>
-        <a-button
-          v-if="
-            this.athletes.find((x) => x.confirm == 0 && x.is_weight_passed == null) !=
-            undefined
-          "
-          type="link"
-        >
-          Wait all weigh-in
-        </a-button>
-        <a-button
-          v-else-if="this.athletes.find((x) => x.confirm == 1) == undefined"
-          type="primary"
-          class="bg-blue-500"
-          @click="confirmAllWeight"
-        >
-          Finish weigh-in
-        </a-button>
-      </div>
-      <a-table :dataSource="program.athletes" :columns="columns">
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 'result'">
-            <CheckCircleOutlined
-              v-if="record.pivot.is_weight_passed == 1"
-              class="!text-green-800 dark:!text-green-400"
-            />
-            <CloseCircleOutlined
-              v-else-if="record.pivot.is_weight_passed == 0"
-              class="!text-red-800 dark:!text-red-400"
-            />
-            <QuestionCircleOutlined v-else />
-          </template>
-          <template v-if="column.key === 'program'">
-            <span>
-              {{ program.weight_code }}
-              {{ program.competition_category.name }}
-            </span>
-          </template>
-          <template v-else-if="column.dataIndex === 'weight'">
-            <div class="flex gap-3 justify-end">
-              <div class="font-bold flex gap-1 items-center" v-if="!record.confirmed">
-                <a-input-number
-                  v-model:value="record.pivot.weight"
-                  :default-value="0"
-                  name="weight"
-                  :min="0"
-                  :max="999"
-                  :precision="2"
-                  :step="0.01"
-                ></a-input-number
-                >kg
-              </div>
-              <span v-else class="font-bold"> {{ record.pivot.weight }} kg </span>
-              <a-button
-                @click="passWeight(record)"
-                name="pass"
-                shape="circle"
-                v-if="!record.confirmed"
+    <template v-if="competition.status >= 3">
+      <div class="mx-6 flex flex-col gap-3">
+        <div class="bg-white p-2 rounded-md shadow-md">
+          <div class="text-xl font-bold mb-4">Weight Choose</div>
+          <a-form>
+            <a-form-item label="Category" name="category">
+              <a-radio-group
+                v-model:value="categoryId"
+                button-style="solid"
+                @change="onChangeCategory"
               >
-                <template #icon>
-                  <CheckOutlined />
+                <template v-for="category in competition.categories" :key="category">
+                  <a-radio-button :value="category.id">{{
+                    category.name
+                  }}</a-radio-button>
                 </template>
-              </a-button>
-            </div>
+              </a-radio-group>
+            </a-form-item>
+            <a-form-item label="Program" name="program">
+              <a-select
+                :options="programs"
+                v-model:value="programId"
+                :fieldNames="{ value: 'id', label: 'weight_code' }"
+                @change="onChangeProgram"
+              />
+            </a-form-item>
+          </a-form>
+        </div>
+        <div v-if="program.athletes != null">
+          <a-button
+            v-if="
+              this.program.athletes.find(
+                (x) => x.pivot.confirm == 0 && x.pivot.is_weight_passed == null
+              ) != undefined
+            "
+            type="link"
+          >
+            Program athletes not weighed
+          </a-button>
+
+          <a-button
+            v-else-if="
+              this.program.athletes.find((x) => x.pivot.confirm == 1) == undefined
+            "
+            type="primary"
+            class="bg-blue-500"
+            @click="confirmAllWeight"
+          >
+            Finish weigh-in
+          </a-button>
+          <span v-else>Program athletes weighed</span>
+        </div>
+        <a-table :dataSource="program.athletes" :columns="columns">
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'result'">
+              <CheckCircleOutlined
+                v-if="record.pivot.is_weight_passed == 1"
+                class="!text-green-800 dark:!text-green-400"
+              />
+              <CloseCircleOutlined
+                v-else-if="record.pivot.is_weight_passed == 0"
+                class="!text-red-800 dark:!text-red-400"
+              />
+              <QuestionCircleOutlined v-else />
+            </template>
+            <template v-if="column.key === 'program'">
+              <span>
+                {{ program.weight_code }}
+                {{ program.competition_category.name }}
+              </span>
+            </template>
+            <template v-else-if="column.dataIndex === 'weight'">
+              <div class="flex gap-3 justify-end">
+                <div class="font-bold flex gap-1 items-center" v-if="!record.confirmed">
+                  <a-input-number
+                    v-model:value="record.pivot.weight"
+                    :default-value="0"
+                    name="weight"
+                    :min="0"
+                    :max="999"
+                    :precision="2"
+                    :step="0.01"
+                  ></a-input-number
+                  >kg
+                </div>
+                <span v-else class="font-bold"> {{ record.pivot.weight }} kg </span>
+                <a-button
+                  @click="passWeight(record)"
+                  name="pass"
+                  shape="circle"
+                  v-if="!record.confirmed"
+                >
+                  <template #icon>
+                    <CheckOutlined />
+                  </template>
+                </a-button>
+              </div>
+            </template>
+            <template v-else>
+              {{ record[column.dataIndex] }}
+            </template>
           </template>
-          <template v-else>
-            {{ record[column.dataIndex] }}
-          </template>
-        </template>
-      </a-table>
-    </div>
+        </a-table>
+      </div>
+    </template>
+    <template v-else>
+      <div class="p-6">
+        <a-card>
+          <a-empty>
+            <template #description>
+              <h3 class="font-bold text-lg">Not draw</h3>
+              <p>draw not finish</p>
+              <inertia-link
+                :href="route('manage.competition.athletes.drawControl', competition.id)"
+              >
+                <a-button type="primary" class="bg-blue-500">
+                  go to athletes draw
+                </a-button>
+              </inertia-link>
+            </template>
+          </a-empty>
+        </a-card>
+      </div>
+    </template>
   </ProgramLayout>
 </template>
 
@@ -132,30 +161,29 @@ export default {
   data() {
     return {
       categoryId: null,
+      programId: null,
       programs: [],
-      program: {
-        athletes: [],
-      },
+      program: {},
       athletes: [],
       columns: [
         {
           key: "name_display",
-          title: "運動員",
+          title: "Athletes",
           dataIndex: "name_display",
         },
         {
           key: "result",
-          title: "過磅結果",
+          title: "Weigh-in result",
           dataIndex: "result",
-          width: 100,
+          width: 150,
         },
         {
           key: "program",
-          title: "組別",
+          title: "Program",
         },
         {
           key: "weight",
-          title: "過磅重量",
+          title: "Weight",
           dataIndex: "weight",
           align: "right",
         },
@@ -191,6 +219,7 @@ export default {
           preserveScroll: true,
           onSuccess: (page) => {
             this.$message.success("已確定");
+            this.onChangeProgram(this.programId);
           },
           onError: (error) => {
             this.$message.error(error.response.data.message);
@@ -200,7 +229,6 @@ export default {
     },
 
     confirmAllWeight() {
-      console.log(this.filtered.date[0]);
       Modal.confirm({
         title: "確認過磅",
         content: "確認過磅後，將無法再修改過磅結果",
@@ -211,7 +239,7 @@ export default {
             .post(
               route("manage.competition.athletes.weights.lock", {
                 competition: this.competition.id,
-                date: this.filtered.date[0],
+                program: this.program.id,
               })
             )
             .then(() => {

@@ -124,7 +124,7 @@ class ProgramController extends Controller
     {
 
         $athletes = $program->draw();
-   
+
         $program->confirmDraw();
 
         return response()->json([
@@ -504,5 +504,4 @@ class ProgramController extends Controller
         });
         return redirect()->back();
     }
-
 }

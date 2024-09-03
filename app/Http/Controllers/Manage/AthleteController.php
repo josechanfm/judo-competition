@@ -112,13 +112,13 @@ class AthleteController extends Controller
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls',
         ]);
-        
+
         $competition->programs()->each(function ($program) {
             $program->athletes()->detach();
         });
-    
+
         $competition->athletes()->delete();
-        
+
         // remove all athletes in programs
 
         $import = new AthletesImport($competition);
@@ -187,6 +187,7 @@ class AthleteController extends Controller
     {
         $competition->categories;
         $competition->programsAthletes;
+        // dd($competition->programsAthletes);
         return Inertia::render('Manage/Weights', [
             'competition' => $competition,
         ]);
@@ -202,23 +203,21 @@ class AthleteController extends Controller
 
     public function Weightslock(Competition $competition, Request $request)
     {
+        // dd($request->all());
+        $program = Program::where('id', $request->program)->first();
         // TODO: check whether all athletes have weight-in
-        if ($competition->programsAthletes()->where('is_weight_passed', null)->whereHas('program', function ($query) use ($request) {
-            return $query->where('date', $request->date);
-        })->exists()) {
+        if ($program->athletes()->where('is_weight_passed', null)->exists()) {
             abort(409, 'Not all athletes have confirm');
         } else {
-            $competition->programsAthletes()->whereHas('program', function ($query) use ($request) {
-                return $query->where('date', $request->date);
-            })->update(['confirm' => 1]);
+            $program->athletes()->update(['confirm' => 1]);
         }
         // return false;
         // call reflow sequence
         $service = (new BoutGenerationService($competition));
         // dd($service);
-        $service->invalidateWeightBouts($request->date);
-        $service->invalidateByeBouts($request->date, 1);
-        $service->resequence($request->date);
+        $service->invalidateWeightBouts($program->bouts);
+        $service->weightByeBouts($program->bouts);
+        $service->resequence();
 
         $competition->update(['status' => 4]);
         return redirect()->back();

@@ -61,6 +61,7 @@ class CompetitionController extends Controller
             'seeding' => '',
             'name_secondary' => '',
             'type' => '',
+            'categories' => '',
             'date_start' => 'required',
             'date_end' => 'required',
             'mat_number' => 'required',
@@ -75,9 +76,7 @@ class CompetitionController extends Controller
         ]);
         $token = Str::random(12);
         $competition_type = $validated['competition_type'];
-        $gameCategories = GameCategory::where('game_type_id', $validated['game_type_id'])->get()->toArray();
         // dd(value_column($gameType));
-        unset($validated['game_type_id']);
         $competition = Competition::create([
             ...$validated,
             'token' => $token,
@@ -85,10 +84,8 @@ class CompetitionController extends Controller
             'is_cancelled' => 0,
         ]);
         CompetitionType::create([...$competition_type, 'competition_id' => $competition->id]);
-        foreach ($gameCategories as $gc) {
+        foreach ($validated['categories'] as $gc) {
             // dd($gc);
-            unset($gc['game_type_id']);
-            unset($gc['id']);
             $seq = 1;
             $competitionCategory = CompetitionCategory::create([...$gc, 'competition_id' => $competition->id]);
 
@@ -135,6 +132,7 @@ class CompetitionController extends Controller
     public function edit(Competition $competition)
     {
         $competition->competition_type;
+        // dd(CompetitionCategory::where('competition_id', $competition->id)->get());
         return Inertia::render('Manage/Competitions/Edit', [
             'competition' => $competition,
             'competition_categories' => CompetitionCategory::where('competition_id', $competition->id)->get(),
@@ -166,6 +164,7 @@ class CompetitionController extends Controller
             'section_number' => 'required',
             'days' => 'required',
             'remark' => '',
+            'categories' => '',
             'competition_type.name' => 'required_if:competition_type,true',
             'competition_type.language' => 'required_if:compcompetition_typeetition,true',
             'competition_type.is_language_secondary_enabled' => 'required_if:competition_type,true|boolean',

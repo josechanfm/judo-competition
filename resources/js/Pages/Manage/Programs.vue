@@ -18,12 +18,19 @@
         </a-tag>
       </template>
       <template #extra>
+        <a-button
+          v-if="competition.status === 0"
+          type="primary"
+          class="bg-blue-500"
+          @click="confirmLockAthlets"
+          >Lock list of athletes</a-button
+        >
         <span v-if="competition.status < 1">Unlocked list of athletes</span>
         <a-button
           v-else-if="competition.status === 1"
           type="primary"
           class="bg-blue-500"
-          @click="confirmProgramArrangement"
+          @click="confirmLockSequences"
           >Lock sequence</a-button
         >
         <span v-else class="text-blue-500">Sequence already Lock</span>
@@ -395,11 +402,14 @@
 import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 import dayjs from "dayjs";
 import { message } from "ant-design-vue";
+import { Modal } from "ant-design-vue";
+import { createVNode } from "vue";
 import { VueDraggableNext } from "vue-draggable-next";
 import duration from "dayjs/plugin/duration";
 import {
   UnorderedListOutlined,
   AppstoreOutlined,
+  ExclamationCircleOutlined,
   HolderOutlined,
   EditOutlined,
   LockOutlined,
@@ -416,6 +426,7 @@ export default {
   components: {
     ProgramLayout,
     UnorderedListOutlined,
+    ExclamationCircleOutlined,
     AppstoreOutlined,
     HolderOutlined,
     EditOutlined,
@@ -595,6 +606,34 @@ export default {
           console.log("error", error);
         });
     },
+    confirmLockAthlets() {
+      Modal.confirm({
+        title: "Do you want to lock list of athletes?",
+        icon: createVNode(ExclamationCircleOutlined),
+        style: "top:20vh",
+        onOk: () => {
+          this.lockAthletes();
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+        class: "test",
+      });
+    },
+    confirmLockSequences() {
+      Modal.confirm({
+        title: "Do you want to lock list of sequences?",
+        icon: createVNode(ExclamationCircleOutlined),
+        style: "top:20vh",
+        onOk: () => {
+          this.confirmProgramArrangement();
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+        class: "test",
+      });
+    },
     onCreate() {
       this.$refs.formRef
         .validateFields()
@@ -643,6 +682,20 @@ export default {
             program.date === date && program.section === section && program.mat === mat
           );
         }) ?? []
+      );
+    },
+    lockAthletes() {
+      this.$inertia.post(
+        route("manage.competition.athletes.lock", this.competition.id),
+        "",
+        {
+          onSuccess: (page) => {
+            console.log(page);
+          },
+          onError: (err) => {
+            console.log(err);
+          },
+        }
       );
     },
     toggleProgramChecked(program) {

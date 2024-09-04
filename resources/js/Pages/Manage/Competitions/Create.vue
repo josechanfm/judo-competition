@@ -59,17 +59,32 @@
           >
             <div class="flex flex-col">
               <div class="flex flex-col" v-if="setting_index == 0">
-                <div class="">
-                  <a-form-item label="Competition Type" name="game_type_id">
-                    <a-select
-                      @change="changeGameType"
-                      type="select"
-                      v-model:value="create_competition.game_type_id"
-                      show-search
-                      :options="gameTypes"
-                      :fieldNames="{ value: 'id', label: 'name' }"
-                    />
-                  </a-form-item>
+                <div class="flex justify-between gap-3">
+                  <div class="w-1/2">
+                    <a-form-item label="Competition Type" name="game_type_id">
+                      <a-select
+                        @change="changeGameType"
+                        type="select"
+                        v-model:value="create_competition.game_type_id"
+                        show-search
+                        :options="gameTypes"
+                        :fieldNames="{ value: 'id', label: 'name' }"
+                      />
+                    </a-form-item>
+                  </div>
+                  <div class="w-1/2">
+                    <a-form-item label="Competition Categories" name="categories">
+                      <a-select
+                        @change="changeCategories"
+                        v-model:value="selectCategories"
+                        type="select"
+                        show-search
+                        mode="multiple"
+                        :options="gameCategories"
+                        :fieldNames="{ value: 'id', label: 'name' }"
+                      ></a-select>
+                    </a-form-item>
+                  </div>
                 </div>
                 <div class="flex justify-between gap-3">
                   <div class="w-full">
@@ -209,25 +224,14 @@
                     <a-form-item label="Male Categories" name="categories_male">
                       <div
                         class=""
-                        v-for="category in create_competition.competition_type.categories"
+                        v-for="category in create_competition.categories"
                         :key="category.id"
                       >
                         <div class="">
                           {{ category.name }}
                         </div>
                         <div class="">
-                          {{
-                            category.weights
-                              .filter((x) => x.includes("MW"))
-                              .map((weight) => {
-                                if (weight.slice(2, -1) == "UL") {
-                                  return "無限量";
-                                } else {
-                                  return `-${weight.slice(2, -1)}kg`;
-                                }
-                              })
-                              .join(",")
-                          }}
+                          {{ changeWeightFormat(category.weights, "MW") }}
                         </div>
                       </div>
                     </a-form-item>
@@ -241,25 +245,14 @@
                     <a-form-item label="Female Categories" name="categories_female">
                       <div
                         class=""
-                        v-for="category in create_competition.competition_type.categories"
+                        v-for="category in create_competition.categories"
                         :key="category.id"
                       >
                         <div class="">
                           {{ category.name }}
                         </div>
                         <div class="">
-                          {{
-                            category.weights
-                              .filter((x) => x.includes("FW"))
-                              .map((weight) => {
-                                if (weight.slice(2, -1) == "UL") {
-                                  return "無限量";
-                                } else {
-                                  return `-${weight.slice(2, -1)}kg`;
-                                }
-                              })
-                              .join(",")
-                          }}
+                          {{ changeWeightFormat(category.weights, "FW") }}
                         </div>
                       </div>
                     </a-form-item>
@@ -437,9 +430,11 @@ export default {
       disabledDate: null,
       tmpContestTime: null,
       setting_index: 0,
+      gameCategories: [],
+      selectCategories: [],
       create_competition: {
-        system: "q",
-        type: "individual",
+        system: "Q",
+        type: "I",
         mat_number: 1,
         section_number: 1,
         referee_number: 1,
@@ -497,6 +492,7 @@ export default {
         date_end: { required: true },
         days: { required: true },
         mat_number: { required: true },
+        categories: { required: true },
         section_number: { required: true },
       },
       validateMessages: {
@@ -561,10 +557,35 @@ export default {
       );
     },
     changeGameType(value) {
+      this.gameCategories = [];
       this.create_competition.competition_type = this.gameTypes.find(
         (x) => x.id == value
       );
-      console.log(this.create_competition.competition_type);
+      this.gameCategories = this.create_competition.competition_type.categories;
+      // console.log(this.create_competition.competition_type);
+    },
+    changeCategories() {
+      this.create_competition.categories = this.create_competition.competition_type.categories.filter(
+        (x) => this.selectCategories.includes(x.id)
+      );
+      console.log(this.create_competition.categories);
+    },
+    changeWeightFormat(weights, gender) {
+      return weights
+        .filter((x) => x.includes(gender))
+        .map((weight) => {
+          let weight_name = weight.replace(gender, "");
+          if (weight_name.includes("-")) {
+            weight_name = weight_name.replace("-", "");
+            return `-${weight_name}kg`;
+          } else if (weight_name.includes("+")) {
+            weight_name = weight_name.replace("+", "");
+            return `+${weight_name}kg`;
+          } else {
+            return weight_name;
+          }
+        })
+        .join(",");
     },
     onCreate() {
       this.$refs.formRef

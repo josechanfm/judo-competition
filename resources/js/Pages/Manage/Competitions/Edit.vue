@@ -173,8 +173,8 @@
                   <div class="">
                     <a-form-item label="Type" name="type">
                       <a-radio-group v-model:value="competition.type">
-                        <a-radio value="i">Individual</a-radio>
-                        <a-radio value="t">Teams</a-radio>
+                        <a-radio value="I">Individual</a-radio>
+                        <a-radio value="T">Teams</a-radio>
                       </a-radio-group>
                     </a-form-item>
                   </div>
@@ -198,18 +198,7 @@
                           {{ category.name }}
                         </div>
                         <div class="">
-                          {{
-                            category.weights
-                              .filter((x) => x.includes("MW"))
-                              .map((weight) => {
-                                if (weight.slice(2, -1) == "UL") {
-                                  return "無限量";
-                                } else {
-                                  return `-${weight.slice(2, -1)}kg`;
-                                }
-                              })
-                              .join(",")
-                          }}
+                          {{ changeWeightFormat(category.weights, "MW") }}
                         </div>
                       </div>
                     </a-form-item>
@@ -218,25 +207,14 @@
                     <a-form-item label="Female categories" name="categories_female">
                       <div
                         class=""
-                        v-for="category in gameTypes[0].categories"
+                        v-for="category in competition_categories"
                         :key="category.id"
                       >
                         <div class="">
                           {{ category.name }}
                         </div>
                         <div class="">
-                          {{
-                            category.weights
-                              .filter((x) => x.includes("FW"))
-                              .map((weight) => {
-                                if (weight.slice(2, -1) == "UL") {
-                                  return "無限量";
-                                } else {
-                                  return `-${weight.slice(2, -1)}kg`;
-                                }
-                              })
-                              .join(",")
-                          }}
+                          {{ changeWeightFormat(category.weights, "FW") }}
                         </div>
                       </div>
                     </a-form-item>
@@ -247,9 +225,9 @@
                 <div class="">
                   <a-form-item label="Competition System" name="system">
                     <a-radio-group v-model:value="competition.system">
-                      <a-radio value="q">Quarter</a-radio>
-                      <a-radio value="f">Full</a-radio>
-                      <a-radio value="k">KO</a-radio>
+                      <a-radio value="Q">Quarter</a-radio>
+                      <a-radio value="F">Full</a-radio>
+                      <a-radio value="K">KO</a-radio>
                     </a-radio-group>
                   </a-form-item>
                 </div>
@@ -299,7 +277,10 @@
               </div>
               <div class="" v-if="setting_index == 3">
                 <div class="">
-                  <a-form-item label="Open language secondary" name="is_language_secondary_enabled">
+                  <a-form-item
+                    label="Open language secondary"
+                    name="is_language_secondary_enabled"
+                  >
                     <a-switch
                       v-model:checked="
                         competition.competition_type.is_language_secondary_enabled
@@ -508,6 +489,23 @@ export default {
     },
     removeTimeFromForm(time) {
       this.competition.days = this.competition.days.filter((t) => t !== time);
+    },
+    changeWeightFormat(weights, gender) {
+      return weights
+        .filter((x) => x.includes(gender))
+        .map((weight) => {
+          let weight_name = weight.replace(gender, "");
+          if (weight_name.includes("-")) {
+            weight_name = weight_name.replace("-", "");
+            return `-${weight_name}kg`;
+          } else if (weight_name.includes("+")) {
+            weight_name = weight_name.replace("+", "");
+            return `+${weight_name}kg`;
+          } else {
+            return weight_name;
+          }
+        })
+        .join(",");
     },
     onUpdate() {
       this.$refs.formRef

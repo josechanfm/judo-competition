@@ -43,10 +43,6 @@
             Game Type
           </inertia-link>
         </a-menu-item>
-        <a-menu-item key="contest_type">
-          <upload-outlined />
-          <span>Contest Types</span>
-        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>

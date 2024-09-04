@@ -50,12 +50,15 @@ class ProgramScheduleService{
         $this->pdf->Output('myfile.pdf', 'I');
     }
     public function header(){
-        $x=10;
+        $x=12;
         $y=5;
         $w=185;
         $h=14;
         $r=5;
-        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
+        $this->pdf->SetLineWidth(0.2);
+        $this->pdf->SetFillColor($this->boxWhiteColor[0],$this->boxWhiteColor[1],$this->boxWhiteColor[2]);
+        $this->pdf->RoundedRect($x, $y, $w, $h, $r, 'DF', $this->styleBoxLine, $this->boxWhiteColor);
+        //$this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
         if($this->logo_primary){
             $this->pdf->image($this->logo_primary,$x+2, $y+2, 10,10,'png');
         }
@@ -147,12 +150,12 @@ class ProgramScheduleService{
         </div>
         ';
         foreach($records as $record){
-            $data .='<table class="tableMain">';
-            $data .='<tr><td>';
+            $data .='<table class="tableMain"><tr>';
+            $data .='<td>';
             $data .='<table class="tableLeft">';
             $data .='<tr>';
             $data .='<td rowspan="4" style="width:42px;border:none!important"><div class="arc"></div>'.$record['sequence'].'</td>';
-            $data .='<td rowspan="4">'.$record['weight'].'<br><font style="font-size:14;font-weight:bold">'.$record['category'].'</font><br><font style="font-size:12;font-weight:bold">'.$record['round'].'</fong></td>';
+            $data .='<td rowspan="4">'.$record['weight'].'<br><font style="font-size:14;font-weight:bold">'.$record['category'].'</font><br><font style="font-size:12;font-weight:bold">'.$record['round'].'</font></td>';
             $data .='<td rowspan="2" style="width:150px">'.$record['white_player'].'</td>';
             $data .='<td rowspan="2" style="width:150px">'.$record['white_team'].'</td>';
             $data .='<td></td>';
@@ -176,6 +179,7 @@ class ProgramScheduleService{
             $data .='<td></td>';
             $data .='<td></td>';
             $data .='</tr>';
+
             $data .='</table>';
             $data .='</td>';
             $data .='<td style="width:5px"></td>';
@@ -186,7 +190,19 @@ class ProgramScheduleService{
         // $mpdf = new \Mpdf\Mpdf();
         // $mpdf->WriteHTML($data);
         // $mpdf->Output('myfile.pdf', 'I');
+        $html='
+        <table>
+            <tr>
+                <td>a</td>
+                <td>b</td>
+                <td>c</td>
+            </tr>
+        </table>
+        ';
         $this->pdf->WriteHTML($data);
+        // $x=100;
+        // $y=100;
+        // $this->pdf->writeHTMLCell(80, '', $x, $y, $data, 0, 1, 0, true, 'J', true);
         $this->pdf->Output('myfile.pdf','I');
     }
 

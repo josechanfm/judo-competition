@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Helpers\PdfHelper;
 use TCPDF;
 
 class SheetTournamentQuarterService{
@@ -200,7 +201,8 @@ class SheetTournamentQuarterService{
         // }else{
         //     $this->pdf->setFont('times','B',$this->playerFontSize,14);
         // }
-        $this->header();
+        $helper=new PdfHelper($this->pdf);
+        $helper->header(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary);
         // $this->pdf->Cell(0, 0, $this->title, 0, 1, 'C', 0, '', 0);
         // $this->pdf->Cell(0, 0, $this->title_sub, 0, 1, 'C', 0, '', 0);
         //$this->pdf->text($this->startX+100, $this->pdf->getPageHeight()-10, $this->pdf->getPageHeight());
@@ -239,25 +241,6 @@ class SheetTournamentQuarterService{
             $this->pdf->Cell($w,0,$poolLabel[$i]['name'],0,0,'C',0,'');
         }
         $this->pdf->StopTransform();
-    }
-    public function header(){
-        $x=10;
-        $y=5;
-        $w=185;
-        $h=14;
-        $r=5;
-        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
-        $this->pdf->image($this->logo_primary,$x+2, $y+2, 10,10,'png');
-        $this->pdf->image($this->logo_secondary,$x+$w-13, $y+2, 10,10,'png');
-        
-        $x=25;
-        $w=165;
-        $this->pdf->setFont('times','B',16);
-        $this->pdf->setXY($x, $y);
-        $this->pdf->Cell($w, $h/1.6, $this->title, 0, 1, 'C', 0, '', 0);
-        $this->pdf->setFont('times','B',11);
-        $this->pdf->setXY($x, $y+($h/1.6));
-        $this->pdf->Cell($w, $h-($h/1.6 ), $this->title_sub, 0, 0, 'C', 0, '', 0);
     }
     private function mainChart($players, $sequences, $winners){
         /* 運動員名牌 */

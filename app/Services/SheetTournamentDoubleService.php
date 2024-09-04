@@ -239,7 +239,7 @@ class SheetTournamentDoubleService{
         $this->pdf->StopTransform();
     }
     public function header(){
-        $x=10;
+        $x=12;
         $y=5;
         $w=185;
         $h=14;

@@ -10,7 +10,7 @@
             v-if="competition.status === 0"
             type="primary"
             class="bg-blue-500"
-            @click="lockAthletes"
+            @click="confirmLockAthletes"
             >Lock list</a-button
           >
           <span v-else class="text-blue-500">List already lock</span>
@@ -394,6 +394,20 @@ export default {
         .catch(() => {
           this.$message.error("Import Error");
         });
+    },
+    confirmLockAthlets() {
+      Modal.confirm({
+        title: "Do you want to lock list of athletes?",
+        icon: createVNode(ExclamationCircleOutlined),
+        style: "top:20vh",
+        onOk: () => {
+          this.lockAthletes();
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+        class: "test",
+      });
     },
     lockAthletes() {
       this.$inertia.post(

@@ -350,7 +350,7 @@ class SheetTournamentFullService{
             // $this->pdf->Cell(30, 4, 'Repechage', 0, 1, 'C', 0, '', 0);
         }else{
             $y=$this->startY+(($this->boxH+$this->boxGap)*$totalPlayers)-$this->boxGap+$this->repechageDistance;
-            $y+=$this->repechageBoxH*8+$this->repechageSectionGap;
+            $y+=$this->repechageSectionGap;
         }
 
         $y+=$this->repechageDistance;
@@ -363,15 +363,17 @@ class SheetTournamentFullService{
         $y1=$y;
         $h=$boxH;
         $w=$boxW;
-        $round=4;
-        for($i=0;$i<6; $i++){
-            if($round-2==$i ){
+        for($i=0;$i<$round; $i++){
+            //遇到白方為懸空,側加高上線圖,
+            if($players[$i][0]==null){
                 $h+=$h;
                 $ty=$y1; //暫存倒數第二個輪上線的Y1位置,用以計算最後一個的位置
             }
+            //當最後一個上線圖
             if($round-1==$i){
                 $y1=$ty+$h/2;
                 $ty=$y1;
+                $h+=$h/4;
             }
             if($round==$i){
                 $y1=$ty+$h/2;
@@ -405,15 +407,17 @@ class SheetTournamentFullService{
             $w=$arcW;
         }
         //$this->pdf->line($x1, $y1-$h+$boxH/2, $x1+$this->arcW, $y1-$h+$boxH/2);
-        $y1=$y1-$h-$boxH/2;
+        $y1=$ty+($h/2);
         if($x1+$this->arcW > 180){
             $x1-=4;
             $this->pdf->line($x1, $y1, $x1-$this->arcW, $y1);
+            $this->pdf->image('images/result_banner_2.png',$x1-$this->arcW*2+5, $y1-2, 14,8, 'png');
+            $this->pdf->text($x1-$this->arcW*2+10, $y1-1, $range=='upper'?'2':'3');
         }else{
             $this->pdf->line($x1, $y1, $x1+$this->arcW, $y1);
+            $this->pdf->image('images/result_banner_2.png',$x1+($this->arcW/2), $y1+2, 14,8, 'png');
+            $this->pdf->text($x1+($this->arcW/2)+5, $y1+3, $range=='upper'?'2':'3');
         }
-        $this->pdf->image('images/result_banner_2.png',$x1-$this->arcW*2+5, $y1-2, 14,8, 'png');
-        $this->pdf->text($x1-$this->arcW*2+10, $y1-1, $range=='upper'?'2':'3');
 
     }
 

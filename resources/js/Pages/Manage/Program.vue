@@ -32,7 +32,7 @@
             <div class="py-2 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
               <div class="flex font-bold text-lg mb-2 justify-between">
                 <div>Athletes list</div>
-                <div>
+                <!-- <div>
                   <a-popconfirm
                     placement="rightTop"
                     ok-text="Yes"
@@ -49,7 +49,7 @@
                     </template>
                     <a-button type="primary" class="bg-blue-500">Add athletes</a-button>
                   </a-popconfirm>
-                </div>
+                </div> -->
               </div>
               <a-table :dataSource="athletes" :columns="athleteColumns">
                 <template #bodyCell="{ column, record }">

@@ -18,12 +18,12 @@
             <a-statistic title="Date" :value="program.date" />
           </a-card>
           <a-card class="shadow-lg">
-            <a-statistic title="Programs" :value="program.bouts.length" />
+            <a-statistic title="Bouts" :value="program.bouts.length" />
           </a-card>
           <a-card class="shadow-lg">
             <a-statistic
               title="Atheles"
-              :value="program.athletes ? program.athletes.length : 0"
+              :value="athletes ? athletes.length : 0"
             />
           </a-card>
         </div>

@@ -31,7 +31,7 @@
           <div class="col-span-2 flex flex-col gap-6">
             <div class="py-2 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
               <div class="flex font-bold text-lg mb-2 justify-between">
-                <div>運動員名單</div>
+                <div>Athletes list</div>
                 <div>
                   <a-popconfirm
                     placement="rightTop"
@@ -47,7 +47,7 @@
                         :options="selectAthletes"
                       ></a-select>
                     </template>
-                    <a-button type="primary" class="bg-blue-500">加入運動員</a-button>
+                    <a-button type="primary" class="bg-blue-500">Add athletes</a-button>
                   </a-popconfirm>
                 </div>
               </div>
@@ -56,7 +56,7 @@
                   <template v-if="column.dataIndex === 'operation'">
                     <div class="space-x-2">
                       <a-popconfirm
-                        title="是要將此運動員移出比賽?"
+                        title="Is to remove this athlete from the program?"
                         ok-text="Yes"
                         cancel-text="No"
                         @confirm="moveAthlete(record)"
@@ -77,12 +77,12 @@
           </div>
           <div class="col-span-2 flex flex-col gap-6">
             <a-card class="w-full">
-              <template #title><div class="font-normal">比賽結果</div></template>
+              <template #title><div class="font-normal">Competition result</div></template>
             </a-card>
             <a-card class="w-full" v-if="program.contest_system">
               <template #title>
                 <div class="flex justify-between">
-                  <div class="font-normal">上線表</div>
+                  <div class="font-normal">Online table</div>
                   <div class="">
                     <a
                       :href="

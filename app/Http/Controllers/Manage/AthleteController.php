@@ -63,7 +63,7 @@ class AthleteController extends Controller
         ]);
 
         if ($validated['new_team'] == true) {
-            $team = Team::create(['name' => $validated['team'], 'competition_id' => $competition->id]);
+            $team = Team::create(['name' => $validated['team'], 'abbreviation' => $validated['team'], 'competition_id' => $competition->id]);
             $validated['team_id'] = $team->id;
         }
 

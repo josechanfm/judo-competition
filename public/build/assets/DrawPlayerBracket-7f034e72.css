@@ -1,0 +1,1 @@
+@keyframes assign-player{0%{transform-origin:50% 50%;position:fixed}50%{transform:translate(50%) translateY(-40vh) scale(1.25)}to{transform:translate(var(--translateX)) translateY(var(--translateY)) scale(1)}}.pending-athlete-list>*{--tw-bg-opacity: 1;background-color:rgb(255 255 255 / var(--tw-bg-opacity))}

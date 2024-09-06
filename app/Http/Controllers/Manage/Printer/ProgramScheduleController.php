@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Manage;
+namespace App\Http\Controllers\Manage\Printer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\ProgramScheduleService;
+use App\Services\Printer\ProgramScheduleService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,10 +14,10 @@ class ProgramScheduleController extends Controller
 
     public function printPdf(Request $request){
         $this->gameSheet=new ProgramScheduleService();
-        $this->schedule();
+        $this->schedule($request->mat??1);
     }
 
-    public function schedule(){
+    public function schedule($mat=1){
         $records=[
             [
                 'sequence'=>'A11',
@@ -54,7 +54,9 @@ class ProgramScheduleController extends Controller
             ]
 
         ];
-        $this->gameSheet->pdf($records);
+        // $weight="-66Kg";
+        // $category="-Cadet";
+        $this->gameSheet->pdf($records,'MAT'.$mat,'2024.12.31');
 
     }
 

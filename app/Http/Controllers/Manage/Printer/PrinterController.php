@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Manage;
+namespace App\Http\Controllers\Manage\Printer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\SheetTournamentService;
+use App\Services\Printer\TournamentService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Program;

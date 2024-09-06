@@ -241,14 +241,12 @@ import { Head } from "@inertiajs/vue3";
       <div>
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
           <div class="p-6 text-gray-900">Other Print Out</div>
-          <a href="/manage/print/winners?gender=men" target="_blank">Winners (Men)</a
-          ><br />
-          <a href="/manage/print/winners?gender=women" target="_blank">Winners (Women)</a
-          ><br />
-          * Referee List<br />
-          * Contest Sheet<br />
-          * Contest Order Tatami X<br />
-          * Weight-in List<br />
+          <a href="/manage/print/winners?gender=men" target="_blank">Winners (Men)</a><br />
+          <a href="/manage/print/winners?gender=women" target="_blank">Winners (Women)</a><br />
+          <a href="/manage/print/referee_list" target="_blank">Referee List</a><br />
+          <a href="/manage/print/weight_in_list" target="_blank">Weight in List</a><br />
+          <a href="/manage/print/program_schedule?mat=1" target="_blank">Contest Order Tatami 1</a><br />
+          <a href="/manage/print/program_schedule?mat=2" target="_blank">Contest Order Tatami 2</a><br />
           * Deligation List<br />
         </div>
       </div>

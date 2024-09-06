@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Manage;
+namespace App\Http\Controllers\Manage\Printer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\SheetTournamentQuarterService;
+use App\Services\Printer\TournamentQuarterService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Program;
@@ -65,7 +65,7 @@ class TournamentQuarterController extends Controller
         $this->dummyData = File::json($dummyPath);
 
         //};
-        $this->gameSheet = new SheetTournamentQuarterService($settings);
+        $this->gameSheet = new TournamentQuarterService($settings);
         //$this->gameSheet->setTitles('Main Title','sub title');
         $this->gameSheet->setFonts('times', 'cid0ct', 'times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         //$this->gameSheet->setRepechage(null);

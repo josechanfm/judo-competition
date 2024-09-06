@@ -1,6 +1,7 @@
 <?php
-namespace App\Services;
+namespace App\Services\Printer;
 
+use App\Helpers\PdfHelper;
 use TCPDF;
 
 class ProgramScheduleService{
@@ -33,48 +34,48 @@ class ProgramScheduleService{
         $this->title_sub=$title_sub;
     }
 
-    public function pdf($records){
-
-
+    public function pdf($records,$mat=null, $date=null){
         $this->pdf = new \Mpdf\Mpdf();
         //$this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
         // $this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
         // $this->pdf->SetPrintHeader(false);
         // $this->pdf->SetMargins(15,10,15);
         // $this->pdf->SetAutoPageBreak(TRUE,0);
         $this->pdf->AddPage();
-
-        $this->header();        
+        //$this->header();
+        $helper=new PdfHelper($this->pdf);
+        $extra=["title"=>$mat,"title_sub"=>$date];
+        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary,$extra);
+        //$helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary);
         $this->schedule($records);
         $this->pdf->Output('myfile.pdf', 'I');
     }
-    public function header(){
-        $x=12;
-        $y=5;
-        $w=185;
-        $h=14;
-        $r=5;
-        $this->pdf->SetLineWidth(0.2);
-        $this->pdf->SetFillColor($this->boxWhiteColor[0],$this->boxWhiteColor[1],$this->boxWhiteColor[2]);
-        $this->pdf->RoundedRect($x, $y, $w, $h, $r, 'DF', $this->styleBoxLine, $this->boxWhiteColor);
-        //$this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
-        if($this->logo_primary){
-            $this->pdf->image($this->logo_primary,$x+2, $y+2, 10,10,'png');
-        }
-        if($this->logo_secondary){
-            $this->pdf->image($this->logo_secondary,$x+$w-13, $y+2, 10,10,'png');
-        }
+    // public function header(){
+    //     $x=12;
+    //     $y=5;
+    //     $w=185;
+    //     $h=14;
+    //     $r=5;
+    //     $this->pdf->SetLineWidth(0.2);
+    //     $this->pdf->SetFillColor($this->boxWhiteColor[0],$this->boxWhiteColor[1],$this->boxWhiteColor[2]);
+    //     $this->pdf->RoundedRect($x, $y, $w, $h, $r, 'DF', $this->styleBoxLine, $this->boxWhiteColor);
+    //     //$this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
+    //     if($this->logo_primary){
+    //         $this->pdf->image($this->logo_primary,$x+2, $y+2, 10,10,'png');
+    //     }
+    //     if($this->logo_secondary){
+    //         $this->pdf->image($this->logo_secondary,$x+$w-13, $y+2, 10,10,'png');
+    //     }
         
-        $x=25;
-        $w=165;
-        $this->pdf->setFont('times','B',16);
-        $this->pdf->setXY($x, $y);
-        $this->pdf->Cell($w, $h/1.6, $this->title, 0, 1, 'C', 0, '', 0);
-        $this->pdf->setFont('times','B',11);
-        $this->pdf->setXY($x, $y+($h/1.6));
-        $this->pdf->Cell($w, $h-($h/1.6 ), $this->title_sub, 0, 0, 'C', 0, '', 0);
-    }
+    //     $x=25;
+    //     $w=165;
+    //     $this->pdf->setFont('times','B',16);
+    //     $this->pdf->setXY($x, $y);
+    //     $this->pdf->Cell($w, $h/1.6, $this->title, 0, 1, 'C', 0, '', 0);
+    //     $this->pdf->setFont('times','B',11);
+    //     $this->pdf->setXY($x, $y+($h/1.6));
+    //     $this->pdf->Cell($w, $h-($h/1.6 ), $this->title_sub, 0, 0, 'C', 0, '', 0);
+    // }
 
     public function schedule($records){
         $this->pdf->setXY($this->startX, $this->startY);
@@ -91,7 +92,7 @@ class ProgramScheduleService{
                     border-collapse: collapse;
                 }
                 .tableMain td{
-                    height:18px;
+                    height:17px;
                     text-align: center;
                     padding: 0px;
                     border-collapse: collapse;
@@ -115,7 +116,7 @@ class ProgramScheduleService{
                 .arc{
                     position: absolute;
                     display: inline-block;
-                    height: 55px;
+                    height: 51.5px;
                     width: 40px;
                     border-radius: 100% / 100% 0% 0% 100%;
                     border: 1px solid #000;
@@ -132,19 +133,19 @@ class ProgramScheduleService{
         <div style="flow:right">
         <table class="tableRight">
             <tr>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
             <tr>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
             <tr>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
-                <td>&nbsp;</td>
+                <td></td>
+                <td></td>
+                <td></td>
             </tr>
         </table>
         </div>
@@ -179,7 +180,6 @@ class ProgramScheduleService{
             $data .='<td></td>';
             $data .='<td></td>';
             $data .='</tr>';
-
             $data .='</table>';
             $data .='</td>';
             $data .='<td style="width:5px"></td>';
@@ -190,15 +190,6 @@ class ProgramScheduleService{
         // $mpdf = new \Mpdf\Mpdf();
         // $mpdf->WriteHTML($data);
         // $mpdf->Output('myfile.pdf', 'I');
-        $html='
-        <table>
-            <tr>
-                <td>a</td>
-                <td>b</td>
-                <td>c</td>
-            </tr>
-        </table>
-        ';
         $this->pdf->WriteHTML($data);
         // $x=100;
         // $y=100;

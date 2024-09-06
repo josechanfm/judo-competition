@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\manage;
+namespace App\Http\Controllers\manage\Printer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;

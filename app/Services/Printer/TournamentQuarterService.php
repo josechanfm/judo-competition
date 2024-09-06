@@ -1,10 +1,10 @@
 <?php
-namespace App\Services;
+namespace App\Services\Printer;
 
 use App\Helpers\PdfHelper;
 use TCPDF;
 
-class SheetTournamentQuarterService{
+class TournamentQuarterService{
 
     protected $gameSetting=array(
         '4'=>array(
@@ -174,9 +174,7 @@ class SheetTournamentQuarterService{
     }
 
     public function pdf($players=[], $winners=[],  $sequences=[], $winnerList=[], $repechagePlayers=[], $repechage=true){
-        //$this->pdf = new TCPDF();
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
         // set margins
         //$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
         //$this->pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -191,32 +189,16 @@ class SheetTournamentQuarterService{
         foreach($this->gameSetting[$this->playerCount] as $key=>$value){
             $this->$key=$value;
         }
-
         $this->round=strlen((string)decbin($this->playerCount/2));
-        
-        // $this->pdf->setFont($this->titleFont, 'B',$this->playerFontSize,14);
-
-        // if(preg_match("/\p{Han}+/u", $this->title) || preg_match("/\p{Han}+/u", $this->title_sub)) { // '/[^a-z\d]/i' should also work.
-        //     $this->pdf->setFont('cid0ct','',$this->playerFontSize,14);
-        // }else{
-        //     $this->pdf->setFont('times','B',$this->playerFontSize,14);
-        // }
         $helper=new PdfHelper($this->pdf);
-        $helper->header(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary);
-        // $this->pdf->Cell(0, 0, $this->title, 0, 1, 'C', 0, '', 0);
-        // $this->pdf->Cell(0, 0, $this->title_sub, 0, 1, 'C', 0, '', 0);
-        //$this->pdf->text($this->startX+100, $this->pdf->getPageHeight()-10, $this->pdf->getPageHeight());
-
+        $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary);
         $this->mainChart($players, $sequences, $winners); //主上線表包括運動員名牌和上線曲線
-        //$this->winnerLine($winners);
         if($this->playerCount>4 && $this->poolLabel!=null){
             $this->boxPool($this->poolLabel);
         }
         if($repechagePlayers){
             $this->repechageChart(count($players),$repechagePlayers,$sequences, $winners); //復活賽上線表包括運動員名牌和上線曲線
-            //$this->repechageQuarterWinnerLine(count($players),$repechageWinners);
         }
-        //$this->sequenceNumbers($sequences);
         $this->resultBox($winnerList);
         $this->pdf->Output('myfile.pdf', 'I');
     }

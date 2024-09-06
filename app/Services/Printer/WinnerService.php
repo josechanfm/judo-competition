@@ -1,9 +1,10 @@
 <?php
-namespace App\Services;
+namespace App\Services\Printer;
+use App\Helpers\PdfHelper;
 
 use TCPDF;
 
-class SheetWinnerService{
+class WinnerService{
     
     protected $pdf=null;
     protected $gameSetting=null;
@@ -82,7 +83,6 @@ class SheetWinnerService{
 
         $this->gender=ucfirst($gender);
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
         // set margins
         //$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
         //$this->pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -93,42 +93,11 @@ class SheetWinnerService{
         $this->pdf->SetMargins(15,10,15);
         $this->pdf->SetAutoPageBreak(TRUE,0);
         $this->pdf->AddPage();
-
-        $this->header();
-        
+        $helper=new PdfHelper($this->pdf);
+        $extra=["title"=>$this->gender,"title_sub"=>$this->report_title];
+        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary,$extra);
         $this->printResult($winnerList);
         $this->pdf->Output('myfile.pdf', 'I');
-    }
-
-    public function header(){
-        $x=10;
-        $y=5;
-        $w=180;
-        $h=14;
-        $r=5;
-        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, array(219,216,183));
-        $this->pdf->image('images/jua_logo.png',$x+2, $y+2, 10,10,'png');
-        $this->pdf->image('images/flags/tn_af-flag.gif',$x+18, $y+2, 0,10,'gif');
-        
-        $x=45;
-        $w=115;
-        $this->pdf->setFont('times','B',16);
-        $this->pdf->setXY($x, $y);
-        $this->pdf->Cell($w, $h/1.6, $this->title, 0, 1, 'C', 0, '', 0);
-        $this->pdf->setFont('times','B',11);
-        $this->pdf->setXY($x, $y+($h/1.6));
-        $this->pdf->Cell($w, $h-($h/1.6 ), $this->title_sub, 0, 0, 'C', 0, '', 0);
-        $x=160;
-        $w=43;
-        $h=20;
-        $r=9;
-        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, array(197,192,139));
-        $this->pdf->setFont('courier','B',35);
-        $this->pdf->setXY($x, $y);
-        $this->pdf->Cell($w, 0, $this->gender, 0, 0, 'C', 0, '', 0);
-        $this->pdf->setFont('times','B',16);
-        $this->pdf->setXY($x, $y+12);
-        $this->pdf->Cell($w, 0, $this->report_title, 0, 0, 'C', 0, '', 0);
     }
     public function printResult($winnerList){
         //$this->pdf->setXY($this->startX, $this->startY);
@@ -178,7 +147,7 @@ class SheetWinnerService{
             $html.='
                 <tr><td style="text-align:center;">'.$row['place'].'</td><td>'.$row['name'].'</td><td>'
             ;
-            $html.='<table width="100%" style="border:none"><tr><td width="60%">'.$row['abbr'].'</td><td width="40%" style="text-align:right"><img src="/images/flags/tn_af-flag.gif"></td></tr></table>';
+            $html.='<table width="100%" style="border:none"><tr><td width="60%">'.$row['abbr'].'</td><td width="40%" style="text-align:right"><img src="'.$row['logo'].'"></td></tr></table>';
             $html.='</td></tr>';
         }
         $html.='

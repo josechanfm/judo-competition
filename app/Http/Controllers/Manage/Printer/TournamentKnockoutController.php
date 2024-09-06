@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Manage;
+namespace App\Http\Controllers\Manage\Printer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\SheetTournamentQuarterService;
+use App\Services\Printer\TournamentQuarterService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,7 +19,7 @@ class TournamentKnockoutController extends Controller
         $dummyPath = storage_path('setting/game_tournament_knockout_dataset.json');
         $this->dummyData = File::json($dummyPath);
 
-        $this->gameSheet=new SheetTournamentQuarterService($settings);
+        $this->gameSheet=new TournamentQuarterService($settings);
         $this->gameSheet->setFonts('times','cid0ct','times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         $poolLable=[
             ['name'=>'分組 A'],

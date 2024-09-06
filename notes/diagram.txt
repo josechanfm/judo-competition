@@ -1,0 +1,29 @@
+Competition management system
+3 ways of adding athlets to a competition
+1. import from membership system
+2. input manully in competition system
+3. import locally in competition system
+Membership management system
+
+
+Create conpetition and setting up conpetition, including ...
+Create or import competition in membership system
+Start athletes applications
+Import athletes from membership system
+(Manually input athletes, or locally import)
+confirm and lock athletes name list (in program)
+Schedule program
+confirm and lock program
+Start competition
+
+Score board system dynamically read from competition system
+procceed contest
+when contest finished, sync data with competition system
+
+competition system, print result
+at the same time competition system could change the sequence of bouts.
+
+
+
+
+

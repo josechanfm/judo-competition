@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Competition Program" />
 
-  <ProgramLayout :competitionId="competition.id">
+  <ProgramLayout :competition="competition">
     <a-page-header title="Competition Program Manage">
       <template #tags>
         <a-tag color="processing">

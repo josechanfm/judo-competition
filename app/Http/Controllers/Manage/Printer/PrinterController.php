@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Program;
 use App\Models\Athlete;
+use Inertia\Inertia;
 
 class PrinterController extends Controller
 {
@@ -19,6 +20,11 @@ class PrinterController extends Controller
         $players=array_slice($bouts,0,$program->chart_size/2);
         dd($players);
         dd($request->all());
+    }
+    public function demo(){
+        return Inertia::render('Manage/PrintOutDemo',[
+
+        ]);
     }
     public function programs(){
         $rows=[

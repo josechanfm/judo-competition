@@ -43,6 +43,12 @@
             Game Type
           </inertia-link>
         </a-menu-item>
+        <a-menu-item key="print.demo">
+          <video-camera-outlined />
+          <inertia-link class="mx-2" :href="route('manage.print.demo')">
+            Print Out Demo
+          </inertia-link>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>

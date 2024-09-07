@@ -36,7 +36,7 @@
             <user-outlined />
             <inertia-link
               class="mx-2"
-              :href="route('manage.competition.programs.index', competitionId)"
+              :href="route('manage.competition.programs.index', competition.id)"
             >
               Program
             </inertia-link>
@@ -50,7 +50,7 @@
           <a-menu-item key="competition.athletes.index">
             <inertia-link
               class="mx-2"
-              :href="route('manage.competition.athletes.index', competitionId)"
+              :href="route('manage.competition.athletes.index', competition.id)"
             >
               Athletes List
             </inertia-link>
@@ -58,7 +58,7 @@
           <a-menu-item key="competition.athletes.drawControl">
             <inertia-link
               class="mx-2"
-              :href="route('manage.competition.athletes.drawControl', competitionId)"
+              :href="route('manage.competition.athletes.drawControl', competition.id)"
             >
               Athletes Draw
             </inertia-link>
@@ -66,7 +66,7 @@
           <a-menu-item key="competition.athletes.weights">
             <inertia-link
               class="mx-2"
-              :href="route('manage.competition.athletes.weights', competitionId)"
+              :href="route('manage.competition.athletes.weights', competition.id)"
             >
               Athletes Weight
             </inertia-link>
@@ -77,7 +77,7 @@
             <upload-outlined />
             <inertia-link
               class="mx-2"
-              :href="route('manage.competition.progress', competitionId)"
+              :href="route('manage.competition.progress', competition.id)"
             >
               Progress
             </inertia-link>
@@ -88,7 +88,7 @@
             <flag-outlined />
             <inertia-link
               class="mx-2"
-              :href="route('manage.competition.teams.index', competitionId)"
+              :href="route('manage.competition.teams.index', competition.id)"
             >
               Team
             </inertia-link>
@@ -108,6 +108,9 @@
           class="trigger"
           @click="() => (collapsed = !collapsed)"
         />
+        <span>
+        {{ competition.name }}
+        </span>
       </a-layout-header>
       <a-layout-content>
         <template #header>
@@ -139,7 +142,7 @@ import {
 import JudokaLogo from "@/Svgs/judoka-logo.svg";
 
 export default {
-  props: ["competitionId"],
+  props: ["competition"],
   components: {
     MenuOutlined,
     UserOutlined,

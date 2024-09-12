@@ -155,9 +155,9 @@ class ProgramController extends Controller
     public function lock(Competition $competition)
     {
         // remove previously generated bouts
-        // $competition->programsBouts;
+        $competition->programsBouts;
         // dd($competition);
-        //$competition->bouts()->delete();
+        $competition->bouts()->delete();
         // TODO: generate bouts
         $competition->generateBouts();
 

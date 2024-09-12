@@ -17,12 +17,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return Inertia::render('Auth/Login');
 });
 
 Route::get('/dashboard', function () {
@@ -59,7 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::post('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'joinAthlete'])->name('manage.program.joinAthlete');
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
 
-    
+
     Route::get('manage/print/demo', [App\Http\Controllers\Manage\Printer\PrinterController::class, 'demo'])->name('manage.print.demo');
     Route::get('manage/print/{competition}/programs', [App\Http\Controllers\Manage\Printer\PrinterController::class, 'programs'])->name('manage.print.programs');
     Route::get('manage/print/tournament_quarter', [App\Http\Controllers\Manage\Printer\TournamentQuarterController::class, 'printPdf'])->name('manage.print.tournament_quarter');
@@ -73,7 +68,6 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/print/program_schedule', [App\Http\Controllers\Manage\Printer\ProgramScheduleController::class, 'printPdf']);
     Route::get('manage/print/weight_in_list', [App\Http\Controllers\Manage\Printer\WeightInController::class, 'printPdf']);
     Route::get('manage/print/referee_list', [App\Http\Controllers\Manage\Printer\RefereeController::class, 'printPdf']);
-
 });
 
 

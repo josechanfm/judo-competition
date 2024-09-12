@@ -90,8 +90,8 @@ class BoutGenerationService
             foreach ($bouts as $r) {
                 $rise[] = array(
                     'round' => $round,
-                    'white' => $r[0],
-                    'blue' => $r[1],
+                    'white' => 0,
+                    'blue' => 0,
                     // 'white'=>$ath[$r[0]-1]->athlete_id,
                     // 'blue'=>$ath[$r[1]-1]->athlete_id,
                 );

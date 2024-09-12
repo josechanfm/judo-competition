@@ -1,5 +1,5 @@
 <template>
-  <ProgramLayout :competitionId="competition.id">
+  <ProgramLayout :competition="competition">
     <a-page-header title="Draw">
       <template #extra>
         <a-button type="link" v-if="competition.status > COMPETITION_STATUS.seat_locked">
@@ -13,13 +13,13 @@
             competition.status === COMPETITION_STATUS.program_arranged && allProgramsDrew
           "
         >
-          鎖定抽籤
+          Lock draw
         </a-button>
         <span></span>
       </template>
 
       <template #tags>
-        <a-tag color="success" v-if="allProgramsDrew"> 所有組別完成抽籤 </a-tag>
+        <a-tag color="success" v-if="allProgramsDrew"> All programs drew </a-tag>
       </template>
     </a-page-header>
 
@@ -62,8 +62,8 @@
         <a-alert
           type="info"
           show-icon
-          message="所有組別完成抽籤"
-          description="如果抽籤結果沒有問題請鎖定抽籤"
+          message="all programs drew"
+          description="If there are no issues with the lottery result, please lock the draw."
           v-if="
             allProgramsDrew && competition.status === COMPETITION_STATUS.program_arranged
           "
@@ -72,8 +72,8 @@
         <a-alert
           type="success"
           show-icon
-          message="抽籤順序已經鎖定"
-          description="抽籤順序已經鎖定"
+          message="The lottery result has been locked."
+          description="The lottery result has been locked."
           v-if="competition.status > COMPETITION_STATUS.seat_locked"
         />
       </div>
@@ -101,8 +101,10 @@
                       :data-status="item.status"
                     >
                       <div class="flex">
-                        <a-tag v-if="item.status > 0" color="success">已抽籤</a-tag>
-                        <a-tag v-else color="processing">待抽籤</a-tag>
+                        <a-tag v-if="item.status > 0" color="success"
+                          >Finish</a-tag
+                        >
+                        <a-tag v-else color="processing">Pending draw</a-tag>
                         {{ item.weight_code }}
                       </div>
                     </a-list-item>
@@ -116,8 +118,8 @@
         <div class="shrink-0 w-2/3 flex items-center justify-center">
           <a-empty v-if="!activeProgramId">
             <template #description>
-              <h3 class="text-lg text-slate-500 font-bold">尚未選擇組別</h3>
-              <p class="text-slate-500">請從左邊選擇一個組別</p>
+              <h3 class="text-lg text-slate-500 font-bold">Program not yet selected</h3>
+              <p class="text-slate-500">Please select a program from the left</p>
             </template>
           </a-empty>
           <div v-else>
@@ -135,10 +137,10 @@
                       @click="draw"
                       v-if="activeProgram.status > 0"
                     >
-                      重新抽籤
+                      Redraw
                     </a-button>
                     <a-button type="primary" class="bg-blue-500" @click="draw" v-else>
-                      抽籤
+                      Draw
                     </a-button>
                   </template>
                   <!-- <a
@@ -176,7 +178,7 @@
                         {{ item.name_secondary }}
                       </div>
                     </div>
-                    <div v-else>輪空</div>
+                    <div v-else>Bye</div>
                   </div>
                 </template>
               </a-list>
@@ -198,7 +200,7 @@
                 <InfoCircleOutlined />
               </template>
 
-              組別資訊
+              Group information
             </a-button>
             <a-button
               type="link"
@@ -210,7 +212,7 @@
                 <FileTextOutlined />
               </template>
 
-              顯示名單
+              Show list
             </a-button>
             <a-button
               type="link"
@@ -222,7 +224,7 @@
                 <PlayCircleOutlined />
               </template>
 
-              開始抽籤
+              Start drawing
             </a-button>
             <a-button
               type="link"
@@ -234,7 +236,7 @@
                 <UndoOutlined />
               </template>
 
-              顯示封面
+              Show cover
             </a-button>
           </div>
         </div>

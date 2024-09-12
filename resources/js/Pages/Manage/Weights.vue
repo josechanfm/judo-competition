@@ -1,5 +1,5 @@
 <template>
-  <ProgramLayout :competitionId="competition.id">
+  <ProgramLayout :competition="competition">
     <a-page-header title="Weigh-in"> </a-page-header>
     <template v-if="competition.status >= 3">
       <div class="mx-6 flex flex-col gap-3">

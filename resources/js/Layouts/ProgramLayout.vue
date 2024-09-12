@@ -33,12 +33,16 @@
       <a-menu v-model:selectedKeys="selectedKeys" theme="light" mode="inline">
         <a-menu-item key="competition.programs.index">
           <div class="flex items-center">
-            <user-outlined />
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <user-outlined />
+              </div>
+              <div>Program</div>
+            </div>
             <inertia-link
               class="mx-2"
               :href="route('manage.competition.programs.index', competition.id)"
             >
-              Program
             </inertia-link>
           </div>
         </a-menu-item>
@@ -109,7 +113,7 @@
           @click="() => (collapsed = !collapsed)"
         />
         <span>
-        {{ competition.name }}
+          {{ competition.name }}
         </span>
       </a-layout-header>
       <a-layout-content>

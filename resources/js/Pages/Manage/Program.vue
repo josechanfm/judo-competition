@@ -1,7 +1,7 @@
 <template>
   <inertia-head :title="program.weight_code" />
 
-  <ProgramLayout :competitionId="program.competition_category.competition_id">
+  <ProgramLayout :competition="competition">
     <!-- Section, Mat sequences
     <a-switch v-model:checked="masterSequence" @change="rebuildBouts" />
     <br />

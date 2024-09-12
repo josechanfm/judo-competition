@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Dashboard" />
 
-  <ProgramLayout :competitionId="competition.id">
+  <ProgramLayout :competition="competition">
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>

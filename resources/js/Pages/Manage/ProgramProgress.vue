@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Dashboard" />
 
-  <ProgramLayout :competitionId="competition.id">
+  <ProgramLayout :competition="competition">
     <a-page-header title="Competition Progress"> </a-page-header>
     <template v-if="competition.status >= 2">
       <div class="flex pt-4">

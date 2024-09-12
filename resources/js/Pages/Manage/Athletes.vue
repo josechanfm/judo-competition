@@ -1,7 +1,7 @@
 <template>
   <inertia-head title="Athletes List" />
 
-  <ProgramLayout :competitionId="competition.id">
+  <ProgramLayout :competition="competition">
     <a-page-header></a-page-header>
     <div class="py-12 mx-8">
       <div class="overflow-hidden flex flex-col gap-3">
@@ -222,13 +222,17 @@
 <script>
 import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 import { message } from "ant-design-vue";
+import { Modal } from "ant-design-vue";
+import { createVNode } from "vue";
 import {
   DownloadOutlined,
   FileExcelOutlined,
   WarningOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
 export default {
   components: {
+    ExclamationCircleOutlined,
     DownloadOutlined,
     FileExcelOutlined,
     WarningOutlined,
@@ -395,7 +399,7 @@ export default {
           this.$message.error("Import Error");
         });
     },
-    confirmLockAthlets() {
+    confirmLockAthletes() {
       Modal.confirm({
         title: "Do you want to lock list of athletes?",
         icon: createVNode(ExclamationCircleOutlined),

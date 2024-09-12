@@ -22,7 +22,7 @@
           v-if="competition.status === 0"
           type="primary"
           class="bg-blue-500"
-          @click="confirmLockAthlets"
+          @click="confirmLockAthletes"
           >Lock list of athletes</a-button
         >
         <span v-if="competition.status < 1">Unlocked list of athletes</span>
@@ -186,7 +186,7 @@
                   <div class="grid grid-cols-2 gap-3 mb-6">
                     <a-card
                       v-for="mat in competition.mat_number"
-                      :title="`場地 ${mat}`"
+                      :title="`Mat ${mat}`"
                       :key="mat"
                       class="borderless"
                       style="min-height: 300px"
@@ -290,10 +290,10 @@
                                 {{ element.weight_code }}
                               </div>
                               <div class="text-sm text-neutral-500">
-                                共 {{ element.athletes_count }} 人，{{
+                                {{ element.athletes_count }} people,{{
                                   element.bouts_count
                                 }}
-                                場次
+                                bouts
                               </div>
                             </div>
                           </div>
@@ -606,7 +606,7 @@ export default {
           console.log("error", error);
         });
     },
-    confirmLockAthlets() {
+    confirmLockAthletes() {
       Modal.confirm({
         title: "Do you want to lock list of athletes?",
         icon: createVNode(ExclamationCircleOutlined),

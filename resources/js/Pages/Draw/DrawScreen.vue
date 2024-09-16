@@ -154,18 +154,18 @@
                     class="absolute bg-yellow-500 rotate-45 h-16 w-16 -right-8 -top-8 transform"
                     v-if="athlete.seed"
                   ></div>
-                  {{ athlete.name_zh }}
+                  {{ athlete.athlete.name }}
                   <span>
                     <template v-if="competition.is_language_secondary_enabled">
-                      {{ athlete.name_pt }}
+                      {{ athlete.athlete.name_secondary }}
                     </template>
                   </span>
                 </div>
                 <div class="text-4xl font-medium">
-                  <span>{{ athlete.team.abbreviation }}</span>
-                  - {{ athlete.team.name_zh }}
+                  <span>{{ athlete.athlete.team.abbreviation }}</span>
+                  - {{ athlete.athlete.team.name }}
                   <template v-if="competition.is_language_secondary_enabled">
-                    - {{ athlete.team.name_pt }}
+                    - {{ athlete.team.name_secondary }}
                   </template>
                 </div>
               </div>

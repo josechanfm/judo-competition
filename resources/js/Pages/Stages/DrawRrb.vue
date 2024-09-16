@@ -1,7 +1,9 @@
 <template>
   <div class="h-full flex-col justify-between">
     <div class="p-6 rounded-lgbackdrop-blur">
-      <table class="w-full text-xl border bg-white border-collapse border-black rounded-lg">
+      <table
+        class="w-full text-xl border bg-white border-collapse border-black rounded-lg"
+      >
         <thead>
           <tr>
             <th class="h-20"></th>

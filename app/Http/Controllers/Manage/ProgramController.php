@@ -12,6 +12,7 @@ use App\Models\Bout;
 use App\Models\Athlete;
 use App\Models\ProgramAthlete;
 use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpSpreadsheet\Reader\Xls\RC4;
 
 class ProgramController extends Controller
 {
@@ -478,10 +479,11 @@ class ProgramController extends Controller
         $validated = $request->validate([
             '*.id' => 'required',
             '*.mat' => 'required',
+            '*.date' => 'required',
             '*.section' => 'required',
             '*.sequence' => 'required',
         ]);
-
+        // dd($validated);
         collect($validated)->each(function (array $val) {
             Program::where('id', $val['id'])->update($val);
         });
@@ -503,5 +505,13 @@ class ProgramController extends Controller
             $program->confirmDraw();
         });
         return redirect()->back();
+    }
+
+    public function programsUpdate(Competition $competition, Request $request)
+    {
+        $programs = $request->all();
+        foreach ($programs as $p) {
+            Program::where('id', $p['id'])->update(['contest_system' => $p['contest_system']]);
+        }
     }
 }

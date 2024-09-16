@@ -55,8 +55,24 @@
             </div>
             <div v-if="view === 'list'" class="my-2 shadow-lg bg-white rounded-lg">
               <div class="pb-2 mx-4 mt-2 flex justify-between">
-                <div class="text-xl font-bold">All Categories</div>
+                <div class="text-xl font-bold">All Programs</div>
                 <div class="">
+                  <a-button
+                    v-if="programsEdit == false"
+                    type="link"
+                    @click="
+                      () => {
+                        this.programsEdit = true;
+                      }
+                    "
+                  >
+                    <div class="flex items-center gap-2"><EditOutlined />Edit</div>
+                  </a-button>
+                  <a-button v-else @click="savePrograms" type="link">
+                    <div class="flex items-center gap-2">
+                      <SaveOutlined />save
+                    </div></a-button
+                  >
                   <a-button type="link">
                     <div class="flex items-center gap-2">
                       <DownloadOutlined />Print pdf
@@ -101,8 +117,14 @@
                     <span>{{ record.athletes_count }}</span>
                   </template>
                   <template v-if="column.dataIndex === 'contest_system'">
-                    <template v-if="edit == false">
+                    <template v-if="programsEdit == false">
                       {{ record.contest_system }}
+                    </template>
+                    <template v-else>
+                      <a-select
+                        v-model:value="record.contest_system"
+                        :options="contest_systems"
+                      ></a-select>
                     </template>
                   </template>
                   <template v-else>
@@ -443,9 +465,16 @@ export default {
   data() {
     return {
       view: "list",
+      programsEdit: false,
       dateFormat: "YYYY-MM-DD",
       editDraggable: false,
       multipleMove: false,
+      contest_systems: [
+        { label: "rrb", value: "rrb" },
+        { label: "rrba", value: "rrba" },
+        { label: "kos", value: "kos" },
+        { label: "erm", value: "erm" },
+      ],
       selectedPrograms: [],
       edit: false,
       partitionedPrograms: {},
@@ -739,14 +768,26 @@ export default {
           }
         }
       });
+      this.editDraggable = false;
+      this.multipleMove = false;
       this.$inertia.post(
         route("manage.competition.program.sequence.update", this.competition.id),
         programs,
         {
           onSuccess: (page) => {
-            this.editDraggable = false;
-            this.multipleMove = false;
-            this.$message.success("移動成功");
+            this.$message.success("Move success");
+          },
+        }
+      );
+    },
+    savePrograms() {
+      this.$inertia.post(
+        route("manage.competition.programs-update", this.competition.id),
+        this.programs,
+        {
+          onSuccess: (page) => {
+            this.programsEdit = false;
+            this.$message.success("Save success");
           },
         }
       );
@@ -797,7 +838,7 @@ export default {
         {
           preserveScroll: true,
           onSuccess: () => {
-            this.$message.success("已確認比賽安排");
+            this.$message.success("The programs sequence has been confirmed");
             this.$inertia.reload({
               preserveScroll: true,
               only: ["programs"],

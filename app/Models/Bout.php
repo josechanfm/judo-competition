@@ -327,7 +327,7 @@ class Bout extends Model
             return 0;
         }
 
-        if ($this->white === $programAthlete > id) {
+        if ($this->white === $programAthlete->id) {
             return $this->result->w_score;
         } else if ($this->blue === $programAthlete->id) {
             return $this->result->b_score;

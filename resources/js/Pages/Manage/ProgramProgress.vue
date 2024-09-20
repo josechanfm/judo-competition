@@ -2,12 +2,21 @@
   <inertia-head title="Dashboard" />
 
   <ProgramLayout :competition="competition">
-    <a-page-header title="Competition Progress"> </a-page-header>
+    <a-page-header title="Competition Progress">
+      <template #extra>
+        <a
+          :href="
+            route('manage.print.program_schedule', { competition_id: competition.id })
+          "
+          target="_blank"
+          >print</a
+        >
+      </template>
+    </a-page-header>
     <template v-if="competition.status >= 2">
       <div class="flex pt-4">
         <div class="h-[90vh] resizable overflow-x-hidden">
           <div class="bg-white px-2">
-            <div class="font-bold text-2xl py-2">Competition Progress</div>
             <a-radio-group
               v-model:value="currentSection.id"
               button-style="solid"
@@ -112,7 +121,15 @@
             </div>
           </div>
         </div>
-        <div class="bg-gray-200 p-4 grow">Resize this div</div>
+        <div class="bg-gray-200 p-4 grow w-32">
+          <embed
+            type="text/html"
+            class="h-[87vh] w-full"
+            :src="
+              route('manage.print.program_schedule', { competition_id: competition.id })
+            "
+          />
+        </div>
       </div>
     </template>
     <template v-else>

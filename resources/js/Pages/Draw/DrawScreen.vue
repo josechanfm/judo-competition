@@ -86,7 +86,7 @@
               :key="lastAction"
               v-if="stagePayload.program.contest_system !== 'rrb'"
             />
-            <draw-rrb v-else :athletes="stagePayload.athletes" :key="lastAction" />
+            <draw-rrb v-else :athletes="stagePayload.athletes" :key="lastAction.id" />
           </div>
         </div>
       </template>

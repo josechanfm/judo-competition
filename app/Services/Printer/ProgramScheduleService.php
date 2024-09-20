@@ -110,6 +110,7 @@ class ProgramScheduleService{
                 .tableLeft td, .tableRight td  {
                     text-align: center;
                     vertical-align: middle;
+                    text-family:cid0ct;
                     border: 1px solid #000; 
                     border-radius: 10px;
                 }

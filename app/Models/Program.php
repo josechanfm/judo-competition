@@ -160,4 +160,20 @@ class Program extends Model
         $this->status = self::STATUS_DREW_CONFIRMED;
         $this->save();
     }
+
+    public function convertWeight()
+    {
+        $weight = $this->weight_code;
+        if (preg_match('/^MW(\d+)([+-])$/', $weight, $matches)) {
+            $sign = $matches[2];
+            $value = $matches[1];
+
+            if ($sign === '-') {
+                return "-{$value}kg";
+            } elseif ($sign === '+') {
+                return "+{$value}kg";
+            }
+        }
+        return $weight;
+    }
 }

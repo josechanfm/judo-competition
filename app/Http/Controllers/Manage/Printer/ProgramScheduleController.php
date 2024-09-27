@@ -18,15 +18,12 @@ class ProgramScheduleController extends Controller
     {
         $data = $request->all();
 
-        $competition = Competition::where('id', $data['competition_id'])->first();
-
-        $bouts = $competition->bouts()->orderBy('sequence')->get();
-
-        // dd($bouts[0]->white_player->name);
+        $bouts = Bout::whereIn('id', $data['bouts'])->orderBy('sequence')->get();
+        // dd($bouts);
         $inputBouts = collect($bouts)->map(function ($bout) {
             return [
                 'sequence' => $bout['sequence'],
-                'category' => $bout->program->competitionCategory->name,
+                'category' => $bout['program']->competitionCategory->name,
                 'weight' => $bout->program->convertWeight(),
                 'round' => $bout->bout_name,
                 'event_date' => $bout->date,
@@ -35,13 +32,12 @@ class ProgramScheduleController extends Controller
                 'blue_player' => $bout?->blue_player->name ?? '',
                 'blue_team' => $bout?->blue_player->team->name ?? '',
                 'time' => $bout->duration_formatted,
-
             ];
         });
         // dd($inputBouts);
 
         $this->gameSheet = new ProgramScheduleService();
-        $this->schedule($inputBouts, $request->mat ?? 1);
+        $this->schedule($inputBouts, $bouts[0]->mat ?? 1);
     }
 
     public function schedule($bouts, $mat = 1)

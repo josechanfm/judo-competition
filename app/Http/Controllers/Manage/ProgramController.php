@@ -113,7 +113,7 @@ class ProgramController extends Controller
         // dd($program->gen_bouts);
         $competition->programsAthletes;
         $competition->programsBouts;
-        $competition->bouts = $competition->bouts()->get();
+        $competition->bouts = $competition->bouts()->orderBy('sequence')->get();
 
         //$competition->programs;
         return Inertia::render('Manage/ProgramProgress', [

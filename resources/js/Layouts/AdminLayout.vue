@@ -49,6 +49,12 @@
             Print Out Demo
           </inertia-link>
         </a-menu-item>
+        <a-menu-item key="system.index">
+          <video-camera-outlined />
+          <inertia-link class="mx-2" :href="route('manage.system.index')">
+            System description
+          </inertia-link>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>
@@ -111,7 +117,7 @@ export default {
     };
   },
   mounted() {
-    console.log(route().current());
+    console.log(route().current().split(".").slice(1).join("."));
     this.selectedKeys.push(route().current().split(".").slice(1).join("."));
   },
 };

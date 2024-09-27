@@ -1,40 +1,45 @@
 <?php
+
 namespace App\Services\Printer;
 
 use App\Helpers\PdfHelper;
 use TCPDF;
 
-class ProgramScheduleService{
-    
-    protected $pdf=null;
-    protected $gameSetting=null;
-    protected $title='Judo Competition of Asia Pacific';
-    protected $title_sub='Judo Union of Asia';
-    protected $logo_primary='images/jua_logo.png';
-    protected $logo_secondary=null;
+class ProgramScheduleService
+{
 
-    protected $startX=15; //面頁基點X軸
-    protected $startY=30; //面頁基點Y軸
-    protected $boxWhiteColor=array(240,240,255);
-    protected $boxBlueColor=array(255,255,255);
-    protected $styleBoxLine=null;
+    protected $pdf = null;
+    protected $gameSetting = null;
+    protected $title = 'Judo Competition of Asia Pacific';
+    protected $title_sub = 'Judo Union of Asia';
+    protected $logo_primary = 'images/jua_logo.png';
+    protected $logo_secondary = null;
+
+    protected $startX = 15; //面頁基點X軸
+    protected $startY = 30; //面頁基點Y軸
+    protected $boxWhiteColor = array(240, 240, 255);
+    protected $boxBlueColor = array(255, 255, 255);
+    protected $styleBoxLine = null;
 
 
-    public function __construct(){
-        $this->styleBoxLine= array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(0, 0, 0));
-
+    public function __construct()
+    {
+        $this->styleBoxLine = array('width' => 0.1, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'phase' => 10, 'color' => array(0, 0, 0));
     }
-    public function setLogos($primary=null, $secondary=null){
-        $this->logo_primary=$primary;
-        $this->logo_secondary=$secondary;
-    }
-
-    public function setTitles($title=null, $title_sub=null){
-        $this->title=$title;
-        $this->title_sub=$title_sub;
+    public function setLogos($primary = null, $secondary = null)
+    {
+        $this->logo_primary = $primary;
+        $this->logo_secondary = $secondary;
     }
 
-    public function pdf($records,$mat=null, $date=null){
+    public function setTitles($title = null, $title_sub = null)
+    {
+        $this->title = $title;
+        $this->title_sub = $title_sub;
+    }
+
+    public function pdf($records, $mat = null, $date = null)
+    {
         $this->pdf = new \Mpdf\Mpdf();
         //$this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         // $this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
@@ -42,10 +47,11 @@ class ProgramScheduleService{
         // $this->pdf->SetMargins(15,10,15);
         // $this->pdf->SetAutoPageBreak(TRUE,0);
         $this->pdf->AddPage();
+
         //$this->header();
-        $helper=new PdfHelper($this->pdf);
-        $extra=["title"=>$mat,"title_sub"=>$date];
-        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary,$extra);
+        $helper = new PdfHelper($this->pdf);
+        $extra = ["title" => $mat, "title_sub" => $date];
+        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $extra);
         //$helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary);
         $this->schedule($records);
         $this->pdf->Output('myfile.pdf', 'I');
@@ -66,7 +72,7 @@ class ProgramScheduleService{
     //     if($this->logo_secondary){
     //         $this->pdf->image($this->logo_secondary,$x+$w-13, $y+2, 10,10,'png');
     //     }
-        
+
     //     $x=25;
     //     $w=165;
     //     $this->pdf->setFont('times','B',16);
@@ -77,9 +83,10 @@ class ProgramScheduleService{
     //     $this->pdf->Cell($w, $h-($h/1.6 ), $this->title_sub, 0, 0, 'C', 0, '', 0);
     // }
 
-    public function schedule($records){
+    public function schedule($records)
+    {
         $this->pdf->setXY($this->startX, $this->startY);
-        $data ='
+        $data = '
         <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -110,9 +117,9 @@ class ProgramScheduleService{
                 .tableLeft td, .tableRight td  {
                     text-align: center;
                     vertical-align: middle;
-                    text-family:cid0ct;
                     border: 1px solid #000; 
                     border-radius: 10px;
+                    font-family:mingliu;
                 }
                 .arc{
                     position: absolute;
@@ -130,7 +137,7 @@ class ProgramScheduleService{
                 </style>
             </head>
         ';
-        $rightTable='
+        $rightTable = '
         <div style="flow:right">
         <table class="tableRight">
             <tr>
@@ -151,42 +158,42 @@ class ProgramScheduleService{
         </table>
         </div>
         ';
-        foreach($records as $record){
-            $data .='<table class="tableMain"><tr>';
-            $data .='<td>';
-            $data .='<table class="tableLeft">';
-            $data .='<tr>';
-            $data .='<td rowspan="4" style="width:42px;border:none!important"><div class="arc"></div>'.$record['sequence'].'</td>';
-            $data .='<td rowspan="4">'.$record['weight'].'<br><font style="font-size:14;font-weight:bold">'.$record['category'].'</font><br><font style="font-size:12;font-weight:bold">'.$record['round'].'</font></td>';
-            $data .='<td rowspan="2" style="width:150px">'.$record['white_player'].'</td>';
-            $data .='<td rowspan="2" style="width:150px">'.$record['white_team'].'</td>';
-            $data .='<td></td>';
-            $data .='<td></td>';
-            $data .='<td></td>';
-            $data .='<td></td>';
-            $data .='</tr>';
-            $data .='<tr>';
-            $data .='<td rowspan="2">I</td>';
-            $data .='<td rowspan="2">W</td>';
-            $data .='<td rowspan="2">S</td>';
-            $data .='<td rowspan="2">'.$record['time'].'</td>';
-            $data .='</tr>';
-            $data .='<tr>';
-            $data .='<td rowspan="2" style="background:lightblue">'.$record['blue_player'].'</td>';
-            $data .='<td rowspan="2" style="background:lightblue">'.$record['blue_team'].'</td>';
-            $data .='</tr>';
-            $data .='<tr>';
-            $data .='<td></td>';
-            $data .='<td></td>';
-            $data .='<td></td>';
-            $data .='<td></td>';
-            $data .='</tr>';
-            $data .='</table>';
-            $data .='</td>';
-            $data .='<td style="width:5px"></td>';
-            $data .='<td>'.$rightTable.'</td>';
-            $data .='</tr></table>';
-            $data .='<div class="spacer"></div>';
+        foreach ($records as $record) {
+            $data .= '<table class="tableMain"><tr>';
+            $data .= '<td>';
+            $data .= '<table class="tableLeft">';
+            $data .= '<tr>';
+            $data .= '<td rowspan="4" style="width:42px;border:none!important"><div class="arc"></div>' . $record['sequence'] . '</td>';
+            $data .= '<td rowspan="4">' . $record['weight'] . '<br><font style="font-size:14;font-weight:bold">' . mb_substr($record['category'], 0, 10) . '</font><br><font style="font-size:12;font-weight:bold">' . $record['round'] . '</font></td>';
+            $data .= '<td rowspan="2" style="width:150px">' . mb_substr($record['white_player'], 0, 18) . '</td>';
+            $data .= '<td rowspan="2" style="width:150px">' . $record['white_team'] . '</td>';
+            $data .= '<td></td>';
+            $data .= '<td></td>';
+            $data .= '<td></td>';
+            $data .= '<td></td>';
+            $data .= '</tr>';
+            $data .= '<tr>';
+            $data .= '<td rowspan="2">I</td>';
+            $data .= '<td rowspan="2">W</td>';
+            $data .= '<td rowspan="2">S</td>';
+            $data .= '<td rowspan="2">' . $record['time'] . '</td>';
+            $data .= '</tr>';
+            $data .= '<tr>';
+            $data .= '<td rowspan="2" style="background:lightblue">' . mb_substr($record['blue_player'], 0, 18). '</td>';
+            $data .= '<td rowspan="2" style="background:lightblue">' . $record['blue_team'] . '</td>';
+            $data .= '</tr>';
+            $data .= '<tr>';
+            $data .= '<td></td>';
+            $data .= '<td></td>';
+            $data .= '<td></td>';
+            $data .= '<td></td>';
+            $data .= '</tr>';
+            $data .= '</table>';
+            $data .= '</td>';
+            $data .= '<td style="width:5px"></td>';
+            $data .= '<td>' . $rightTable . '</td>';
+            $data .= '</tr></table>';
+            $data .= '<div class="spacer"></div>';
         }
         // $mpdf = new \Mpdf\Mpdf();
         // $mpdf->WriteHTML($data);
@@ -195,7 +202,6 @@ class ProgramScheduleService{
         // $x=100;
         // $y=100;
         // $this->pdf->writeHTMLCell(80, '', $x, $y, $data, 0, 1, 0, true, 'J', true);
-        $this->pdf->Output('myfile.pdf','I');
+        $this->pdf->Output('myfile.pdf', 'I');
     }
-
 }

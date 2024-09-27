@@ -4,12 +4,15 @@
   <ProgramLayout :competition="competition">
     <a-page-header title="Competition Progress">
       <template #extra>
-        <a
-          :href="
-            route('manage.print.program_schedule', { competition_id: competition.id })
-          "
-          target="_blank"
-          >print</a
+        <span class="">already choose {{ select_bouts.length }} bouts</span>
+        <a-button
+          type="text"
+          class="text-blue-500"
+          @click="() => ((this.select_bouts = []), (this.select_bout = {}))"
+          >Clear</a-button
+        >
+        <a-button type="text" class="text-blue-500" @click="confirmPrint(competition)"
+          >Show</a-button
         >
       </template>
     </a-page-header>
@@ -90,10 +93,20 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <template v-for="bout in competition.bouts">
+                              <template
+                                v-for="bout in competition.bouts.filter(
+                                  (x) => x.mat == mat && x.section == selectSection
+                                )"
+                                :key="bout.id"
+                              >
                                 <tr
-                                  :key="bout.id"
-                                  v-if="bout.mat == mat && bout.section == selectSection"
+                                  @click="selectBout(bout, mat, selectSection)"
+                                  :class="
+                                    select_bouts.includes(bout.id) ||
+                                    select_bout.id == bout.id
+                                      ? 'border border-blue-500'
+                                      : ''
+                                  "
                                   class="border-b dark:border-neutral-500 dark:bg-neutral-600 odd:bg-neutral-100"
                                 >
                                   <td class="py-4 w-10">{{ bout.program_id }}</td>
@@ -122,13 +135,7 @@
           </div>
         </div>
         <div class="bg-gray-200 p-4 grow w-32">
-          <embed
-            type="text/html"
-            class="h-[87vh] w-full"
-            :src="
-              route('manage.print.program_schedule', { competition_id: competition.id })
-            "
-          />
+          <embed type="text/html" class="h-[87vh] w-full" :src="printLink" />
         </div>
       </div>
     </template>
@@ -177,6 +184,9 @@ export default {
         mats: {},
       },
       selectSection: 1,
+      printLink: "",
+      select_bout: {},
+      select_bouts: [],
       dateFormat: "YYYY-MM-DD",
       columns: [
         {
@@ -273,6 +283,40 @@ export default {
           ).length;
         }
       });
+    },
+    confirmPrint(competition) {
+      console.log(this.printLink);
+      this.printLink = route("manage.print.program_schedule", {
+        competition_id: competition.id,
+        bouts: this.select_bouts,
+      });
+    },
+    selectBout(bout, mat, section) {
+      console.log(mat, section);
+      if (this.select_bouts != []) {
+        if (this.select_bout.mat == mat && this.select_bout.section == section) {
+          if (bout.sequence > this.select_bout.sequence) {
+            this.select_bouts = this.competition.bouts
+              .filter((x) => x.mat == mat && x.section == section)
+              .slice(this.select_bout.sequence - 1, bout.sequence)
+              .map((x) => x.id);
+          } else {
+            this.select_bouts = this.competition.bouts
+              .filter((x) => x.mat == mat && x.section == section)
+              .slice(bout.sequence - 1, this.select_bout.sequence)
+              .map((x) => x.id);
+          }
+        } else {
+          console.log(1);
+          this.select_bout = bout;
+          this.select_bouts = [bout.id];
+        }
+      } else {
+        console.log(2);
+        this.select_bout = bout;
+        this.select_bouts = [bout.id];
+      }
+      console.log(this.select_bouts);
     },
   },
   watch: {

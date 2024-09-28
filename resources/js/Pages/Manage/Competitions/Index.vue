@@ -4,11 +4,13 @@
   <AdminLayout>
     <template #header>
       <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Competition Manage</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+          Competition Manage
+        </h2>
       </div>
     </template>
     <div class="py-12 mx-8">
-      <div class="mb-8 flex justify-between">
+      <div class="mb-8 flex justify-between flex-col md:flex-row">
         <div class="text-xl font-bold">Competition Manage</div>
         <div>
           <inertia-link :href="route('manage.competitions.create')"

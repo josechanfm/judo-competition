@@ -3,7 +3,7 @@
 
   <AdminLayout>
     <div class="py-12 mx-8 md:max-w-6xl xl:mx-auto">
-      <div class="mb-8 flex justify-between">
+      <div class="mb-8 flex justify-between flex-col md:flex-row">
         <div class="text-xl font-bold">Competition types</div>
         <div>
           <a-button

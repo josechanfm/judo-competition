@@ -37,7 +37,7 @@
               <div class="pb-1">
                 <user-outlined />
               </div>
-              <div>Program</div>
+              <div v-if="!collapsed">Program</div>
             </div>
             <inertia-link
               class="mx-2"
@@ -78,23 +78,31 @@
         </a-sub-menu>
         <a-menu-item key="competition.progress">
           <div class="flex items-center">
-            <upload-outlined />
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <upload-outlined />
+              </div>
+              <div v-if="!collapsed">Progress</div>
+            </div>
             <inertia-link
               class="mx-2"
               :href="route('manage.competition.progress', competition.id)"
             >
-              Progress
             </inertia-link>
           </div>
         </a-menu-item>
         <a-menu-item key="competition.teams.index">
           <div class="flex items-center">
-            <flag-outlined />
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <flag-outlined />
+              </div>
+              <div v-if="!collapsed">Team</div>
+            </div>
             <inertia-link
               class="mx-2"
               :href="route('manage.competition.teams.index', competition.id)"
             >
-              Team
             </inertia-link>
           </div>
         </a-menu-item>

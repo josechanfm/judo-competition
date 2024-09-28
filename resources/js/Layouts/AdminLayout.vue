@@ -32,28 +32,51 @@
       </div>
       <a-menu v-model:selectedKeys="selectedKeys" theme="light" mode="inline">
         <a-menu-item key="competitions.index">
-          <user-outlined />
-          <inertia-link class="mx-2" :href="route('manage.competitions.index')">
-            Home
-          </inertia-link>
+          <div class="flex items-center">
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <user-outlined />
+              </div>
+              <div v-if="!collapsed">Home</div>
+            </div>
+            <inertia-link class="mx-2" :href="route('manage.competitions.index')">
+            </inertia-link>
+          </div>
         </a-menu-item>
         <a-menu-item key="gameTypes.index">
-          <video-camera-outlined />
-          <inertia-link class="mx-2" :href="route('manage.gameTypes.index')">
-            Game Type
-          </inertia-link>
+          <div class="flex items-center">
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <video-camera-outlined />
+              </div>
+              <div v-if="!collapsed">Game Type</div>
+            </div>
+            <inertia-link class="mx-2" :href="route('manage.gameTypes.index')">
+            </inertia-link>
+          </div>
         </a-menu-item>
         <a-menu-item key="print.demo">
-          <video-camera-outlined />
-          <inertia-link class="mx-2" :href="route('manage.print.demo')">
-            Print Out Demo
-          </inertia-link>
+          <div class="flex items-center">
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <video-camera-outlined />
+              </div>
+              <div v-if="!collapsed">Print Out Demo</div>
+            </div>
+            <inertia-link class="mx-2" :href="route('manage.print.demo')"> </inertia-link>
+          </div>
         </a-menu-item>
         <a-menu-item key="system.index">
-          <video-camera-outlined />
-          <inertia-link class="mx-2" :href="route('manage.system.index')">
-            System description
-          </inertia-link>
+          <div class="flex items-center">
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <video-camera-outlined />
+              </div>
+              <div v-if="!collapsed">Documentation</div>
+            </div>
+            <inertia-link class="mx-2" :href="route('manage.system.index')">
+            </inertia-link>
+          </div>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>

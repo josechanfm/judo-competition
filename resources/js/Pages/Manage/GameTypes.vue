@@ -22,12 +22,12 @@
         <div class="flex gap-6 sm:flex-row flex-col">
           <div class="w-1/2">
             <a-form
-              id="modalFrom"
-              name="ModalForm"
-              ref="formRef"
+              ref="newGameTypeRef"
               :model="newGameType"
               layout="vertical"
               autocomplete="off"
+              :rules="rules"
+              :validate-messages="validateMessages"
             >
               <a-form-item name="language" label="Language">
                 <a-select
@@ -54,11 +54,44 @@
                   style="width: 200px"
                 ></a-select>
               </a-form-item>
+              <a-form-item name="awarding_methods">
+                <template #label>
+                  <div class="flex items-center gap-2">
+                    <span>Awarding Methods</span>
+                    <a-tooltip placement="right">
+                      <template #title>
+                        <span
+                          >In judo competitions while involving 4 participants or fewer,
+                          the handling of winning ranks typically varies based on the
+                          event's regulations. Generally, there are two common approaches:
+                          Method one awards all athletes a rank, while method two limits
+                          the number of ranked to the total number of althlets minus
+                          one.</span
+                        >
+                      </template>
+                      <InfoCircleOutlined />
+                    </a-tooltip>
+                  </div>
+                </template>
+                <div class="flex items-center gap-3">
+                  Method1
+                  <a-switch
+                    v-model:checked="newGameType.awarding_methods"
+                    :unCheckedValue="0"
+                    :checkedValue="1"
+                  />
+                  Method2
+                </div>
+              </a-form-item>
               <p class="underline font-bold">Type information</p>
               <a-form-item name="name" label="Name">
                 <a-input type="input" v-model:value="newGameType.name"></a-input>
               </a-form-item>
-              <a-form-item name="name_secondary" label="Name Secondary">
+              <a-form-item
+                name="name_secondary"
+                label="Name Secondary"
+                v-if="newGameType.is_language_secondary_enabled"
+              >
                 <a-input
                   type="input"
                   v-model:value="newGameType.name_secondary"
@@ -88,13 +121,13 @@
           <div class="flex gap-6 sm:flex-row flex-col">
             <div class="w-1/2">
               <a-form
-                id="modalFrom"
-                name="ModalForm"
-                ref="formRef"
+                ref="gameTypeRef"
                 :model="gameType"
                 layout="vertical"
                 autocomplete="off"
                 :disabled="!gameType.isEditing"
+                :rules="rules"
+                :validate-messages="validateMessages"
               >
                 <a-form-item name="language" label="Language">
                   <a-select
@@ -136,34 +169,96 @@
                     </span>
                   </p>
                 </a-form-item>
+                <a-form-item name="awarding_methods">
+                  <template #label>
+                    <div class="flex items-center gap-2">
+                      <span>Awarding Methods</span>
+                      <a-tooltip placement="right">
+                        <template #title>
+                          <span
+                            >In judo competitions while involving 4 participants or fewer,
+                            the handling of winning ranks typically varies based on the
+                            event's regulations. Generally, there are two common
+                            approaches: Method one awards all athletes a rank, while
+                            method two limits the number of ranked to the total number of
+                            althlets minus one.</span
+                          >
+                        </template>
+                        <InfoCircleOutlined />
+                      </a-tooltip>
+                    </div>
+                  </template>
+                  <div class="flex items-center gap-3" v-if="gameType.isEditing">
+                    Method1
+                    <a-switch
+                      v-model:checked="newGameType.awarding_methods"
+                      :unCheckedValue="0"
+                      :checkedValue="1"
+                    />
+                    Method2
+                  </div>
+                  <div class="flex items-center gap-3" v-else>
+                    {{ newGameType.awarding_methods == 0 ? "Method1" : "Method2" }}
+                  </div>
+                </a-form-item>
                 <p class="underline font-bold">Type infomation</p>
                 <a-form-item name="name" label="Name">
-                  <a-input type="input" v-model:value="gameType.name"></a-input>
+                  <a-input
+                    type="input"
+                    v-model:value="gameType.name"
+                    v-if="gameType.isEditing"
+                  ></a-input>
+                  <div v-else>{{ gameType.name }}</div>
                 </a-form-item>
-                <a-form-item name="name_secondary" label="Name secondary">
-                  <a-input type="input" v-model:value="gameType.name_secondary"></a-input>
+                <a-form-item
+                  name="name_secondary"
+                  label="Name secondary"
+                  v-if="gameType.is_language_secondary_enabled"
+                >
+                  <a-input
+                    type="input"
+                    v-model:value="gameType.name_secondary"
+                    v-if="gameType.isEditing"
+                  ></a-input>
+                  <div v-else>{{ gameType.name_secondary }}</div>
                 </a-form-item>
                 <a-form-item name="code" label="Code">
-                  <a-input type="input" v-model:value="gameType.code"></a-input>
+                  <a-input
+                    type="input"
+                    v-model:value="gameType.code"
+                    v-if="gameType.isEditing"
+                  ></a-input>
+                  <div v-else>{{ gameType.code }}</div>
                 </a-form-item>
               </a-form>
             </div>
-            <div class="flex flex-col gap-3 w-1/2">
-              <div>Category and Weights</div>
+            <div class="flex flex-col gap-6 w-1/2">
+              <div class="flex items-center gap-2">
+                Category and Weights
+                <a-tooltip placement="right">
+                  <template #title>
+                    <span
+                      >Category and Weights code needs to be filled in with the
+                      format<span class="text-red-400">(MW/FW(Weight)(+/-))</span></span
+                    >
+                  </template>
+                  <InfoCircleOutlined />
+                </a-tooltip>
+              </div>
               <div v-for="category in gameType.categories" :key="category.id">
-                <div class="mb-2">
+                <div class="flex items-center mb-2 gap-2">
                   <a-tag>{{ category.code }}</a-tag>
                   {{ category.name }}
                   <template v-if="gameType.is_language_secondary_enabled">
                     / {{ category.name_secondary }}
                   </template>
-                  <span class="pl-2 mt-2 text-sm text-blue-500"
+                  <span class="text-sm text-blue-500 flex items-center gap-1"
                     ><ClockCircleOutlined /> {{ category.duration }}</span
                   >
                   <template v-if="gameType.isEditing">
                     <a-button
                       type="link"
-                      @click="gameType.editCategory = null"
+                      @click="confirmEditCategory()"
                       v-if="gameType.editCategory == category.id"
                     >
                       Confirm
@@ -190,34 +285,45 @@
                     class="flex flex-col gap-6"
                     :class="gameType.editCategory == category.id ? 'block' : 'hidden'"
                   >
-                    <div class="">
-                      <div>Code</div>
-                      <a-input type="input" v-model:value="category.code"></a-input>
-                    </div>
-                    <div class="">
-                      <div>Name</div>
-                      <a-input type="input" v-model:value="category.name"></a-input>
-                    </div>
-                    <div class="">
-                      <div>Name Secondary</div>
-                      <a-input
-                        type="input"
-                        v-model:value="category.name_secondary"
-                      ></a-input>
-                    </div>
-                    <div class="">
-                      <div>Category duration</div>
-                      <a-time-picker
-                        v-model:value="category.duration"
-                        format="mm:ss"
-                        value-format="mm:ss"
-                      />
-                    </div>
+                    <a-form
+                      ref="gameCategoryRef"
+                      :model="gameType"
+                      layout="vertical"
+                      autocomplete="off"
+                      :disabled="!gameType.isEditing"
+                      :rules="rules"
+                      :validate-messages="validateMessages"
+                    >
+                      <a-form-item name="code" label="Code">
+                        <a-input type="input" v-model:value="category.code"></a-input>
+                      </a-form-item>
+                      <a-form-item name="name" label="Name">
+                        <a-input type="input" v-model:value="category.name"></a-input>
+                      </a-form-item>
+                      <a-form-item
+                        name="name_secondary"
+                        label="Name Secondary"
+                        v-if="gameType.is_language_secondary_enabled"
+                      >
+                        <a-input
+                          type="input"
+                          v-model:value="category.name_secondary"
+                        ></a-input>
+                      </a-form-item>
+                      <a-form-item name="duration" label="Category Duration">
+                        <a-time-picker
+                          v-model:value="category.duration"
+                          format="mm:ss"
+                          value-format="mm:ss"
+                        />
+                      </a-form-item>
+                    </a-form>
                   </div>
-                  <div>
+                  <div class="flex items-center">
                     <a-space :size="[0, 'small']" wrap>
                       <template v-for="weight in category.weights" :key="weight">
                         <a-tag
+                          class="flex items-center"
                           :color="weight[0] == 'F' ? 'pink' : 'blue'"
                           :closable="gameType.isEditing"
                           @close="removeTag($event, category, weight)"
@@ -225,8 +331,9 @@
                           {{ weight }}
                         </a-tag>
                       </template>
-                      <div v-if="gameType.isEditing">
+                      <div v-if="gameType.isEditing" class="flex items-center">
                         <a-input
+                          type="input"
                           :class="category.addWeight == true ? 'block' : 'hidden'"
                           v-model:value="addWeight"
                           size="small"
@@ -239,6 +346,7 @@
                           </template>
                         </a-input>
                         <a
+                          class="flex items-center"
                           id="weightInput"
                           :class="category.addWeight != true ? 'block' : 'hidden'"
                           @click="category.addWeight = true"
@@ -249,13 +357,19 @@
                   </div>
                 </div>
               </div>
-              <div v-if="gameType.isEditing == true">
+              <div v-if="gameType.isEditing == true" class="pt-3">
                 <a-button @click="addCategory(gameType)">Add category</a-button>
               </div>
             </div>
           </div>
-          <div v-if="gameType.isEditing">
-            <a-button type="primary" class="bg-blue-500" danger>Delete</a-button>
+          <div v-if="gameType.isEditing" class="flex gap-2">
+            <a-button
+              type="primary"
+              class="bg-blue-500"
+              danger
+              @click="deleteCompetitionType(gameType)"
+              >Delete</a-button
+            >
             <a-button
               type="primary"
               class="bg-blue-500"
@@ -274,8 +388,12 @@ import AdminLayout from "@/Layouts/AdminLayout.vue";
 import {
   PlusOutlined,
   CloseCircleOutlined,
+  InfoCircleOutlined,
   ClockCircleOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
+import { ref, createVNode } from "vue";
+import { Modal } from "ant-design-vue";
 import { message } from "ant-design-vue";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
@@ -285,8 +403,10 @@ export default {
   components: {
     AdminLayout,
     PlusOutlined,
+    InfoCircleOutlined,
     CloseCircleOutlined,
     ClockCircleOutlined,
+    ExclamationCircleOutlined,
   },
   props: ["gameTypes", "languages"],
   data() {
@@ -296,7 +416,25 @@ export default {
       addWeight: "",
       removeCategories: "",
       newGameType: {
+        awarding_methods: 0,
         is_language_secondary_enabled: 0,
+      },
+      rules: {
+        language: { required: true },
+        language_secondary: { required: true },
+        name: { required: true },
+        code: { required: true },
+        duration: { required: true },
+      },
+      validateMessages: {
+        required: "${label} is required!",
+        types: {
+          email: "${label} is not a valid email!",
+          number: "${label} is not a valid number!",
+        },
+        number: {
+          range: "${label} must be between ${min} and ${max}",
+        },
       },
     };
   },
@@ -308,6 +446,7 @@ export default {
     createNewGameType() {
       this.newGameType = {
         is_language_secondary_enabled: 0,
+        awarding_methods: 0,
       };
       this.newGameType.isCreateing = true;
     },
@@ -325,25 +464,40 @@ export default {
       // console.log(record.categories);
       console.log(record);
       this.$inertia.post(route("manage.gameTypes.store"), record, {
-        onSuccess(res) {
+        onSuccess: (res) => {
           console.log(res);
         },
-        onError(errors) {
+        onError: (errors) => {
           console.log(errors);
         },
       });
     },
     addCategory(gameType) {
-      gameType.categories.push({
-        id: 100000000,
-        code: "",
-        game_type_id: gameType.id,
-        name: "",
-        weights: [],
-        name_secondary: "",
-        duartion: "",
-      });
-      gameType.editCategory = 100000000;
+      if (this.gameType?.editCategory) {
+        this.$refs.newGameTypeRef.validateFields().then(() => {
+          gameType.categories.push({
+            id: 100000000,
+            code: "",
+            game_type_id: gameType.id,
+            name: "",
+            weights: [],
+            name_secondary: "",
+            duartion: "",
+          });
+          gameType.editCategory = 100000000;
+        });
+      } else {
+        gameType.categories.push({
+          id: 100000000,
+          code: "",
+          game_type_id: gameType.id,
+          name: "",
+          weights: [],
+          name_secondary: "",
+          duartion: "",
+        });
+        gameType.editCategory = 100000000;
+      }
     },
     test() {
       console.log(this.gameTypes);
@@ -363,6 +517,12 @@ export default {
         gameType.categories.splice(index, 1);
       }
     },
+    confirmEditCategory() {
+      console.log("aaa");
+      this.$refs.gameTypeRef.validateFields().then(() => {
+        this.gameType.editCategory = null;
+      });
+    },
     confirmAddWeight(category) {
       if (
         this.addWeight.match(/^(FW|MW)(\d{1,3})(\+|-)$/) &&
@@ -372,8 +532,35 @@ export default {
         this.addWeight = "";
         category.addWeight = false;
       } else {
-        message.error("公斤格式錯誤或已有此公斤");
+        message.error("The Category and Weights format is wrong or already exists");
       }
+    },
+    deleteCompetitionType(record) {
+      Modal.confirm({
+        title: "是否確定",
+        icon: createVNode(ExclamationCircleOutlined),
+        content: "刪除報名記錄?" + record.name_zh + " / " + record.name_fn,
+        okText: "確定",
+        cancelText: "取消",
+        onOk: () => {
+          this.$inertia.delete(
+            route("manage.gameTypes.destroy", {
+              competition: this.competition.id,
+              application: record.id,
+            }),
+            {
+              onSuccess: (page) => {
+                message.success("刪除成功");
+                console.log(page);
+              },
+              onError: (error) => {
+                message.error("刪除失敗");
+                console.log(error);
+              },
+            }
+          );
+        },
+      });
     },
   },
 };

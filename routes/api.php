@@ -17,5 +17,5 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::get('competition', [App\Http\Controllers\Api\CompetitionController::class, 'getCompetition']);
-Route::post('competition', [App\Http\Controllers\Api\CompetitionController::class, 'sendCompetition']);
+Route::get('api/competition/send', [App\Http\Controllers\Api\CompetitionController::class, 'getCompetition']);
+Route::post('api/competition/get', [App\Http\Controllers\Api\CompetitionController::class, 'sendCompetition']);

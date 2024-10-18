@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('name_secondary');
             $table->char('code', 5);
-            $table->boolean('winner_plus');
+            $table->boolean('awarding_methods');
             $table->string('language')->nullable();
             $table->boolean('is_language_secondary_enabled');
             $table->string('language_secondary')->nullable();

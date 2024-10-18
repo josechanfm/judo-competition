@@ -43,13 +43,14 @@ class GameTypeController extends Controller
      */
     public function store(Request $request)
     {
-        dd($request->all());
+        // dd($request->all());
         // dd($validated['is_language_secondary_enabled']);
         $validated = $request->validate([
             'id' => 'sometimes',
             'name' => 'required',
             'name_secondary' => 'required_if:is_language_secondary_enabled,true',
             // TODO: add filtering
+            'awarding_methods' => 'required',
             'language' => 'required',
             'is_language_secondary_enabled' => 'required',
             'language_secondary' => 'required_if:is_language_secondary_enabled,true',
@@ -73,6 +74,7 @@ class GameTypeController extends Controller
                 'language' => $validated['language'],
                 'is_language_secondary_enabled' => $validated['is_language_secondary_enabled'] == true ? 1 : 0,
                 'language_secondary' => $validated['language_secondary'] ?? null,
+                'awarding_methods' => $validated['awarding_methods'],
                 'code' => $validated['code'],
             ]
         );
@@ -120,15 +122,25 @@ class GameTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-    }
+    public function update(Request $request, string $id) {}
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
+        $game_categories = GameCategory::where('game_type_id', $id)->get();
+
+        $game_categories->each(function ($category) {
+            $category->delete();
+        });
+
+        $game_type = GameType::where('id', $id)->first();
+
+        $game_type->delete();
+
+        return redirect()->back();
+
         //
     }
 }

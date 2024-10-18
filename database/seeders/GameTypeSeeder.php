@@ -19,7 +19,7 @@ class GameTypeSeeder extends Seeder
                 'name' => 'IJF',
                 'name_secondary' => 'IJF',
                 'code'=>'IJF',
-                'winner_plus'=>'0',
+                'awarding_methods'=>'0',
                 'language'=>'en',
                 'is_language_secondary_enabled'=>0,
                 'language'=>'en',
@@ -79,7 +79,7 @@ class GameTypeSeeder extends Seeder
                 'name' => '學界賽',
                 'name_secondary' => 'COMPEONATO SESCOLAR',
                 'code'=>'CEJ',
-                'winner_plus'=>'0',
+                'awarding_methods'=>'0',
                 'language'=>'zh_TW',
                 'is_language_secondary_enabled'=>1,
                 'language'=>'pt',
@@ -95,7 +95,7 @@ class GameTypeSeeder extends Seeder
             ],[
                 'name' => '公開賽',
                 'code'=>'OPEN',
-                'winner_plus'=>'1',
+                'awarding_methods'=>'1',
                 'language'=>'zh_TW',
                 'is_language_secondary_enabled'=>0,
                 'game_categories'=>[]

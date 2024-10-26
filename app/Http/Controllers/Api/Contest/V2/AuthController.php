@@ -3,6 +3,7 @@
 namespace Modules\Admin\Http\Controllers\Api\Contest\V2;
 
 use App\Http\Controllers\Controller;
+use App\Models\Competition;
 use App\Models\Contest;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\ActivityLogger;
@@ -16,7 +17,7 @@ class AuthController extends Controller
             'device_uuid' => 'required',
         ]);
 
-        $contest = Contest::where('token', $validated['token'])->first();
+        $contest = Competition::where('token', $validated['token'])->first();
 
         // revoke all previous token
         $contest->tokens()->where('name', $validated['device_uuid'])->delete();

@@ -5,6 +5,7 @@ namespace Modules\Admin\Http\Controllers\Api\Contest\V2;
 use App\Http\Controllers\Controller;
 use App\Models\Bout;
 use App\Models\BoutResult;
+use App\Models\Competition;
 use App\Models\Contest;
 use App\Models\LinkedBout;
 use Illuminate\Database\Eloquent\Builder;
@@ -142,8 +143,8 @@ class BoutController extends Controller
         ]);
     }
 
-    private static function isContestInProgress (Contest $contest) {
-        return Contest::STATUS_PROGRAM_STARTED === $contest->status;
+    private static function isContestInProgress (Competition $contest) {
+        return Competition::STATUS_CREATED === $contest->status;
     }
 
     public function result(Request $request, LinkedBout $bout)

@@ -84,7 +84,7 @@
             <player
               :athletes="stagePayload.athletes"
               :key="lastAction"
-              v-if="stagePayload.program.contest_system !== 'rrb'"
+              v-if="stagePayload.program.competition_system !== 'rrb'"
             />
             <draw-rrb v-else :athletes="stagePayload.athletes" :key="lastAction.id" />
           </div>
@@ -407,7 +407,7 @@ export default {
         case "draw":
           stagePayload.value = JSON.parse(e.data.payload);
           // follow ijf sequence
-          if (stagePayload.value.program.contest_system !== "rrb") {
+          if (stagePayload.value.program.competition_system !== "rrb") {
             stagePayload.value.athletes = handleSortAthletes(
               stagePayload.value.athletes,
               stagePayload.value.program.chart_size

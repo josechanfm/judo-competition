@@ -15,7 +15,11 @@
           >
         </div>
       </div>
-      <a-card title="Create a new competition type" v-if="newGameType.isCreateing">
+      <a-card
+        class="mb-2"
+        title="Create a new competition type"
+        v-if="newGameType.isCreateing"
+      >
         <template #extra>
           <a-button @click="newGameType.isCreateing = false">Cancel</a-button>
         </template>
@@ -121,6 +125,7 @@
           <div class="flex gap-6 sm:flex-row flex-col">
             <div class="w-1/2">
               <a-form
+                v-if="gameType.isEditing == true"
                 ref="gameTypeRef"
                 :model="gameType"
                 layout="vertical"
@@ -131,14 +136,10 @@
               >
                 <a-form-item name="language" label="Language">
                   <a-select
-                    v-if="gameType.isEditing"
                     v-model:value="gameType.language"
                     :options="languages"
                     style="width: 200px"
                   ></a-select>
-                  <p v-else>
-                    {{ languages.find((l) => l.value == gameType.language).label }}
-                  </p>
                 </a-form-item>
                 <a-form-item label="Open secondary language" v-if="gameType.isEditing">
                   <a-switch
@@ -231,6 +232,44 @@
                   <div v-else>{{ gameType.code }}</div>
                 </a-form-item>
               </a-form>
+              <div v-else class="text-[14px] flex flex-col gap-3">
+                <div class="">Language</div>
+                <div class="mb-3">
+                  {{ languages.find((l) => l.value == gameType.language).label }}
+                </div>
+                <div class="flex items-center gap-2">
+                  Awarding Methods<a-tooltip placement="right">
+                    <template #title>
+                      <span
+                        >In judo competitions while involving 4 participants or fewer, the
+                        handling of winning ranks typically varies based on the event's
+                        regulations. Generally, there are two common approaches: Method
+                        one awards all athletes a rank, while method two limits the number
+                        of ranked to the total number of althlets minus one.</span
+                      >
+                    </template>
+                    <InfoCircleOutlined />
+                  </a-tooltip>
+                </div>
+                <div class="mb-3">
+                  {{ gameType.awarding_methods == 1 ? "Method2" : "Method1" }}
+                </div>
+                <div class="" v-if="gameType.is_language_secondary_enabled == 1">
+                  Language secondary
+                </div>
+                <div class="mb-3" v-if="gameType.is_language_secondary_enabled == 1">
+                  {{
+                    languages.find((l) => l.value == gameType.language_secondary).label
+                  }}
+                </div>
+                <p class="underline font-bold">Type infomation</p>
+                <div class="">Name</div>
+                <div class="mb-3">{{ gameType.name }}</div>
+                <div class="">Name secondary</div>
+                <div class="mb-3">{{ gameType.name_secondary }}</div>
+                <div class="">Code</div>
+                <div class="mb-3">{{ gameType.code }}</div>
+              </div>
             </div>
             <div class="flex flex-col gap-6 w-1/2">
               <div class="flex items-center gap-2">
@@ -258,7 +297,7 @@
                   <template v-if="gameType.isEditing">
                     <a-button
                       type="link"
-                      @click="confirmEditCategory()"
+                      @click="confirmEditCategory(gameType)"
                       v-if="gameType.editCategory == category.id"
                     >
                       Confirm
@@ -283,11 +322,11 @@
                 <div class="flex flex-col gap-3">
                   <div
                     class="flex flex-col gap-6"
-                    :class="gameType.editCategory == category.id ? 'block' : 'hidden'"
+                    v-if="gameType.editCategory == category.id"
                   >
                     <a-form
                       ref="gameCategoryRef"
-                      :model="gameType"
+                      :model="category"
                       layout="vertical"
                       autocomplete="off"
                       :disabled="!gameType.isEditing"
@@ -438,7 +477,9 @@ export default {
       },
     };
   },
-  created() {},
+  created() {
+    window.app = this;
+  },
   methods: {
     reload() {
       this.$inertia.reload(["gameTypes"]);
@@ -462,14 +503,16 @@ export default {
             .asSeconds())
       );
       // console.log(record.categories);
-      console.log(record);
-      this.$inertia.post(route("manage.gameTypes.store"), record, {
-        onSuccess: (res) => {
-          console.log(res);
-        },
-        onError: (errors) => {
-          console.log(errors);
-        },
+      this.$refs.gameTypeRef[0].validateFields().then(() => {
+        this.$inertia.post(route("manage.gameTypes.store"), record, {
+          onSuccess: (res) => {
+            this.newGameType.isCreateing = false;
+            message.success("Creation successful");
+          },
+          onError: (errors) => {
+            message.success("Creation failed");
+          },
+        });
       });
     },
     addCategory(gameType) {
@@ -517,10 +560,10 @@ export default {
         gameType.categories.splice(index, 1);
       }
     },
-    confirmEditCategory() {
-      console.log("aaa");
-      this.$refs.gameTypeRef.validateFields().then(() => {
-        this.gameType.editCategory = null;
+    confirmEditCategory(gameType) {
+      console.log("aaa", this.$refs?.gameCategoryRef ?? "error");
+      this.$refs.gameCategoryRef[0].validateFields().then(() => {
+        gameType.editCategory = null;
       });
     },
     confirmAddWeight(category) {
@@ -537,28 +580,22 @@ export default {
     },
     deleteCompetitionType(record) {
       Modal.confirm({
-        title: "是否確定",
+        title: "Are you sure",
         icon: createVNode(ExclamationCircleOutlined),
-        content: "刪除報名記錄?" + record.name_zh + " / " + record.name_fn,
-        okText: "確定",
-        cancelText: "取消",
+        content: "Delete game type?",
+        okText: "confirm",
+        cancelText: "cancel",
         onOk: () => {
-          this.$inertia.delete(
-            route("manage.gameTypes.destroy", {
-              competition: this.competition.id,
-              application: record.id,
-            }),
-            {
-              onSuccess: (page) => {
-                message.success("刪除成功");
-                console.log(page);
-              },
-              onError: (error) => {
-                message.error("刪除失敗");
-                console.log(error);
-              },
-            }
-          );
+          this.$inertia.delete(route("manage.gameTypes.destroy", record.id), {
+            onSuccess: (page) => {
+              message.success("Deletion successful");
+              console.log(page);
+            },
+            onError: (error) => {
+              message.error("Deletion failed");
+              console.log(error);
+            },
+          });
         },
       });
     },

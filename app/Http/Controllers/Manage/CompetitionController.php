@@ -110,7 +110,7 @@ class CompetitionController extends Controller
                     'section' => 1,
                     'weight_code' => $w,
                     'sequence' => $seq,
-                    'contest_system' => 'kos',
+                    'competition_system' => $competition->system == 'Q' ? 'erm' : ($competition->system == 'F' ? 'full' : 'kos'),
                     'duration' => $competitionCategory->duration,
                     'chart_size' => 0,
                     'status' => 0,

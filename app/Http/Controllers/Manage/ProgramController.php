@@ -186,15 +186,15 @@ class ProgramController extends Controller
                         'queue' => 0,
                         'mat' => $program->mat,
                         'section' => $program->section,
-                        'contest_system' => $program->contest_system,
+                        'competition_system' => $program->competition_system,
                         'round' => $round,
                         'turn' => 0,
                         'white' => 0,
                         'blue' => 0,
                     ];
                 }
-                //repeatcharge round 1, only for program contest_system "erm" 
-                if ($program->contest_system == 'erm') {
+                //repeatcharge round 1, only for program competition_system "erm" 
+                if ($program->competition_system == 'erm') {
                     if ($roundSize == 4) {
                         $data[] = [
                             'program_id' => $program->id,
@@ -203,7 +203,7 @@ class ProgramController extends Controller
                             'queue' => 0,
                             'mat' => $program->mat,
                             'section' => $program->section,
-                            'contest_system' => $program->contest_system,
+                            'competition_system' => $program->competition_system,
                             'round' => 7,
                             'turn' => 0,
                             'white' => 0,
@@ -216,7 +216,7 @@ class ProgramController extends Controller
                             'queue' => 0,
                             'mat' => $program->mat,
                             'section' => $program->section,
-                            'contest_system' => $program->contest_system,
+                            'competition_system' => $program->competition_system,
                             'round' => 7,
                             'turn' => 0,
                             'white' => 0,
@@ -231,7 +231,7 @@ class ProgramController extends Controller
                             'queue' => 0,
                             'mat' => $program->mat,
                             'section' => $program->section,
-                            'contest_system' => $program->contest_system,
+                            'competition_system' => $program->competition_system,
                             'round' => 3,
                             'turn' => 0,
                             'white' => 0,
@@ -244,7 +244,7 @@ class ProgramController extends Controller
                             'queue' => 0,
                             'mat' => $program->mat,
                             'section' => $program->section,
-                            'contest_system' => $program->contest_system,
+                            'competition_system' => $program->competition_system,
                             'round' => 3,
                             'turn' => 0,
                             'white' => 0,
@@ -259,7 +259,7 @@ class ProgramController extends Controller
         Bout::upsert(
             $data,
             ['program_id', 'in_program_sequence'],
-            ['sequence', 'queue', 'mat', 'section', 'contest_system', 'round', 'turn', 'white', 'blue']
+            ['sequence', 'queue', 'mat', 'section', 'competition_system', 'round', 'turn', 'white', 'blue']
         );
 
         //Rearrage the sequence number based on section and mat id, the bouts are order by chart_size and sequence of programs
@@ -381,7 +381,7 @@ class ProgramController extends Controller
                 '67' => [63, 64]
             ],
         ];
-        $programs = $competition->programs->where('contest_system', 'erm');
+        $programs = $competition->programs->where('competition_system', 'erm');
         foreach ($programs as $program) {
             foreach ($riseFromErm[$program->chart_size] as $seq => $rise) {
                 $bouts = Bout::where('program_id', $program->id)->where('in_program_sequence', $seq)->update([
@@ -460,7 +460,7 @@ class ProgramController extends Controller
                 '63' => [61, 62]
             ],
         ];
-        $programs = $competition->programs->where('contest_system', 'kos');
+        $programs = $competition->programs->where('competition_system', 'kos');
         foreach ($programs as $program) {
             foreach ($riseFromKos[$program->chart_size] as $seq => $rise) {
                 $bouts = Bout::where('program_id', $program->id)->where('in_program_sequence', $seq)->update([
@@ -511,7 +511,7 @@ class ProgramController extends Controller
     {
         $programs = $request->all();
         foreach ($programs as $p) {
-            Program::where('id', $p['id'])->update(['contest_system' => $p['contest_system']]);
+            Program::where('id', $p['id'])->update(['competition_system' => $p['competition_system']]);
         }
     }
 }

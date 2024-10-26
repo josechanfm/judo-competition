@@ -72,7 +72,7 @@
 <script>
 export default {
   components: {},
-  props: ["contest_system", "bouts"],
+  props: ["competition_system", "bouts"],
   data() {
     return {
       showTableSeq: false,

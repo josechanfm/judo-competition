@@ -195,6 +195,19 @@
                     <a-textarea v-model:value="create_competition.remark" :rows="5" />
                   </a-form-item>
                 </div>
+                <div class="flex justify-end h-full gap-3">
+                  <a-button
+                    class="text-right"
+                    @click="
+                      () => {
+                        this.$refs.formRef.validateFields().then(() => {
+                          this.setting_index++;
+                        });
+                      }
+                    "
+                    >Next</a-button
+                  >
+                </div>
               </div>
               <div class="flex flex-col" v-else-if="setting_index == 1">
                 <div class="" v-if="create_competition.game_type_id != null">
@@ -258,6 +271,30 @@
                     </a-form-item>
                   </div>
                 </div>
+                <div class="flex justify-end h-full gap-3">
+                  <a-button
+                    class="text-right"
+                    @click="
+                      () => {
+                        this.$refs.formRef.validateFields().then(() => {
+                          this.setting_index--;
+                        });
+                      }
+                    "
+                    >Last</a-button
+                  >
+                  <a-button
+                    class="text-right"
+                    @click="
+                      () => {
+                        this.$refs.formRef.validateFields().then(() => {
+                          this.setting_index++;
+                        });
+                      }
+                    "
+                    >Next</a-button
+                  >
+                </div>
               </div>
               <div class="" v-if="setting_index == 2">
                 <div class="">
@@ -311,6 +348,30 @@
                       </a-radio-group>
                     </div>
                   </a-form-item>
+                </div>
+                <div class="flex justify-end h-full gap-3">
+                  <a-button
+                    class="text-right"
+                    @click="
+                      () => {
+                        this.$refs.formRef.validateFields().then(() => {
+                          this.setting_index--;
+                        });
+                      }
+                    "
+                    >Last</a-button
+                  >
+                  <a-button
+                    class="text-right"
+                    @click="
+                      () => {
+                        this.$refs.formRef.validateFields().then(() => {
+                          this.setting_index++;
+                        });
+                      }
+                    "
+                    >Next</a-button
+                  >
                 </div>
               </div>
               <div class="" v-if="setting_index == 3">
@@ -400,12 +461,9 @@
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div class="flex justify-end h-full">
-                <a-form-item>
+                <div class="flex justify-end h-full">
                   <a-button class="text-right" @click="onCreate">Create</a-button>
-                </a-form-item>
+                </div>
               </div>
             </div>
           </a-form>

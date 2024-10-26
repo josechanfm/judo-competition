@@ -15,7 +15,7 @@
     <div>Dates: {{ competition.dates }}</div>
     <a-typography-title :level="3">Program Info:</a-typography-title>
     <div>{{ program.date }}</div>
-    <div>{{ program.contest_system }}</div>
+    <div>{{ program.competition_system }}</div>
     <div>{{ program.chat_size }}</div>
     <div>{{ program.weight_code }}</div>
     <div>{{ program.competition_category.name }}</div>

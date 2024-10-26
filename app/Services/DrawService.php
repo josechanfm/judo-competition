@@ -60,7 +60,7 @@ class DrawService
      */
     public function draw(): array
     {
-        switch ($this->program->contest_system) {
+        switch ($this->program->competition_system) {
             case Program::ERM:
                 return $this->drawERM();
             case Program::RRB:

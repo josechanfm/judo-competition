@@ -18,7 +18,7 @@ class Bout extends Model
         'date',
         'mat',
         'section',
-        'contest_system',
+        'competition_system',
         'round',
         'turn',
         'white',
@@ -67,7 +67,7 @@ class Bout extends Model
     public function getBoutNameAttribute()
     {
         try {
-            switch ($this->contest_system) {
+            switch ($this->competition_system) {
                 case Program::KOS:
                     return $this->getKOSBoutName();
                 case Program::RRB:
@@ -197,7 +197,7 @@ class Bout extends Model
         $bout->date = $program->date;
         $bout->mat = $program->mat;
         $bout->section = $program->section;
-        $bout->contest_system = $program->contest_system;
+        $bout->competition_system = $program->competition_system;
         $bout->duration = $program->duration;
 
         Log::debug('Bout::fromProgram', [
@@ -422,7 +422,7 @@ class Bout extends Model
             $this->result()->save($boutResult);
         }
         $this->save();
-        switch ($this->contest_system) {
+        switch ($this->competition_system) {
             case Program::KOS:
             case Program::ERM:
                 $this->setRankForKOSERM();
@@ -493,7 +493,7 @@ class Bout extends Model
      */
     public function rise()
     {
-        if ($this->contest_system === Program::RRBA) {
+        if ($this->competition_system === Program::RRBA) {
             $this->handleRRBARise();
         }
         // 如果有下一場
@@ -626,7 +626,7 @@ class Bout extends Model
 
     public function getRank(): int
     {
-        return ($this->contest_system === Program::ERM) ? 2 : 3;
+        return ($this->competition_system === Program::ERM) ? 2 : 3;
     }
 
     public function updateScore($whiteScore, $blueScore)

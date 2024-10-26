@@ -16,7 +16,7 @@ class Program extends Model
     public const KOS = 'kos';
     public const RRBA = 'rrba';
 
-    public const ALL_CONTEST_SYSTEMS = [
+    public const ALL_competition_systemS = [
         self::ERM,
         self::RRB,
         self::KOS,
@@ -33,7 +33,7 @@ class Program extends Model
         'status' => self::STATUS_CREATED,
     ];
 
-    protected $fillable = ['competition_category_id', 'sequence', 'date', 'weight_code', 'mat', 'section', 'contest_system', 'chart_size', 'duration', 'status'];
+    protected $fillable = ['competition_category_id', 'sequence', 'date', 'weight_code', 'mat', 'section', 'competition_system', 'chart_size', 'duration', 'status'];
     protected $appends = ['duration_formatted'];
 
     protected $with = [
@@ -89,7 +89,7 @@ class Program extends Model
 
         $chartSize = pow(2, strlen(decbin($athletesCount - 1)));
 
-        switch ($this->contest_system) {
+        switch ($this->competition_system) {
             case self::ERM:
             case self::KOS:
                 $this->chart_size = $chartSize;
@@ -106,36 +106,36 @@ class Program extends Model
 
         // convert to rrb if athlete count < 8
         if ($this->competition->system == 'Q') {
-            $this->contest_system = self::ERM;
+            $this->competition_system = self::ERM;
         }
 
         if ($athletesCount == 2) {
-            $this->contest_system = self::KOS;
+            $this->competition_system = self::KOS;
         }
 
         if ($athletesCount == 3) {
             if ($this->competition->small_system[3] == false) {
-                $this->contest_system = self::RRB;
+                $this->competition_system = self::RRB;
             } else {
-                $this->contest_system = self::KOS;
+                $this->competition_system = self::KOS;
             }
         }
         if ($athletesCount == 4) {
             if ($this->competition->small_system[4] == false) {
-                $this->contest_system = self::RRB;
+                $this->competition_system = self::RRB;
             } else {
-                $this->contest_system = self::ERM;
+                $this->competition_system = self::ERM;
             }
         }
 
         if ($athletesCount == 5) {
             if ($this->competition->small_system[5] == false) {
-                $this->contest_system = self::RRB;
+                $this->competition_system = self::RRB;
             } else {
-                $this->contest_system = self::RRBA;
+                $this->competition_system = self::RRBA;
             }
         }
-        // dd($this->contest_system);
+        // dd($this->competition_system);
         $this->updateChartSize();
         $this->save();
     }

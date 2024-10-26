@@ -107,6 +107,13 @@ class AthleteController extends Controller
 
         return redirect()->back();
     }
+
+    public function unlock(Competition $competition)
+    {
+        $competition->update(['status' => 0]);
+
+        return redirect()->back();
+    }
     public function import(Request $request, Competition $competition)
     {
         $request->validate([
@@ -122,12 +129,12 @@ class AthleteController extends Controller
         // remove all athletes in programs
 
         $import = new AthletesImport($competition);
-
+        // $import->failures()
         $import->import(request()->file('file'));
         // dd($import->failures());
         // dd('aaaa');
         return response()->json([
-            'errors' => $import->failures()
+            'errors' => []
         ]);
     }
     /**
@@ -145,11 +152,17 @@ class AthleteController extends Controller
             'programs' => '',
             'new_team' => '',
             'team' => '',
-            'team.name' => 'unique:teams',
+            'team.*.name' => 'unique:teams',
             'team_id' => '',
         ]);
 
         if ($validated['new_team'] == true) {
+            $team = Team::create(['name' => $validated['team'], 'abbreviation' => $validated['team'], 'competition_id' => $competition->id]);
+            $validated['team_id'] = $team->id;
+        }
+
+        foreach ($validated['programs'] as $p) {
+            ProgramAthlete::Create(['program_id' => $p, 'athlete_id' => $athlete->id]);
         }
 
         $athlete->update($validated);

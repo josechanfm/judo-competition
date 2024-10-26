@@ -116,14 +116,14 @@
                   <template v-if="column.dataIndex === 'athletes'">
                     <span>{{ record.athletes_count }}</span>
                   </template>
-                  <template v-if="column.dataIndex === 'contest_system'">
+                  <template v-if="column.dataIndex === 'competition_system'">
                     <template v-if="programsEdit == false">
-                      {{ record.contest_system }}
+                      {{ record.competition_system }}
                     </template>
                     <template v-else>
                       <a-select
-                        v-model:value="record.contest_system"
-                        :options="contest_systems"
+                        v-model:value="record.competition_system"
+                        :options="competition_systems"
                       ></a-select>
                     </template>
                   </template>
@@ -307,7 +307,7 @@
                                   {{ element.competition_category.name }}
                                 </a-tag>
                                 <a-tag class="uppercase"
-                                  >{{ element.contest_system }}
+                                  >{{ element.competition_system }}
                                 </a-tag>
                                 {{ element.weight_code }}
                               </div>
@@ -361,7 +361,7 @@
                                     {{ element.category.name }}
                                   </a-tag>
                                   <a-tag class="uppercase"
-                                    >{{ element.contest_system_name }}
+                                    >{{ element.competition_system_name }}
                                   </a-tag>
                                   {{ element.name }}
                                 </div>
@@ -469,7 +469,7 @@ export default {
       dateFormat: "YYYY-MM-DD",
       editDraggable: false,
       multipleMove: false,
-      contest_systems: [
+      competition_systems: [
         { label: "rrb", value: "rrb" },
         { label: "rrba", value: "rrba" },
         { label: "kos", value: "kos" },
@@ -521,7 +521,7 @@ export default {
         },
         {
           title: "Contest System",
-          dataIndex: "contest_system",
+          dataIndex: "competition_system",
         },
         {
           title: "Duration",

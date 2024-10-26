@@ -5,7 +5,7 @@
     <a-page-header></a-page-header>
     <div class="py-12 mx-8">
       <div class="overflow-hidden flex flex-col gap-3">
-        <div class="text-right">
+        <div class="flex justify-end items-center gap-3">
           <a-button
             v-if="competition.status === 0"
             type="primary"
@@ -14,6 +14,13 @@
             >Lock list</a-button
           >
           <span v-else class="text-blue-500">List already lock</span>
+          <a-button
+            v-if="competition.status === 1"
+            type="primary"
+            class="bg-blue-500"
+            @click="unLockAthletes"
+            >unlock</a-button
+          >
         </div>
         <div class="grid grid-cols-4 gap-12 py-4">
           <a-card class="shadow-lg">
@@ -406,6 +413,31 @@ export default {
         style: "top:20vh",
         onOk: () => {
           this.lockAthletes();
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+        class: "test",
+      });
+    },
+    unLockAthletes() {
+      Modal.confirm({
+        title: "Do you want to unlock list of athletes?",
+        icon: createVNode(ExclamationCircleOutlined),
+        style: "top:20vh",
+        onOk: () => {
+          this.$inertia.post(
+            route("manage.competition.athletes.unlock", this.competition.id),
+            "",
+            {
+              onSuccess: (page) => {
+                message.success("Unlock successful");
+              },
+              onError: (page) => {
+                message.error("Unlock failed");
+              },
+            }
+          );
         },
         onCancel() {
           console.log("Cancel");

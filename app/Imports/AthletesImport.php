@@ -13,11 +13,12 @@ use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Validators\Failure;
 
-class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, WithHeadingRow
+class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, WithHeadingRow, SkipsEmptyRows
 {
     use SkipsFailures, Importable;
     /**
@@ -38,6 +39,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     {
         return 2;
     }
+
     public function __construct(Competition $competition)
     {
         $this->competition = $competition;
@@ -45,8 +47,13 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
 
     public function collection(Collection $rows): void
     {
-        // dd($rows);
         foreach ($rows as $index => $row) {
+            $count = count(array_filter($row->take(8)->toArray(), function ($value) {
+                return $value !== null;
+            }));
+            if ($count == 0) {
+                continue;
+            }
             $categories = $this->competition->categories()->pluck('id', 'code');
 
             $validator = Validator::make($row->toArray(), [
@@ -54,7 +61,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
 
                 'category' => ['required', function ($attribute, $value, $fail) use (&$categories) {
                     if (!$categories->has($value)) {
-                        $fail('沒有此運動員的組別');
+                        $fail('There is no category for this athlete.');
                     }
                 }],
                 'weight_code' => ['required', function ($attribute, $value, $fail) use ($row, &$categories) {
@@ -68,15 +75,16 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
                     }
 
                     if ($weightCodeNotExist) {
-                        $fail('沒有此運動員的公斤級');
+                        $fail('There is no weight code for this athlete.');
                     }
                 }],
-                'team' => 'required',
+                'team_name' => 'required',
+                'team_abbreviation' => 'required',
                 'name' => 'nullable|string',
                 'name_secondary' => 'nullable|string',
                 'seed' => 'nullable|integer|min:0|max:32',
             ]);
-
+            // dd($validator->errors())->message();
             if ($validator->fails()) {
                 foreach ($validator->errors()->messages() as $attr => $messages) {
                     $this->failures[] = new Failure($index, $attr, $messages, $row->toArray());
@@ -109,7 +117,8 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         // 創建代表隊資料
         return Team::firstOrCreate([
             'competition_id' => $this->competition->id,
-            'abbreviation' => $row['team'],
+            'name' => $row['team_name'],
+            'abbreviation' => $row['team_abbreviation'],
         ]);
     }
 
@@ -118,7 +127,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         return Athlete::firstOrCreate([
             'gender' => $row['gender'],
             'name' => $row['name'],
-            'name_display' => $row['name'].$row['name_secondary'],
+            'name_display' => $row['name'] . $row['name_secondary'],
             'competition_id' => $this->competition->id,
             'team_id' => $team->id,
         ]);

@@ -52,6 +52,7 @@ Route::middleware('auth')->group(function () {
     Route::post('manage/competition/{competition}/athletes/weights-lock', [App\Http\Controllers\Manage\AthleteController::class, 'Weightslock'])->name('manage.competition.athletes.weights.lock');
     Route::post('manage/competition/{competition}/athletes/import', [App\Http\Controllers\Manage\AthleteController::class, 'import'])->name('manage.competition.athletes.import');
     Route::post('manage/competition/{competition}/athletes/lock', [App\Http\Controllers\Manage\AthleteController::class, 'lock'])->name('manage.competition.athletes.lock');
+    Route::post('manage/competition/{competition}/athletes/unlock', [App\Http\Controllers\Manage\AthleteController::class, 'unlock'])->name('manage.competition.athletes.unlock');
     Route::post('manage/competition/{competition}/programAthlete/{programAthlete}/weight_checked', [App\Http\Controllers\Manage\AthleteController::class, 'weightChecked'])->name('manage.competition.programAthlete.weightChecked');
     Route::get('manage/competition/{competition}/program/gen_bouts', [App\Http\Controllers\Manage\ProgramController::class, 'gen_bouts'])->name('manage.competition.program.gen_bouts');
     Route::get('manage/competition/{competition}/progress', [App\Http\Controllers\Manage\ProgramController::class, 'progress'])->name('manage.competition.progress');

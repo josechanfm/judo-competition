@@ -22,7 +22,7 @@ return new class extends Migration
             $table->date('date')->nullable();
             $table->unsignedSmallInteger('mat')->nullable();
             $table->unsignedSmallInteger('section')->nullable();
-            $table->string('contest_system')->nullable();
+            $table->string('competition_system')->nullable();
             $table->smallInteger('round')->nullable();  
             $table->smallInteger('turn')->nullable();
 

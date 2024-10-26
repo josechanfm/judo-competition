@@ -79,7 +79,7 @@
             <a-card class="w-full">
               <template #title><div class="font-normal">Competition result</div></template>
             </a-card>
-            <a-card class="w-full" v-if="program.contest_system">
+            <a-card class="w-full" v-if="program.competition_system">
               <template #title>
                 <div class="flex justify-between">
                   <div class="font-normal">Online table</div>
@@ -97,7 +97,7 @@
               <component
                 v-if="program.bouts.length > 0"
                 :is="tournamentTable"
-                :contestSystem="program.contest_system"
+                :contestSystem="program.competition_system"
                 :bouts="bouts"
               />
             </a-card>
@@ -254,7 +254,7 @@ export default {
         }
         this.bouts.push(b);
       });
-      if (this.program.contest_system == "kos") {
+      if (this.program.competition_system == "kos") {
         this.bouts.splice(this.program.chart_size - 2, 0, "");
         this.bouts.splice(this.program.chart_size - 1, 0, "");
         this.bouts.splice(this.program.chart_size - 4, 0, "");

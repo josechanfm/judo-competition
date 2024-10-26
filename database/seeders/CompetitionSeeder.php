@@ -56,7 +56,7 @@ class CompetitionSeeder extends Seeder
                 'weight_code' => 'MW42-',
                 'mat' => '1',
                 'section' => '1',
-                'contest_system' => 'erm',
+                'competition_system' => 'erm',
                 'chart_size' => '4',
                 'duration' => 240,
                 'status' => 0
@@ -67,7 +67,7 @@ class CompetitionSeeder extends Seeder
                 'weight_code' => 'MW55-',
                 'mat' => '1',
                 'section' => '1',
-                'contest_system' => 'erm',
+                'competition_system' => 'erm',
                 'chart_size' => '4',
                 'duration' => 240,
                 'status' => 0
@@ -78,7 +78,7 @@ class CompetitionSeeder extends Seeder
                 'weight_code' => 'MW60-',
                 'mat' => '1',
                 'section' => '1',
-                'contest_system' => 'erm',
+                'competition_system' => 'erm',
                 'chart_size' => '8',
                 'duration' => 240,
                 'status' => 0
@@ -89,7 +89,7 @@ class CompetitionSeeder extends Seeder
                 'date' => '2024-04-15',
                 'mat' => '2',
                 'section' => '1',
-                'contest_system' => 'erm',
+                'competition_system' => 'erm',
                 'chart_size' => '16',
                 'duration' => 240,
                 'status' => 0
@@ -100,7 +100,7 @@ class CompetitionSeeder extends Seeder
                 'weight_code' => 'MW72-',
                 'mat' => '2',
                 'section' => '1',
-                'contest_system' => 'erm',
+                'competition_system' => 'erm',
                 'chart_size' => '32',
                 'duration' => 240,
                 'status' => 0
@@ -111,7 +111,7 @@ class CompetitionSeeder extends Seeder
                 'weight_code' => 'MW78-',
                 'mat' => '2',
                 'section' => '1',
-                'contest_system' => 'erm',
+                'competition_system' => 'erm',
                 'chart_size' => '64',
                 'duration' => 240,
                 'status' => 0

@@ -286,7 +286,7 @@ class BoutGenerationService
 
         $athletes = $program->programsAthletes();
         // dd($athletes);
-        switch ($program->contest_system) {
+        switch ($program->competition_system) {
             case Program::KOS:
                 $this->assignAthletesToKOS($program, $athletes);
                 break;
@@ -327,7 +327,7 @@ class BoutGenerationService
 
     private function assignAthletesToRRB(Program $program, $athletes): void
     {
-        if ($program->contest_system === Program::RRBA) {
+        if ($program->competition_system === Program::RRBA) {
             $seatMap = $this->getPromotionRRBA();
         } else {
             $seatMap = $this->getPromotionRRB($program->chart_size);
@@ -407,7 +407,7 @@ class BoutGenerationService
 
     private function generateForProgram($program): void
     {
-        switch ($program->contest_system) {
+        switch ($program->competition_system) {
             case Program::ERM:
                 $this->generateForErm($program);
                 break;
@@ -440,7 +440,7 @@ class BoutGenerationService
      */
     private function generateForRrb($program): void
     {
-        if ($program->contest_system === Program::RRBA) {
+        if ($program->competition_system === Program::RRBA) {
             $schema = $this->getPromotionRRBA();
         } else {
             $schema = $this->getPromotionRRB($program->chart_size);

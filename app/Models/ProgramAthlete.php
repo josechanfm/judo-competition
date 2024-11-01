@@ -26,4 +26,10 @@ class ProgramAthlete extends Model
     {
         return $this->belongsTo(Program::class);
     }
+
+    public function setRank(int $rank)
+    {
+        $this->rank = $rank;
+        $this->save();
+    }
 }

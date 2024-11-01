@@ -90,10 +90,8 @@ class BoutGenerationService
             foreach ($bouts as $r) {
                 $rise[] = array(
                     'round' => $round,
-                    'white' => 0,
-                    'blue' => 0,
-                    // 'white'=>$ath[$r[0]-1]->athlete_id,
-                    // 'blue'=>$ath[$r[1]-1]->athlete_id,
+                    'white' => $r[0],
+                    'blue' => $r[1],
                 );
             }
         }
@@ -291,7 +289,7 @@ class BoutGenerationService
                 $this->assignAthletesToKOS($program, $athletes);
                 break;
             case Program::RRB:
-            case PROGRAM::RRBA:
+            case Program::RRBA:
                 // dd('aaa');
                 $this->assignAthletesToRRB($program, $athletes);
                 break;
@@ -332,11 +330,12 @@ class BoutGenerationService
         } else {
             $seatMap = $this->getPromotionRRB($program->chart_size);
         }
-
+        // dd($seatMap);
         $athletes = $athletes->get();
 
         $program->bouts()->orderBy('in_program_sequence')->get()->each(function (Bout $bout) use ($seatMap, $athletes) {
             $map = $seatMap[$bout->in_program_sequence - 1];
+            // dd($athletes->where('seat', $map['white'])->first());
             $bout->update([
                 'white' => $athletes->where('seat', $map['white'])->first()->id ?? 0,
                 'blue' => $athletes->where('seat', $map['blue'])->first()->id ?? 0,

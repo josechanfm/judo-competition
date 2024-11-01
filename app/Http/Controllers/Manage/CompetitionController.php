@@ -87,8 +87,8 @@ class CompetitionController extends Controller
         foreach ($validated['categories'] as $gc) {
             // dd($gc);
             $seq = 1;
-            
-            
+            $competitionCategory = CompetitionCategory::create([...$gc, 'competition_id' => $competition->id]);
+
             if ($competition->gender == 0) {
                 $filtered = array_filter($competitionCategory->weights, function ($weight) {
                     return strpos($weight, "FW") !== false;

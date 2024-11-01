@@ -23,6 +23,7 @@ class ProgramController extends Controller
     {
         //$competition->categories;
         // $program=Program::find(1);
+        // dd($competition->bouts()->get());
         return Inertia::render('Manage/Programs', [
             'programs' => $competition->programs()
                 //->with('competitionCategory')
@@ -109,13 +110,10 @@ class ProgramController extends Controller
     }
     public function progress(Competition $competition)
     {
-        // $program=Program::find(1);
-        // dd($program->gen_bouts);
         $competition->programsAthletes;
         $competition->programsBouts;
         $competition->bouts = $competition->bouts()->orderBy('sequence')->get();
 
-        //$competition->programs;
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
         ]);
@@ -493,17 +491,18 @@ class ProgramController extends Controller
 
     public function lockSeat(Competition $competition)
     {
-        $competition->update(['status' => 3]);
-
         $service = (new BoutGenerationService($competition));
 
         $service->invalidateByeBouts();
-
+        // dd('aaaa');
         $service->resequence();
 
         $competition->programs()->each(function (Program $program) {
             $program->confirmDraw();
         });
+
+        $competition->update(['status' => 3]);
+
         return redirect()->back();
     }
 

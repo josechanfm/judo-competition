@@ -44,7 +44,7 @@ class Bout extends Model
 
     public function getWhitePlayerAttribute()
     {
-        if ($this->white == 0) {
+        if ($this->white ==  0 || $this->white == -1) {
             //return Athlete::make(["name_display"=>"ss"]);
             return (object)["name_display" => ""];
         } else {
@@ -53,7 +53,7 @@ class Bout extends Model
     }
     public function getBluePlayerAttribute()
     {
-        if ($this->blue == 0) {
+        if ($this->blue == 0 || $this->blue == -1) {
             return (object)["name_display" => ""];
         } else {
             return  ProgramAthlete::find($this->blue)->athlete;
@@ -255,13 +255,13 @@ class Bout extends Model
             return $this->blueAthlete;
         }
 
-        return $this->whiteAthlete->athlete;
+        return $this->whiteAthlete;
     }
 
     public function getLoser(): ProgramAthlete|null
     {
         if ($this->winner === $this->blue) {
-            return $this->whiteAthlete->athlete;
+            return $this->whiteAthlete;
         }
 
         return $this->blueAthlete;

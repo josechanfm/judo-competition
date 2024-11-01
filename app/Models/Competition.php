@@ -5,12 +5,14 @@ namespace App\Models;
 use App\Services\BoutGenerationService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Competition extends Model implements HasMedia
 {
     use InteractsWithMedia;
+    use HasApiTokens;
 
     use HasFactory;
     public const STATUS_CREATED = 0;
@@ -39,7 +41,6 @@ class Competition extends Model implements HasMedia
     }
     public function bouts()
     {
-
         $programIds = $this->programs->pluck('id');
         return Bout::whereIn('program_id', $programIds);
     }

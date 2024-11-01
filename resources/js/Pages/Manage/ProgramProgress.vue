@@ -2,7 +2,7 @@
   <inertia-head title="Dashboard" />
 
   <ProgramLayout :competition="competition">
-    <a-page-header title="Competition Progress">
+    <a-page-header title="Competition Progress" class="bg-white">
       <template #extra>
         <span class="">already choose {{ select_bouts.length }} bouts</span>
         <a-button

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\AthletesImport;
 use App\Models\Athlete;
 use App\Models\Competition;
+use App\Models\CompetitionCategory;
 use App\Models\ProgramAthlete;
 use App\Models\Program;
 use App\Models\Team;
@@ -110,6 +111,42 @@ class AthleteController extends Controller
 
     public function unlock(Competition $competition)
     {
+        $competition->programs()->delete();
+
+        foreach ($competition->categories as $category) {
+            // dd($gc);
+            $seq = 1;
+
+            if ($competition->gender == 0) {
+                $filtered = array_filter($category->weights, function ($weight) {
+                    return strpos($weight, "FW") !== false;
+                });
+            } else if ($competition->gender == 1) {
+                $filtered = array_filter($category->weights, function ($weight) {
+                    return strpos($weight, "MW") !== false;
+                });
+            } else {
+                $filtered = $category->weights;
+            }
+
+            foreach ($filtered as $w) {
+                Program::create([
+                    'competition_id' => $competition->id,
+                    'competition_category_id' => $category->id,
+                    'date' => $competition->days[0],
+                    'mat' => 1,
+                    'section' => 1,
+                    'weight_code' => $w,
+                    'sequence' => $seq,
+                    'competition_system' => $competition->system == 'Q' ? 'erm' : ($competition->system == 'F' ? 'full' : 'kos'),
+                    'duration' => $category->duration,
+                    'chart_size' => 0,
+                    'status' => 0,
+                ]);
+                $seq++;
+            }
+        }
+        // dd($competition->categories);
         $competition->update(['status' => 0]);
 
         return redirect()->back();
@@ -199,17 +236,21 @@ class AthleteController extends Controller
     public function Weights(Request $request, Competition $competition)
     {
         $competition->categories;
-        $competition->programsAthletes;
         // dd($competition->programsAthletes);
         return Inertia::render('Manage/Weights', [
+            'programs_athletes' => $competition->programsAthletes,
             'competition' => $competition,
         ]);
     }
     public function weightChecked(Request $request, Competition $competition, ProgramAthlete $programAthlete)
     {
+        // dd('aaa');
         $programAthlete->weight = $request->weight;
+
         $programAthlete->is_weight_passed = 1;
+
         $programAthlete->save();
+
         return redirect()->back();
     }
 

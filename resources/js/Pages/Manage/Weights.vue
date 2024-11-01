@@ -74,7 +74,10 @@
             </template>
             <template v-else-if="column.dataIndex === 'weight'">
               <div class="flex gap-3 justify-end">
-                <div class="font-bold flex gap-1 items-center" v-if="!record.confirmed">
+                <div
+                  class="font-bold flex gap-1 items-center"
+                  v-if="!record.pivot.confirm"
+                >
                   <a-input-number
                     v-model:value="record.pivot.weight"
                     :default-value="0"
@@ -91,7 +94,7 @@
                   @click="passWeight(record)"
                   name="pass"
                   shape="circle"
-                  v-if="!record.confirmed"
+                  v-if="!record.pivot.confirm"
                 >
                   <template #icon>
                     <CheckOutlined />
@@ -153,7 +156,7 @@ export default {
     CloseOutlined,
     QuestionCircleOutlined,
   },
-  props: ["competition"],
+  props: ["competition", "programs_athletes"],
   // programs: {
   //   type: Object,
   //   required: true,
@@ -192,13 +195,14 @@ export default {
   },
   methods: {
     onChangeCategory(event) {
-      this.programs = this.competition.programs_athletes.filter(
+      this.programs = this.programs_athletes.filter(
         (p) => p.competition_category_id == event.target.value
       );
       console.log(event.target.value);
     },
     onChangeProgram(event) {
-      this.program = this.competition.programs_athletes.find((p) => p.id == event);
+      this.program = this.programs_athletes.find((p) => p.id == event);
+      console.log(this.program);
     },
 
     passWeight(record) {
@@ -211,7 +215,7 @@ export default {
         route("manage.competition.programAthlete.weightChecked", {
           weight: record.pivot.weight,
           competition: this.competition.id,
-          programAthlete: record.id,
+          programAthlete: record.pivot.id,
         }),
         null,
         {
@@ -235,20 +239,28 @@ export default {
         okText: "確認",
         cancelText: "取消",
         onOk: () => {
-          window.axios
-            .post(
-              route("manage.competition.athletes.weights.lock", {
-                competition: this.competition.id,
-                program: this.program.id,
-              })
-            )
-            .then(() => {
-              this.$message.success("過磅已確認");
-              this.$inertia.reload();
-            })
-            .catch((error) => {
-              this.$message.error(error.response.data.message);
-            });
+          this.$inertia.post(
+            route("manage.competition.athletes.weights.lock", {
+              competition: this.competition.id,
+              program: this.program.id,
+            }),
+            null,
+            {
+              //preserveState: false,
+              preserveScroll: true,
+              onSuccess: (page) => {
+                this.$message.success("過磅已確認");
+                this.$inertia.reload({
+                  preserveScroll: true,
+                  only: ["programs_athletes"],
+                });
+                this.onChangeProgram(this.program.id);
+              },
+              onError: (error) => {
+                this.$message.error(error.response.data.message);
+              },
+            }
+          );
         },
       });
     },

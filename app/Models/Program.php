@@ -51,7 +51,7 @@ class Program extends Model
     }
     public function athletes()
     {
-        return $this->belongsToMany(Athlete::class, 'program_athlete')->withPivot(['seed', 'seat', 'weight', 'is_weight_passed', 'rank', 'score', 'confirm']);
+        return $this->belongsToMany(Athlete::class, 'program_athlete')->withPivot(['id','seed', 'seat', 'weight', 'is_weight_passed', 'rank', 'score', 'confirm']);
     }
 
     public function programsAthletes()

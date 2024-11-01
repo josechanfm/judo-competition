@@ -1,12 +1,11 @@
 <?php
 
-namespace Modules\Admin\Http\Controllers\Api\Contest\V2;
+namespace App\Http\Controllers\Api\Contest\V2;
 
 use App\Http\Controllers\Controller;
 use App\Models\Bout;
 use App\Models\BoutResult;
 use App\Models\Competition;
-use App\Models\Contest;
 use App\Models\LinkedBout;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -19,26 +18,31 @@ class BoutController extends Controller
 {
     public function __construct()
     {
+        // dd(request()->user('sanctum'));
         if (request()->user('sanctum')) {
             if (!self::isContestInProgress(request()->user('sanctum'))) {
                 abort(400, 'Contest is not in-progress');
             }
         }
+        // dd('aa');
+
     }
 
     public function index(Request $request)
     {
-        $contest = $request->user();
+        // dd('aaa');
+        $competition = $request->user();
+        // $competition = Competition::where('id', 3)->first();
 
         $limit = $request->query('limit', null);
 
         $ongoingBouts = null;
         $upcomingBouts = null;
 
-        $bouts = QueryBuilder::for($contest->bouts())->with([
+        $bouts = QueryBuilder::for($competition->bouts())->with([
             'program',
-            'blueAthlete.team',
-            'whiteAthlete.team',
+            'blueAthlete.athlete.team',
+            'whiteAthlete.athlete.team',
             'blueAthlete.athlete',
             'whiteAthlete.athlete'
         ])->orderBy('queue')
@@ -73,17 +77,17 @@ class BoutController extends Controller
                         ->where(function ($q) {
                             return
                                 $q->where('status', Bout::STATUS_STARTED)
-                                  ->orWhere(function ($qry) {
+                                ->orWhere(function ($qry) {
                                     return $qry->where('status', Bout::STATUS_PENDING)
-                                                ->where('queue', 1);
+                                        ->where('queue', 1);
                                 });
                         })->pluck('queue', 'mat');
 
                     $upcomingBouts = $query2->clone()->toBase()
-                                            ->addSelect([DB::raw('MIN(queue) as queue'), 'mat'])
-                                            ->where('status', Bout::STATUS_PENDING)
-                                            ->groupBy('mat')
-                                            ->pluck('queue', 'mat');
+                        ->addSelect([DB::raw('MIN(queue) as queue'), 'mat'])
+                        ->where('status', Bout::STATUS_PENDING)
+                        ->groupBy('mat')
+                        ->pluck('queue', 'mat');
 
                     $query->where(function ($qry) use ($upcomingBouts, $date, $section) {
                         $qry->whereIn('queue', []);
@@ -108,10 +112,6 @@ class BoutController extends Controller
                 'mat',
                 'section'
             ]);
-
-        if ($limit) {
-            $bouts = $bouts->limit($limit);
-        }
 
         return response()->json([
             'bouts' => $bouts->get(),
@@ -143,8 +143,9 @@ class BoutController extends Controller
         ]);
     }
 
-    private static function isContestInProgress (Competition $contest) {
-        return Competition::STATUS_CREATED === $contest->status;
+    private static function isContestInProgress(Competition $contest)
+    {
+        return Competition::STATUS_PROGRAMS_ARRANGED === $contest->status;
     }
 
     public function result(Request $request, LinkedBout $bout)
@@ -171,11 +172,11 @@ class BoutController extends Controller
             ], 400);
         }
 
-//        if ($bout->status === Bout::STATUS_FINISHED) {
-//            return response()->json([
-//                'message' => 'bout already has result'
-//            ], 419);
-//        }
+        //        if ($bout->status === Bout::STATUS_FINISHED) {
+        //            return response()->json([
+        //                'message' => 'bout already has result'
+        //            ], 419);
+        //        }
 
         $prevBlueBout = $bout->getPrevBlueAttribute();
 
@@ -197,7 +198,8 @@ class BoutController extends Controller
             }
         }
 
-        $bout->uploadResult((int)$validated['status'],
+        $bout->uploadResult(
+            (int)$validated['status'],
             new BoutResult(
                 array_merge($validated, [
                     'device_uuid' => request()->user()->currentAccessToken()->name,

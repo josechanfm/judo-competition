@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\Http\Controllers\Api\Contest\V2;
+namespace App\Http\Controllers\Api\Contest\V2;
 
 use App\Http\Controllers\Controller;
 use App\Models\Competition;
@@ -12,22 +12,23 @@ class AuthController extends Controller
 {
     public function token(Request $request)
     {
+        // dd($request);
         $validated = $request->validate([
-            'token' => 'required|exists:contests,token',
+            'token' => 'required|exists:competitions,token',
             'device_uuid' => 'required',
         ]);
 
-        $contest = Competition::where('token', $validated['token'])->first();
+        $competition = Competition::where('token', $validated['token'])->first();
 
         // revoke all previous token
-        $contest->tokens()->where('name', $validated['device_uuid'])->delete();
-
-//        activity()->performedOn($contest)
-//                  ->causedBy($validated['device_uuid'])
-//                  ->log('logged in');
+        $competition->tokens()->where('name', $validated['device_uuid'])->delete();
+        // dd('aaaa');
+        //        activity()->performedOn($contest)
+        //                  ->causedBy($validated['device_uuid'])
+        //                  ->log('logged in');
 
         return response()->json([
-            'token' => $contest->createToken($validated['device_uuid'])->plainTextToken,
+            'token' => $competition->createToken($validated['device_uuid'])->plainTextToken,
         ]);
     }
 

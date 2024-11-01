@@ -453,6 +453,7 @@ export default {
       dateFormat: "YYYY-MM-DD",
       isEditing: false,
       addWeight: "",
+      newCategoriesCount: 0,
       removeCategories: "",
       newGameType: {
         awarding_methods: 0,
@@ -518,8 +519,9 @@ export default {
     addCategory(gameType) {
       if (this.gameType?.editCategory) {
         this.$refs.newGameTypeRef.validateFields().then(() => {
+          let id = 100000000 + this.newCategoriesCount;
           gameType.categories.push({
-            id: 100000000,
+            id: id,
             code: "",
             game_type_id: gameType.id,
             name: "",
@@ -527,11 +529,13 @@ export default {
             name_secondary: "",
             duartion: "",
           });
-          gameType.editCategory = 100000000;
+          gameType.editCategory = id;
+          this.newCategoriesCount++;
         });
       } else {
+        let id = 100000000 + this.newCategoriesCount;
         gameType.categories.push({
-          id: 100000000,
+          id: id,
           code: "",
           game_type_id: gameType.id,
           name: "",
@@ -539,7 +543,8 @@ export default {
           name_secondary: "",
           duartion: "",
         });
-        gameType.editCategory = 100000000;
+        gameType.editCategory = id;
+        this.newCategoriesCount++;
       }
     },
     test() {
@@ -568,7 +573,7 @@ export default {
     },
     confirmAddWeight(category) {
       if (
-        this.addWeight.match(/^(FW|MW)(\d{1,3})(\+|-)$/) &&
+        this.addWeight.match(/^(FW|MW)((\d{1,3})(\+|-))|ULW$/) &&
         !category.weights.includes(this.addWeight)
       ) {
         category.weights.push(this.addWeight);

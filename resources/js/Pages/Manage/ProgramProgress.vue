@@ -58,7 +58,7 @@
 
                 <p>
                   Category:
-                  {{ currentSection.mats[mat].program.competition_category.name ?? "" }}
+                  {{ currentSection.mats[mat].program?.competition_category?.name ?? "" }}
                 </p>
                 <p>Weight: {{ currentSection.mats[mat].program.weight_code }}</p>
                 <template v-if="currentSection.mats[mat].bout">

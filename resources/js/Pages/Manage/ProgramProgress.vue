@@ -293,26 +293,26 @@ export default {
     },
     selectBout(bout, mat, section) {
       console.log(mat, section);
-      if (this.select_bouts != []) {
+      if (this.select_bouts.length != 0) {
         if (this.select_bout.mat == mat && this.select_bout.section == section) {
-          if (bout.sequence > this.select_bout.sequence) {
+          if (bout.queue > this.select_bout.queue) {
             this.select_bouts = this.competition.bouts
               .filter((x) => x.mat == mat && x.section == section)
-              .slice(this.select_bout.sequence - 1, bout.sequence)
+              .slice(this.select_bout.queue - 1, bout.queue)
               .map((x) => x.id);
           } else {
             this.select_bouts = this.competition.bouts
               .filter((x) => x.mat == mat && x.section == section)
-              .slice(bout.sequence - 1, this.select_bout.sequence)
+              .slice(bout.queue - 1, this.select_bout.queue)
               .map((x) => x.id);
           }
         } else {
-          console.log(1);
+          console.log(3);
           this.select_bout = bout;
           this.select_bouts = [bout.id];
         }
       } else {
-        console.log(2);
+        console.log(4);
         this.select_bout = bout;
         this.select_bouts = [bout.id];
       }

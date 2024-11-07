@@ -90,6 +90,7 @@ export default {
           title: "Section Number",
           dataIndex: "section_number",
         },
+        { title: "Token", dataIndex: "token" },
         {
           title: "Status",
           dataIndex: "status",

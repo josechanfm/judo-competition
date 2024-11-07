@@ -21,10 +21,7 @@
             <a-statistic title="Bouts" :value="program.bouts.length" />
           </a-card>
           <a-card class="shadow-lg">
-            <a-statistic
-              title="Atheles"
-              :value="athletes ? athletes.length : 0"
-            />
+            <a-statistic title="Atheles" :value="athletes ? athletes.length : 0" />
           </a-card>
         </div>
         <div class="grid grid-cols-4 gap-12">
@@ -77,16 +74,23 @@
           </div>
           <div class="col-span-2 flex flex-col gap-6">
             <a-card class="w-full">
-              <template #title><div class="font-normal">Competition result</div></template>
+              <template #title
+                ><div class="font-normal">Competition result</div></template
+              >
             </a-card>
             <a-card class="w-full" v-if="program.competition_system">
               <template #title>
                 <div class="flex justify-between">
+                  {{ program.competition_system }}
                   <div class="font-normal">Online table</div>
                   <div class="">
                     <a
                       :href="
-                        route('manage.print.tournament_quarter', { program: program.id })
+                        route(
+                          'manage.print.' +
+                            competition_systems[program.competition_system],
+                          { program: program.id }
+                        )
                       "
                       target="_blank"
                       >Print Pdf</a
@@ -132,23 +136,28 @@ export default {
       bouts: [],
       selectAthlete: "",
       selectAthletes: [],
+      competition_systems: {
+        erm: "tournament_quarter",
+        kos: "tournament_knockout",
+        rrb: "round_robbin_option2",
+      },
       tournamentTable: "Tournament" + this.program.chart_size,
       dateFormat: "YYYY-MM-DD",
       playersList: [
         {
-          name: "palyer 1",
+          name: "player 1",
           win: [1, 0],
         },
         {
-          name: "palyer 2",
+          name: "player 2",
           win: [0, 0],
         },
         {
-          name: "palyer 3",
+          name: "player 3",
           win: [1, 1],
         },
         {
-          name: "palyer 4",
+          name: "player 4",
           win: [0, 0],
         },
       ],

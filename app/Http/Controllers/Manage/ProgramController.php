@@ -112,7 +112,7 @@ class ProgramController extends Controller
     {
         $competition->programsAthletes;
         $competition->programsBouts;
-        $competition->bouts = $competition->bouts()->orderBy('sequence')->get();
+        $competition->bouts = $competition->bouts()->orderBy('queue')->get();
 
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
@@ -121,13 +121,23 @@ class ProgramController extends Controller
 
     public function draw(Competition $competition, Program $program)
     {
-
         $athletes = $program->draw();
 
         $program->confirmDraw();
 
         return response()->json([
             'athletes' => $athletes
+        ]);
+    }
+
+    public function resetDraw(Competition $competition, Program $program)
+    {
+        $program->programsAthletes()->update(['seat' => 0]);
+
+        $program->bouts()->update(['white' => 0, 'blue' => 0, 'winner' => 0, 'status' => 0]);
+
+        return response()->json([
+            'athletes' => $program->programsAthletes
         ]);
     }
 

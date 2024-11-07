@@ -182,6 +182,7 @@ class BoutGenerationService
     public function weightByeBouts($bouts, $status = 0): void
     {
         $bouts->each(function (Bout $bout) use ($status) {
+            $bout = Bout::where('id', $bout->id)->first();
             if ($bout->isWhiteBye() || $bout->isBlueBye()) {
                 $bout->byeRise($status);
             }
@@ -199,7 +200,9 @@ class BoutGenerationService
         $bouts->where('queue', '!=', 0)->each(function (Bout $bout) {
             // dd($bout->load('whiteAthlete', 'blueAthlete'));
             $bout->load('whiteAthlete', 'blueAthlete');
-            // dd($bout->blueAthlete);
+            // if ($bout->id == 110) {
+            //     dd($bout->blueAthlete);
+            // }
             if (
                 ($bout->white > 0 && $bout->blue > 0) &&
                 (!$bout->whiteAthlete->is_weight_passed &&
@@ -273,7 +276,6 @@ class BoutGenerationService
         $this->getSections()->each(function ($section) use ($date) {
             if ($date == null || $section['date'] == $date) {
                 $programs = $this->getProgramsUnderSection(...$section);
-
                 $this->cleanUpQueueForBoutsInSection($programs, ...$section);
             }
         });
@@ -335,11 +337,12 @@ class BoutGenerationService
 
         $program->bouts()->orderBy('in_program_sequence')->get()->each(function (Bout $bout) use ($seatMap, $athletes) {
             $map = $seatMap[$bout->in_program_sequence - 1];
-            // dd($athletes->where('seat', $map['white'])->first());
+
             $bout->update([
                 'white' => $athletes->where('seat', $map['white'])->first()->id ?? 0,
                 'blue' => $athletes->where('seat', $map['blue'])->first()->id ?? 0,
             ]);
+            // dd($bout);
         });
     }
 
@@ -653,7 +656,7 @@ class BoutGenerationService
         $queue = 1;
 
         $bouts->where('queue', '!=', 0)
-            ->sortBy('queue')
+            ->sortBy('sequence')
             ->each(function ($bout) use (&$queue) {
                 $bout->queue = $queue++;
                 $bout->save();

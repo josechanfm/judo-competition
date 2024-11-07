@@ -45,11 +45,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('manage/competition/{competition}/athletes', App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
     Route::post('manage/competition/{competition}/programsUpdate', [\App\Http\Controllers\Manage\ProgramController::class, 'programsUpdate'])->name('manage.competition.programs-update');
     Route::post('manage/competition/{competition}/program/{program}/draw', [App\Http\Controllers\Manage\ProgramController::class, 'draw'])->name('manage.competition.program.draw');
+    Route::post('manage/competition/{competition}/program/{program}/reset-draw', [App\Http\Controllers\Manage\ProgramController::class, 'resetDraw'])->name('manage.competition.program.reset');
     Route::get('manage/competition/{competition}/program/{program}/athletes', [App\Http\Controllers\Manage\ProgramController::class, 'athletes'])->name('manage.competition.program.athletes');
     Route::post('manage/competition/{competition}/program/update-sequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.program.sequence.update');
     Route::post('manage/competition/{competition}/program/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.program.lock');
     Route::post('manage/competition/{competition}/program/lock-seat', [App\Http\Controllers\Manage\ProgramController::class, 'lockSeat'])->name('manage.competition.program.lock-seat');
-    Route::post('manage/competition/{competition}/athletes/weights-lock', [App\Http\Controllers\Manage\AthleteController::class, 'Weightslock'])->name('manage.competition.athletes.weights.lock');
+    Route::post('manage/competition/{competition}/athletes/weights-lock', [App\Http\Controllers\Manage\AthleteController::class, 'weightsLock'])->name('manage.competition.athletes.weights.lock');
+    Route::post('maange/competition/{competition}/athletes/weights-lock-cancel', [App\Http\Controllers\Manage\AthleteController::class, 'WeightsCancelLock'])->name('manage.competition.athletes.weights.cancelLock');
     Route::post('manage/competition/{competition}/athletes/import', [App\Http\Controllers\Manage\AthleteController::class, 'import'])->name('manage.competition.athletes.import');
     Route::post('manage/competition/{competition}/athletes/lock', [App\Http\Controllers\Manage\AthleteController::class, 'lock'])->name('manage.competition.athletes.lock');
     Route::post('manage/competition/{competition}/athletes/unlock', [App\Http\Controllers\Manage\AthleteController::class, 'unlock'])->name('manage.competition.athletes.unlock');
@@ -65,9 +67,9 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/print/tournament_quarter', [App\Http\Controllers\Manage\Printer\TournamentQuarterController::class, 'printPdf'])->name('manage.print.tournament_quarter');
     Route::get('manage/print/tournament_double', [App\Http\Controllers\Manage\Printer\TournamentDoubleController::class, 'printPdf']);
     Route::get('manage/print/tournament_full', [App\Http\Controllers\Manage\Printer\TournamentFullController::class, 'printPdf']);
-    Route::get('manage/print/round_robbin_option1', [App\Http\Controllers\Manage\Printer\RoundRobbinOption1Controller::class, 'printPdf']);
-    Route::get('manage/print/round_robbin_option2', [App\Http\Controllers\Manage\Printer\RoundRobbinOption2Controller::class, 'printPdf']);
-    Route::get('manage/print/tournament_knockout', [App\Http\Controllers\Manage\Printer\TournamentKnockoutController::class, 'printPdf']);
+    Route::get('manage/print/round_robbin_option1', [App\Http\Controllers\Manage\Printer\RoundRobbinOption1Controller::class, 'printPdf'])->name('manage.print.round_robbin_option1');
+    Route::get('manage/print/round_robbin_option2', [App\Http\Controllers\Manage\Printer\RoundRobbinOption2Controller::class, 'printPdf'])->name('manage.print.round_robbin_option2');
+    Route::get('manage/print/tournament_knockout', [App\Http\Controllers\Manage\Printer\TournamentKnockoutController::class, 'printPdf'])->name('manage.print.tournament_knockout');;
     Route::get('manage/print/winners', [App\Http\Controllers\Manage\Printer\WinnerController::class, 'printPdf']);
     Route::get('manage/print/game_sheet', [App\Http\Controllers\Manage\Printer\PrinterController::class, 'gameSheet'])->name('name_sheet');
     Route::get('manage/print/program_schedule', [App\Http\Controllers\Manage\Printer\ProgramScheduleController::class, 'printPdf'])->name('manage.print.program_schedule');

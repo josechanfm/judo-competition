@@ -1,4 +1,24 @@
 {
+    "2": {
+        "startX": 25,
+        "startY": 35,
+        "boxW": 60,
+        "boxH": 20,
+        "boxGap": 6,
+        "arcW": 20,
+        "arcWFirst": 4,
+        "repechageBoxH": 5,
+        "repechageDistance": 15,
+        "repechageBoxGap": 6,
+        "repechageSectionGap": 10,
+        "circleSize": 3,
+        "circleFontSize": 10,
+        "playerFontSize": 14,
+        "resultXY": [
+            120,
+            120
+        ]
+    },
     "4": {
         "startX": 25,
         "startY": 35,
@@ -12,9 +32,12 @@
         "repechageBoxGap": 6,
         "repechageSectionGap": 10,
         "circleSize": 3,
-        "circleFontSize":10,
+        "circleFontSize": 10,
         "playerFontSize": 14,
-        "resultXY":[120,120]
+        "resultXY": [
+            120,
+            120
+        ]
     },
     "8": {
         "startX": 25,
@@ -29,9 +52,12 @@
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "circleFontSize":10,
+        "circleFontSize": 10,
         "playerFontSize": 14,
-        "resultXY":[140,130]
+        "resultXY": [
+            140,
+            130
+        ]
     },
     "16": {
         "startX": 25,
@@ -46,9 +72,12 @@
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "circleFontSize":10,
+        "circleFontSize": 10,
         "playerFontSize": 12,
-        "resultXY":[145,170]
+        "resultXY": [
+            145,
+            170
+        ]
     },
     "32": {
         "startX": 25,
@@ -63,9 +92,12 @@
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 2.5,
-        "circleFontSize":10,
+        "circleFontSize": 10,
         "playerFontSize": 10,
-        "resultXY":[135,230]
+        "resultXY": [
+            135,
+            230
+        ]
     },
     "64": {
         "startX": 25,
@@ -80,8 +112,11 @@
         "repechageBoxGap": 1,
         "repechageSectionGap": 1,
         "circleSize": 2,
-        "circleFontSize":10,
+        "circleFontSize": 10,
         "playerFontSize": 8,
-        "resultXY":[150,233]
+        "resultXY": [
+            150,
+            233
+        ]
     }
 }

@@ -47,11 +47,14 @@
             "
             type="primary"
             class="bg-blue-500"
-            @click="confirmAllWeight"
+            @click="lockProgramWeighIn"
           >
-            Finish weigh-in
+            Lock weigh-in
           </a-button>
-          <span v-else>Program athletes weighed</span>
+          <div class="flex gap-2 items-center" v-else>
+            <span>Program athletes weighed</span>
+            <a-button type="primary" @click="cancelLockWeighIn">Cancel Lock</a-button>
+          </div>
         </div>
         <a-table :dataSource="program.athletes" :columns="columns">
           <template #bodyCell="{ column, record }">
@@ -198,6 +201,8 @@ export default {
       this.programs = this.programs_athletes.filter(
         (p) => p.competition_category_id == event.target.value
       );
+      this.programId = null;
+      this.program = [];
       console.log(event.target.value);
     },
     onChangeProgram(event) {
@@ -207,7 +212,7 @@ export default {
 
     passWeight(record) {
       if (record.pivot.weight === null) {
-        this.$message.error("過磅重量未錄入");
+        this.$message.error("Weight not input");
         return;
       }
 
@@ -222,7 +227,7 @@ export default {
           //preserveState: false,
           preserveScroll: true,
           onSuccess: (page) => {
-            this.$message.success("已確定");
+            this.$message.success("Weight recorded");
             this.onChangeProgram(this.programId);
           },
           onError: (error) => {
@@ -232,12 +237,12 @@ export default {
       );
     },
 
-    confirmAllWeight() {
+    lockProgramWeighIn() {
       Modal.confirm({
-        title: "確認過磅",
-        content: "確認過磅後，將無法再修改過磅結果",
-        okText: "確認",
-        cancelText: "取消",
+        title: "Confirm Lock?",
+        content: "Do you want to lock the weigh-in record?",
+        okText: "OK",
+        cancelText: "Cancel",
         onOk: () => {
           this.$inertia.post(
             route("manage.competition.athletes.weights.lock", {
@@ -249,7 +254,39 @@ export default {
               //preserveState: false,
               preserveScroll: true,
               onSuccess: (page) => {
-                this.$message.success("過磅已確認");
+                this.$message.success("Already lock");
+                this.$inertia.reload({
+                  preserveScroll: true,
+                  only: ["programs_athletes"],
+                });
+                this.onChangeProgram(this.program.id);
+              },
+              onError: (error) => {
+                this.$message.error(error.response.data.message);
+              },
+            }
+          );
+        },
+      });
+    },
+    cancelLockWeighIn() {
+      Modal.confirm({
+        title: "Cancel lock?",
+        content: "Do you want to cancel the locked wight-in record?",
+        okText: "OK",
+        cancelText: "Cancel",
+        onOk: () => {
+          this.$inertia.post(
+            route("manage.competition.athletes.weights.cancelLock", {
+              competition: this.competition.id,
+              program: this.program.id,
+            }),
+            null,
+            {
+              //preserveState: false,
+              preserveScroll: true,
+              onSuccess: (page) => {
+                this.$message.success("Already cancel lock");
                 this.$inertia.reload({
                   preserveScroll: true,
                   only: ["programs_athletes"],

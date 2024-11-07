@@ -7,6 +7,7 @@ use App\Models\Bout;
 use App\Models\BoutResult;
 use App\Models\Competition;
 use App\Models\LinkedBout;
+use App\Services\BoutGenerationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -145,7 +146,7 @@ class BoutController extends Controller
 
     private static function isContestInProgress(Competition $contest)
     {
-        return Competition::STATUS_PROGRAMS_ARRANGED === $contest->status;
+        return Competition::STATUS_PROGRAM_STARTED === $contest->status;
     }
 
     public function result(Request $request, LinkedBout $bout)

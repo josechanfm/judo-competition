@@ -48,7 +48,7 @@ class Bout extends Model
             //return Athlete::make(["name_display"=>"ss"]);
             return (object)["name_display" => ""];
         } else {
-            return  ProgramAthlete::find($this->white)->athlete;
+            return  ProgramAthlete::find($this->white)->athlete ?? (object)["name_display" => ""];
         };
     }
     public function getBluePlayerAttribute()
@@ -56,7 +56,7 @@ class Bout extends Model
         if ($this->blue == 0 || $this->blue == -1) {
             return (object)["name_display" => ""];
         } else {
-            return  ProgramAthlete::find($this->blue)->athlete;
+            return  ProgramAthlete::find($this->blue)->athlete ?? (object)["name_display" => ""];
         };
     }
     public function getRankAttribute()
@@ -303,16 +303,32 @@ class Bout extends Model
         } else if ($this->isBlueBye()) {
             $this->setResult('white');
         }
-
         $this->invalidate($stauts);
         $this->save();
     }
 
     public function cancel($winner = -1)
     {
+        $this->queue = 0;
         $this->status = self::STATUS_CANCELLED;
         $this->winner = $winner;
         $this->rise();
+        switch ($this->competition_system) {
+            case Program::KOS:
+            case Program::ERM:
+                $this->setRankForKOSERM();
+                break;
+            case Program::RRB:
+                $this->setRankForRRB();
+                break;
+            case Program::RRBA:
+                if ($this->in_program_sequecne < 5) {
+                    $this->setRankForRRB();
+                } else {
+                    $this->setRankForRRBA();
+                }
+                break;
+        }
         $this->save();
     }
 
@@ -343,13 +359,18 @@ class Bout extends Model
 
     private function setRankForKOSERM()
     {
-        $rank = $this->getRank();
-
-        $this->getWinner()?->setRank($rank);
-        $this->getLoser()?->setRank($rank + 1);
+        if ($this->turn == 1) {
+            $this->getWinner()?->setRank(1);
+            $this->getLoser()?->setRank(2);
+        } else if ($this->turn == 2) {
+            $this->getWinner()?->setRank(3);
+            $this->getLoser()?->setRank(5);
+        } else if ($this->turn == 3) {
+            $this->getLoser()?->setRank(7);
+        }
     }
 
-    private function setRankForRRB($winColor)
+    private function setRankForRRB()
     {
         $athletes = $this->program->programsAthletes;
         $athletes->each(function (ProgramAthlete $programAthlete) {
@@ -399,7 +420,7 @@ class Bout extends Model
         // });
     }
 
-    private function setRankForRRBA($winColor)
+    private function setRankForRRBA()
     {
         if ($this->in_program_sequence === 6) {
             $this->getWinner()?->setRank(1);
@@ -483,6 +504,22 @@ class Bout extends Model
         }
         $this->status = self::STATUS_CANCELLED;
         $this->save();
+        switch ($this->competition_system) {
+            case Program::KOS:
+            case Program::ERM:
+                $this->setRankForKOSERM();
+                break;
+            case Program::RRB:
+                $this->setRankForRRB();
+                break;
+            case Program::RRBA:
+                if ($this->in_program_sequence < 5) {
+                    $this->setRankForRRB();
+                } else {
+                    $this->setRankForRRBA();
+                }
+                break;
+        }
         $this->touchProgramStatus();
     }
 
@@ -502,6 +539,9 @@ class Bout extends Model
 
             $toColor = ($winnerTo->white_rise_from == $this->in_program_sequence) ? 'white' : 'blue';
             $winnerTo->{$toColor} = $this->getWinnerId();
+            if ($winnerTo->white == -1 || $winnerTo->blue == -1) {
+                $winnerTo->cancel();
+            }
             $winnerTo->save();
         }
 
@@ -513,6 +553,9 @@ class Bout extends Model
 
             // 如果 Loser 過磅失敗
             $loserTo->{$toColor} = $this->getLoser()?->is_weight_passed === 1 ? $this->getLoserId() : -1;
+            if ($loserTo->white == -1 || $loserTo->blue == -1) {
+                $loserTo->cancel();
+            }
             $loserTo->save();
         }
     }

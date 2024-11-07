@@ -301,7 +301,7 @@
                   <a-form-item label="Competition System" name="system">
                     <a-radio-group v-model:value="create_competition.system">
                       <a-radio value="Q">Quarter</a-radio>
-                      <a-radio value="F">Full</a-radio>
+                      <a-radio value="F" disabled>Full(coming soon)</a-radio>
                       <a-radio value="K">KO</a-radio>
                     </a-radio-group>
                   </a-form-item>
@@ -327,23 +327,27 @@
                       <div class="">3 players</div>
                       <a-radio-group v-model:value="create_competition.small_system[3]">
                         <a-radio :value="false">Round Robin</a-radio>
-                        <a-radio :value="true">Semi-Finals + Final</a-radio>
+                        <a-radio :value="true" disabled
+                          >Semi-Finals + Final(coming soon)</a-radio
+                        >
                       </a-radio-group>
                     </div>
                     <div class="flex gap-3">
                       <div class="">4 players</div>
                       <a-radio-group v-model:value="create_competition.small_system[4]">
                         <a-radio :value="false">Round Robin</a-radio>
-                        <a-radio :value="true">Semi-Finals + one Bronze + Final</a-radio>
+                        <a-radio :value="true" disabled
+                          >Semi-Finals + one Bronze + Final(coming soon)</a-radio
+                        >
                       </a-radio-group>
                     </div>
                     <div class="flex gap-3">
                       <div class="">5 players</div>
                       <a-radio-group v-model:value="create_competition.small_system[5]">
                         <a-radio :value="false">Round Robin</a-radio>
-                        <a-radio :value="true"
+                        <a-radio :value="true" disabled
                           >Pool with 2 and pool with 3 - best each in Final, second in one
-                          Bronze</a-radio
+                          Bronze(coming soon)</a-radio
                         >
                       </a-radio-group>
                     </div>

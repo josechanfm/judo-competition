@@ -1,6 +1,6 @@
 <template>
-    <a-button @click="showTableSeq=!showTableSeq">Sequence</a-button>
-    <a-button @click="showTableGridLine=!showTableGridLine">Grid Line</a-button>
+    <!-- <a-button @click="showTableSeq=!showTableSeq">Sequence</a-button>
+    <a-button @click="showTableGridLine=!showTableGridLine">Grid Line</a-button> -->
     <table class="tblTournament" ref="tblTournament" :class="showTableGridLine?'gridLine':''">
         <tr>
             <td v-if="showTableSeq" class="seq">1</td>

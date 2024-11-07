@@ -255,7 +255,7 @@ class AthleteController extends Controller
     }
 
 
-    public function Weightslock(Competition $competition, Request $request)
+    public function weightsLock(Competition $competition, Request $request)
     {
         // dd($request->all());
         $program = Program::where('id', $request->program)->first();
@@ -274,6 +274,23 @@ class AthleteController extends Controller
         $service->resequence();
 
         $competition->update(['status' => 4]);
+        return redirect()->back();
+    }
+
+    public function weightsCancelLock(Competition $competition, Request $request)
+    {
+
+        $program = Program::where('id', $request->program)->first();
+
+        $program->athletes()->update(['confirm' => 0]);
+
+        $program->bouts()->update(['status' => 0, 'winner' => 0, 'queue' => 1]);
+
+        $service = (new BoutGenerationService($competition));
+
+        $service->weightByeBouts($program->bouts);
+        $service->resequence();
+        
         return redirect()->back();
     }
 }

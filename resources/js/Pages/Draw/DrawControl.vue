@@ -101,9 +101,7 @@
                       :data-status="item.status"
                     >
                       <div class="flex">
-                        <a-tag v-if="item.status > 0" color="success"
-                          >Finish</a-tag
-                        >
+                        <a-tag v-if="item.status > 0" color="success">Finish</a-tag>
                         <a-tag v-else color="processing">Pending draw</a-tag>
                         {{ item.weight_code }}
                       </div>
@@ -131,14 +129,10 @@
               <template #extra>
                 <div class="flex gap-3">
                   <template v-if="competition.status < COMPETITION_STATUS.seat_locked">
-                    <a-button
-                      type="link"
-                      danger
-                      @click="draw"
-                      v-if="activeProgram.status > 0"
-                    >
-                      Redraw
-                    </a-button>
+                    <div class="flex gap-3" v-if="activeProgram.status > 0">
+                      <a-button type="link" danger @click="reset">Reset</a-button>
+                      <a-button type="link" danger @click="draw"> Redraw </a-button>
+                    </div>
                     <a-button type="primary" class="bg-blue-500" @click="draw" v-else>
                       Draw
                     </a-button>
@@ -446,6 +440,19 @@ export default {
         )
         .then(({ data }) => {
           this.activeProgram.status = 1;
+          this.athletes = data.athletes;
+        });
+    },
+    reset() {
+      return window.axios
+        .post(
+          route("manage.competition.program.reset", [
+            this.competition.id,
+            this.activeProgramId,
+          ])
+        )
+        .then(({ data }) => {
+          this.activeProgram.status = 0;
           this.athletes = data.athletes;
         });
     },

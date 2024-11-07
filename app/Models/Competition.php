@@ -16,15 +16,14 @@ class Competition extends Model implements HasMedia
 
     use HasFactory;
     public const STATUS_CREATED = 0;
-    public const STATUS_INITIALIZED = 1;
-    public const STATUS_ATHLETES_IMPORTED = 2;
-    public const STATUS_ATHLETES_CONFIRMED = 3;
-    public const STATUS_PROGRAMS_ARRANGED = 4;
+    public const STATUS_ATHLETES_CONFIRMED = 1;
+    public const STATUS_PROGRAMS_ARRANGED = 2;
     // 完成抽籤
-    public const STATUS_SEAT_LOCKED = 5;
+    public const STATUS_SEAT_LOCKED = 3;
     // bout adjust
-    public const STATUS_PROGRAM_STARTED = 6;
-    public const STATUS_FINISH = 7;
+    public const STATUS_PROGRAM_STARTED = 4;
+    public const STATUS_FINISH = 5;
+
     protected $fillable = ['competition_type_id', 'type_id', 'date_start', 'date_end', 'country', 'name', 'name_secondary', 'scale', 'days', 'remark', 'mat_number', 'section_number', 'language', 'is_language_secondary_enabled', 'system', 'small_system', 'type', 'gender', 'seeding', 'language_secondary', 'token', 'is_cancelled', 'status'];
     protected $casts = [
         'days' => 'json',

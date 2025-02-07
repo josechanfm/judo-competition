@@ -15,14 +15,16 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('/v2')->group(function () {
-    Route::post('/token', [App\Http\Controllers\Api\Contest\V2\AuthController::class, 'token']);
+    Route::post('/token', [App\Http\Controllers\Api\Competition\V2\AuthController::class, 'token']);
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::delete('/token', [App\Http\Controllers\Api\Contest\V2\AuthController::class, 'revokeToken']);
-        Route::post('/bouts/{bout}/start', [App\Http\Controllers\Api\Contest\V2\BoutController::class, 'start']);
-        Route::post('/bouts/{bout}/reset', [App\Http\Controllers\Api\Contest\V2\BoutController::class, 'reset']);
-        Route::post('/bouts/{bout}/result', [App\Http\Controllers\Api\Contest\V2\BoutController::class, 'result']);
-        Route::resource('bouts', App\Http\Controllers\Api\Contest\V2\BoutController::class);
-        Route::get('/contest', [App\Http\Controllers\Api\Contest\V2\ContestController::class, 'get']);
+        Route::delete('/token', [App\Http\Controllers\Api\Competition\V2\AuthController::class, 'revokeToken']);
+        Route::post('/bouts/{bout}/start', [App\Http\Controllers\Api\Competition\V2\BoutController::class, 'start']);
+        Route::post('/bouts/{bout}/reset', [App\Http\Controllers\Api\Competition\V2\BoutController::class, 'reset']);
+        Route::post('/bouts/{bout}/result', [App\Http\Controllers\Api\Competition\V2\BoutController::class, 'result']);
+        Route::resource('bouts', App\Http\Controllers\Api\Competition\V2\BoutController::class);
+        Route::get('/contest', [App\Http\Controllers\Api\Competition\V2\ContestController::class, 'get']);
+        Route::get('/competition', [App\Http\Controllers\Api\Competition\V2\CompetitionController::class, 'get']);
+        Route::get('/weightIn', [App\Http\Controllers\Api\Competition\V2\WeightInController::class, 'get']);
     });
 });

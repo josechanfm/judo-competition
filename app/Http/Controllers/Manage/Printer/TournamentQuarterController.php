@@ -66,7 +66,7 @@ class TournamentQuarterController extends Controller
 
         //};
         $this->gameSheet = new TournamentQuarterService($settings);
-        //$this->gameSheet->setTitles('Main Title','sub title');
+        $this->gameSheet->setTitles('Main Title', 'sub title');
         $this->gameSheet->setFonts('times', 'cid0ct', 'times'); //times, courier, dejavusans, freemomo,freeserif, cid0ct,cid0cs, cid0kr, cid0jp, 
         //$this->gameSheet->setRepechage(null);
 

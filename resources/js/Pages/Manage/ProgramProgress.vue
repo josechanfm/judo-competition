@@ -55,7 +55,6 @@
                   "
                   >+</a-button
                 >
-
                 <p>
                   Category:
                   {{ currentSection.mats[mat].program?.competition_category?.name ?? "" }}

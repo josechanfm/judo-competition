@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Contest\V2;
+namespace App\Http\Controllers\Api\Competition\V2;
 
 use App\Http\Controllers\Controller;
 use App\Models\Competition;

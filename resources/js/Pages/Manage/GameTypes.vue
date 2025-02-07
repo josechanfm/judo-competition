@@ -258,9 +258,7 @@
                   Language secondary
                 </div>
                 <div class="mb-3" v-if="gameType.is_language_secondary_enabled == 1">
-                  {{
-                    languages.find((l) => l.value == gameType.language_secondary).label
-                  }}
+                  {{ gameType.name_secondary }}
                 </div>
                 <p class="underline font-bold">Type infomation</p>
                 <div class="">Name</div>

@@ -52,6 +52,10 @@ class Competition extends Model implements HasMedia
     {
         return $this->hasManyThrough(Program::class, CompetitionCategory::class)->with('athletes');
     }
+    public function referees()
+    {
+        return $this->hasMany(CompetitionReferee::class);
+    }
     // public function programsAthletes()
     // {
     //     return $this->hasMany(ProgramAthlete::class);
@@ -80,9 +84,5 @@ class Competition extends Model implements HasMedia
     public function getDrawCoverUrlAttribute(): string
     {
         return $this->getFirstMediaUrl('draw-cover') == '' ? asset('assets/draw-background.jpg') : $this->getFirstMediaUrl('draw-cover');
-    }
-    public function referees()
-    {
-        return $this->hasMany(Referee::class);
     }
 }

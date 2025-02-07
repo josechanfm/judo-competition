@@ -1,10 +1,10 @@
 <template>
-  <inertia-head title="Competition Edit" />
+  <inertia-head :title="$t('competitions.edit_competition')" />
 
   <AdminLayout>
     <div class="py-12 mx-8">
       <div class="mb-8 flex justify-between">
-        <div class="text-xl font-bold">Competition Edit</div>
+        <div class="text-xl font-bold">{{ $t("competitions.edit_competition") }}</div>
       </div>
       <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex">
         <div class="border-r-2 border-gray-300 shrink-0 py-2 px-2">
@@ -15,7 +15,7 @@
                 class="text-lg font-bold flex items-center py-4"
                 :class="setting_index == 0 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(0)"
-                >Basie information</a-button
+                >{{ $t("competitions.basic") }}</a-button
               >
             </div>
             <div>
@@ -24,7 +24,7 @@
                 class="text-lg font-bold flex items-center py-4"
                 :class="setting_index == 1 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(1)"
-                >Category Setting</a-button
+                >{{ $t("competitions.category_setting") }}</a-button
               >
             </div>
             <div>
@@ -33,7 +33,7 @@
                 class="text-lg font-bold flex items-center py-4"
                 :class="setting_index == 2 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(2)"
-                >System Setting</a-button
+                >{{ $t("competitions.system_setting") }}</a-button
               >
             </div>
             <div>
@@ -42,7 +42,7 @@
                 class="text-lg font-bold flex items-center py-4"
                 :class="setting_index == 3 ? 'bg-gray-300' : ''"
                 @click="changeSettingIndex(3)"
-                >Language Setting</a-button
+                >{{ $t("competitions.language_setting") }}</a-button
               >
             </div>
           </div>
@@ -60,19 +60,22 @@
             <div class="flex flex-col">
               <div class="flex flex-col" v-if="setting_index == 0">
                 <div class="">
-                  <a-form-item label="Competition Type" name="game_type_id">
+                  <a-form-item :label="$t('competitions.type')" name="game_type_id">
                     {{ competition.competition_type.name }}
                   </a-form-item>
                 </div>
                 <div class="flex justify-between gap-3">
                   <div class="w-full">
-                    <a-form-item label="Competition Name" name="name">
+                    <a-form-item :label="$t('competitions.name')" name="name">
                       <a-input type="input" v-model:value="competition.name" />
                     </a-form-item>
                   </div>
                 </div>
                 <div class="">
-                  <a-form-item label="Country" name="country">
+                  <a-form-item
+                    :label="$t('competitions.country_or_region')"
+                    name="country"
+                  >
                     <a-select
                       v-model:value="competition.country"
                       show-search
@@ -82,14 +85,14 @@
                   </a-form-item>
                 </div>
                 <div class="">
-                  <a-form-item label="City" name="city">
+                  <a-form-item :label="$t('city')" name="city">
                     <a-input class="" type="input" v-model:value="competition.scale" />
                   </a-form-item>
                 </div>
 
                 <div class="flex justify-between gap-3">
                   <div class="w-full">
-                    <a-form-item label="Start Date" name="date_start">
+                    <a-form-item :label="$t('start_date')" name="date_start">
                       <a-date-picker
                         v-model:value="competition.date_start"
                         :format="dateFormat"
@@ -98,7 +101,7 @@
                     </a-form-item>
                   </div>
                   <div class="w-full">
-                    <a-form-item label="End Date" name="date_end">
+                    <a-form-item :label="$t('end_date')" name="date_end">
                       <a-date-picker
                         v-model:value="competition.date_end"
                         :format="dateFormat"
@@ -108,7 +111,7 @@
                     </a-form-item>
                   </div>
                   <div class="w-full">
-                    <a-form-item label="Mat Number" name="mat_number">
+                    <a-form-item :label="$t('mat_number')" name="mat_number">
                       <a-input-number
                         v-model:value="competition.mat_number"
                         style="width: 150px"
@@ -117,7 +120,7 @@
                     </a-form-item>
                   </div>
                   <div class="w-full">
-                    <a-form-item label="Section Number" name="section_number">
+                    <a-form-item :label="$t('section_number')" name="section_number">
                       <a-input-number
                         v-model:value="competition.section_number"
                         style="width: 150px"
@@ -126,7 +129,7 @@
                     </a-form-item>
                   </div>
                   <div class="w-full">
-                    <a-form-item label="Referee Number" name="referee_number">
+                    <a-form-item :label="$t('referee_number')" name="referee_number">
                       <a-input-number
                         v-model:vlaue="competition.referee_number"
                         style="width: 150px"
@@ -138,7 +141,7 @@
                   </div>
                 </div>
                 <div class="w-full flex-col">
-                  <a-form-item label="Days" name="days">
+                  <a-form-item :label="$t('competitions.days')" name="days">
                     <div
                       class="rounded shadow border p-2 w-72 flex items-center mb-2"
                       v-for="time in competition.days"
@@ -146,9 +149,9 @@
                     >
                       <div class="flex-1 font-bold">{{ time }}</div>
                       <div>
-                        <a-button type="link" danger @click="removeTimeFromForm(time)"
-                          >Remove</a-button
-                        >
+                        <a-button type="link" danger @click="removeTimeFromForm(time)">{{
+                          $t("action.remove")
+                        }}</a-button>
                       </div>
                     </div>
                   </a-form-item>
@@ -159,11 +162,11 @@
                       :disabled-date="disabledDate"
                       value-format="YYYY-MM-DD"
                     />
-                    <a-button @click="addTimeToForm">Add</a-button>
+                    <a-button @click="addTimeToForm">{{ $t("add") }}</a-button>
                   </div>
                 </div>
                 <div class="">
-                  <a-form-item label="Remark" name="remark">
+                  <a-form-item :label="$t('remark')" name="remark">
                     <a-textarea v-model:value="competition.remark" :rows="5" />
                   </a-form-item>
                 </div>
@@ -184,15 +187,15 @@
               <div class="flex flex-col" v-else-if="setting_index == 1">
                 <div class="">
                   <div class="">
-                    <a-form-item label="Type" name="type">
+                    <a-form-item :label="$t('competitions.type')" name="type">
                       <a-radio-group v-model:value="competition.type">
-                        <a-radio value="I">Individual</a-radio>
-                        <a-radio value="T">Teams</a-radio>
+                        <a-radio value="I">{{ $t("competitions.individual") }}</a-radio>
+                        <a-radio value="T">{{ $t("competitions.teams") }}</a-radio>
                       </a-radio-group>
                     </a-form-item>
                   </div>
                   <div class="">
-                    <a-form-item label="Gender" name="gender">
+                    <a-form-item :label="$t('gender')" name="gender">
                       <a-radio-group v-model:value="competition.gender">
                         <a-radio :value="2">male & female</a-radio>
                         <a-radio :value="1">male</a-radio>
@@ -201,7 +204,7 @@
                     </a-form-item>
                   </div>
                   <div class="" v-if="competition.gender == 1 || competition.gender == 2">
-                    <a-form-item label="Male categories" name="categories_male">
+                    <a-form-item :label="$t('male_categories')" name="categories_male">
                       <div
                         class=""
                         v-for="category in competition_categories"
@@ -217,7 +220,7 @@
                     </a-form-item>
                   </div>
                   <div class="" v-if="competition.gender == 0 || competition.gender == 2">
-                    <a-form-item label="Female categories" name="categories_female">
+                    <a-form-item :label="$t('female_categories')" name="categories_female">
                       <div
                         class=""
                         v-for="category in competition_categories"
@@ -289,14 +292,18 @@
                       <div class="">3 players</div>
                       <a-radio-group v-model:value="competition.small_system[3]">
                         <a-radio :value="false">Round Robin</a-radio>
-                        <a-radio :value="true" disabled>Semi-Finals + Final(coming soon)</a-radio>
+                        <a-radio :value="true" disabled
+                          >Semi-Finals + Final(coming soon)</a-radio
+                        >
                       </a-radio-group>
                     </div>
                     <div class="flex gap-3">
                       <div class="">4 players</div>
                       <a-radio-group v-model:value="competition.small_system[4]">
                         <a-radio :value="false">Round Robin</a-radio>
-                        <a-radio :value="true" disabled>Semi-Finals + one Bronze + Final(coming soon)</a-radio>
+                        <a-radio :value="true" disabled
+                          >Semi-Finals + one Bronze + Final(coming soon)</a-radio
+                        >
                       </a-radio-group>
                     </div>
                     <div class="flex gap-3">

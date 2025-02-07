@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('competition_id');
             $table->foreignId('referee_id');
-            $table->tinyInteger('mat')->nullable();
-            $table->tinyInteger('number')->nullable();
+            $table->tinyInteger('serial_number')->nullable();
+            $table->tinyInteger('mat_number')->nullable();
             $table->timestamps();
         });
     }

@@ -33,7 +33,7 @@
         "repechageSectionGap": 10,
         "circleSize": 3,
         "circleFontSize": 10,
-        "playerFontSize": 14,
+        "playerFontSize": 12,
         "resultXY": [
             120,
             120
@@ -53,7 +53,7 @@
         "repechageSectionGap": 5,
         "circleSize": 3,
         "circleFontSize": 10,
-        "playerFontSize": 14,
+        "playerFontSize": 12,
         "resultXY": [
             140,
             130

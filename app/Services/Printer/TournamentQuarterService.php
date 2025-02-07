@@ -37,7 +37,7 @@ class TournamentQuarterService
             'repechageSectionGap' => 10,
             'circleSize' => 3,
             'circleFontSize' => 10,
-            'playerFontSize' => 14
+            'playerFontSize' => 12
         ),
         '8' => array(
             'startX' => 25,
@@ -118,7 +118,7 @@ class TournamentQuarterService
     protected $repechageSectionGap = 5; //復活賽表, second
     protected $circleSize = 3;
     protected $circleFontSize = 10;
-    protected $playerFontSize = 10;
+    protected $playerFontSize = 9;
 
     protected $round = 0;
     protected $playerCount = 0;

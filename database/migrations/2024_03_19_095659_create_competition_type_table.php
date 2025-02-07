@@ -16,7 +16,7 @@ return new class extends Migration
 
             $table->foreignId('competition_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('name_secondary');
+            $table->string('name_secondary')->nullable();
             $table->char('code', 5);
             $table->boolean('awarding_methods');
             $table->string('language')->nullable();

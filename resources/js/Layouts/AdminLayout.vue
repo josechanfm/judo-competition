@@ -37,7 +37,7 @@
               <div class="pb-1">
                 <user-outlined />
               </div>
-              <div v-if="!collapsed">Home</div>
+              <div v-if="!collapsed">{{ $t("layout.menu.home") }}</div>
             </div>
             <inertia-link class="mx-2" :href="route('manage.competitions.index')">
             </inertia-link>
@@ -49,7 +49,7 @@
               <div class="pb-1">
                 <video-camera-outlined />
               </div>
-              <div v-if="!collapsed">Game Type</div>
+              <div v-if="!collapsed">{{ $t("layout.menu.competition_type") }}</div>
             </div>
             <inertia-link class="mx-2" :href="route('manage.gameTypes.index')">
             </inertia-link>
@@ -70,9 +70,9 @@
           <div class="flex items-center">
             <div class="flex items-center gap-2">
               <div class="pb-1">
-                <video-camera-outlined />
+                <FileTextOutlined />
               </div>
-              <div v-if="!collapsed">Documentation</div>
+              <div v-if="!collapsed">{{ $t("layout.menu.documentation") }}</div>
             </div>
             <inertia-link class="mx-2" :href="route('manage.system.index')">
             </inertia-link>
@@ -82,16 +82,38 @@
     </a-layout-sider>
     <a-layout>
       <a-layout-header style="background: #fff; padding: 0">
-        <menu-unfold-outlined
-          v-if="collapsed"
-          class="trigger"
-          @click="() => (collapsed = !collapsed)"
-        />
-        <menu-fold-outlined
-          v-else
-          class="trigger"
-          @click="() => (collapsed = !collapsed)"
-        />
+        <div class="flex justify-between items-center">
+          <menu-unfold-outlined
+            v-if="collapsed"
+            class="trigger"
+            @click="() => (collapsed = !collapsed)"
+          />
+          <menu-fold-outlined
+            v-else
+            class="trigger"
+            @click="() => (collapsed = !collapsed)"
+          />
+          <div class="flex items-center gap-12 pr-4">
+            <div class="group">
+              <button class="text-xl flex items-center"><GlobalOutlined /></button>
+              <div
+                class="absolute grid group-hover:grid-rows-[1fr] grid-rows-[0fr] bg-white z-50 overflow-hidden duration-300 ease-in-out transition-all"
+              >
+                <div class="min-h-0">
+                  <div class="whitespace-nowrap px-4 hover:text-blue-500 h-12">
+                    <button @click="changeLang('en')">{{ $t("language.en") }}</button>
+                  </div>
+                  <div class="whitespace-nowrap px-4 hover:text-blue-500 h-12">
+                    <button @click="changeLang('zh_TW')">
+                      {{ $t("language.zh_TW") }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="text-xl flex justify-center"><LogoutOutlined /></button>
+          </div>
+        </div>
       </a-layout-header>
       <a-layout-content>
         <template #header>
@@ -111,12 +133,16 @@
 
 <script>
 import { ref } from "vue";
+import { getActiveLanguage, loadLanguageAsync } from "laravel-vue-i18n";
 import {
   MenuOutlined,
   UserOutlined,
   VideoCameraOutlined,
+  GlobalOutlined,
   UploadOutlined,
   MenuUnfoldOutlined,
+  FileTextOutlined,
+  LogoutOutlined,
   MenuFoldOutlined,
 } from "@ant-design/icons-vue";
 import JudokaLogo from "@/Svgs/judoka-logo.svg";
@@ -129,6 +155,9 @@ export default {
     UploadOutlined,
     MenuUnfoldOutlined,
     MenuFoldOutlined,
+    FileTextOutlined,
+    LogoutOutlined,
+    GlobalOutlined,
     JudokaLogo,
   },
   setup() {
@@ -140,8 +169,16 @@ export default {
     };
   },
   mounted() {
+    console.log(getActiveLanguage());
     console.log(route().current().split(".").slice(1).join("."));
     this.selectedKeys.push(route().current().split(".").slice(1).join("."));
+  },
+  methods: {
+    async changeLang(locale) {
+      await window.axios.get(route("app.locale.update", { locale: locale }));
+      await loadLanguageAsync(locale);
+      console.log(getActiveLanguage());
+    },
   },
 };
 </script>

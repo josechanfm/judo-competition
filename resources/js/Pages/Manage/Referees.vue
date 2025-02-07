@@ -1,10 +1,10 @@
 <template>
-  <inertia-head title="Teams List" />
+  <inertia-head title="Referees List" />
 
   <ProgramLayout :competition="competition">
     <template #header>
       <div class="mx-4 py-4">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Teams List</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Referees List</h2>
       </div>
     </template>
     <div class="py-12 mx-8">
@@ -23,23 +23,44 @@
             <a-statistic title="Programs" :value="programs.length" />
           </a-card>
           <a-card class="shadow-lg">
-            <a-statistic title="Atheles" :value="competition.athletes.length" />
+            <a-statistic title="Referees" :value="referees.length" />
           </a-card>
         </div>
         <div class="p-4 mb-2 shadow-lg bg-white rounded-lg">
           <div class="flex justify-between">
-            <div class="text-xl font-bold pb-2">Teams List</div>
+            <div class="text-xl font-bold pb-2">Referees List</div>
             <div class="flex gap-3">
               <a-button type="primary" class="bg-blue-500" @click="onCreateRecord"
-                >Add team</a-button
+                >Add referee</a-button
               >
             </div>
           </div>
-          <a-table :dataSource="teams" :columns="columns">
+          <a-table :dataSource="referees" :columns="columns">
             <template #bodyCell="{ column, record }">
-              <template v-if="column.dataIndex === 'operation'">
+              <template v-if="column.dataIndex === 'name'">
+                {{ record.referee.name }}
+              </template>
+              <template v-else-if="column.dataIndex === 'country'">
+                {{ record.referee.country }}
+              </template>
+              <template v-else-if="column.dataIndex === 'serial_number'">
+                <a-input-number
+                  type="input"
+                  v-model:value="record.serial_number"
+                  @pressEnter="inputSerialNumber(record)"
+                ></a-input-number>
+              </template>
+              <template v-else-if="column.dataIndex === 'mat_number'">
+                <a-input-number
+                  type="input"
+                  v-model:value="record.mat_number"
+                  @pressEnter="inputMatNumber(record)"
+                ></a-input-number>
+              </template>
+              <template v-else-if="column.dataIndex === 'operation'">
                 <a-button @click="onEditRecord(record)">Edit</a-button>
               </template>
+
               <template v-else>
                 {{ record[column.dataIndex] }}
               </template>
@@ -64,30 +85,19 @@
         :validate-messages="validateMessages"
       >
         <div class="flex flex-col">
-          <div class="flex justify-between gap-3">
-            <div class="w-1/2">
-              <a-form-item label="Abbreviation" name="abbreviation">
-                <a-input type="input" v-model:value="modal.data.abbreviation" />
-              </a-form-item>
-            </div>
-            <div class="w-1/2">
-              <a-form-item label="Name" name="name">
-                <a-input type="input" v-model:value="modal.data.name" />
-              </a-form-item>
-            </div>
-          </div>
-          <div class="flex justify-between gap-3">
-            <div class="w-1/2">
-              <a-form-item label="Name Secondary" name="name_secondary">
-                <a-input type="input" v-model:value="modal.data.name_secondary" />
-              </a-form-item>
-            </div>
-            <div class="w-1/2">
-              <a-form-item label="Leader" name="leader">
-                <a-input type="input" v-model:value="modal.data.leader" />
-              </a-form-item>
-            </div>
-          </div>
+          <a-form-item label="Name" name="name">
+            <a-input type="input" v-model:value="modal.data.name" />
+          </a-form-item>
+          <a-form-item label="Country" name="country">
+            <a-select
+              :options="countries"
+              :fieldNames="{ value: 'name', label: 'name' }"
+              v-model:value="modal.data.country"
+            />
+          </a-form-item>
+          <a-form-item label="city">
+            <a-input type="input" v-model:value="modal.data.city"></a-input>
+          </a-form-item>
           <div class="text-right">
             <a-form-item>
               <a-button
@@ -118,7 +128,7 @@
 <script>
 import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 export default {
-  props: ["competition", "programs", "teams"],
+  props: ["competition", "programs", "countries", "referees"],
   data() {
     return {
       modal: {
@@ -129,24 +139,24 @@ export default {
       },
       columns: [
         {
-          title: "Abbreviation",
-          dataIndex: "abbreviation",
-        },
-        {
           title: "Name",
           dataIndex: "name",
         },
         {
-          title: "Name Secondary",
-          dataIndex: "name_secondary",
+          title: "country",
+          dataIndex: "country",
         },
         {
-          title: "Operation",
-          dataIndex: "operation",
+          title: "serial_number",
+          dataIndex: "serial_number",
+        },
+        {
+          title: "mat_number",
+          dataIndex: "mat_number",
         },
       ],
       rules: {
-        abbreviation: { required: true },
+        country: { required: true },
         name: { required: true },
       },
       validateMessages: {
@@ -171,7 +181,7 @@ export default {
   },
   methods: {
     onCreateRecord() {
-      this.modal.title = "Create";
+      this.modal.title = "Add Referee";
       this.modal.data = {};
       this.modal.mode = "CREATE";
       this.modal.isOpen = true;
@@ -200,7 +210,7 @@ export default {
         .validateFields()
         .then(() => {
           this.$inertia.post(
-            route("manage.competition.teams.store", this.competition.id),
+            route("manage.competition.referees.store", this.competition.id),
             this.modal.data,
             {
               onSuccess: (page) => {
@@ -218,32 +228,16 @@ export default {
           console.log(error);
         });
     },
-    onUpdate() {
-      this.$refs.formRef
-        .validateFields()
-        .then(() => {
-          this.$inertia.put(
-            route("manage.competition.teams.update", {
-              competition: this.competition.id,
-              team: this.modal.data.id,
-            }),
-            this.modal.data,
-            {
-              onSuccess: (page) => {
-                this.modal.data = {};
-                this.modal.isOpen = false;
-              },
-              onError: (err) => {
-                console.log(err);
-              },
-            }
-          );
-
-          console.log("values", this.modal.data, this.modal.data);
-        })
-        .catch((error) => {
-          console.log("error", error);
-        });
+    inputSerialNumber(record) {
+      //   console.log(record);
+      this.$inertia.patch(
+        route("manage.competition.referees.update", [this.competition.id, record.id]),
+        { serial_number: record.serial_number },
+        {
+          onSuccess: (page) => {},
+          onError: (err) => {},
+        }
+      );
     },
   },
 };

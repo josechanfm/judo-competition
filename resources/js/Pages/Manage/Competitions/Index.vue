@@ -1,20 +1,20 @@
 <template>
-  <inertia-head title="Competition Manage" />
+  <inertia-head :title="$t('competitions.manage')" />
 
   <AdminLayout>
     <template #header>
       <div class="mx-4 py-4">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-          Competition Manage
+          {{ $t("competitions.manage") }}
         </h2>
       </div>
     </template>
     <div class="py-12 mx-8">
       <div class="mb-8 flex justify-between flex-col md:flex-row">
-        <div class="text-xl font-bold">Competition Manage</div>
+        <div class="text-xl font-bold">{{ $t("competitions.manage") }}</div>
         <div>
           <inertia-link :href="route('manage.competitions.create')"
-            ><a-button class="bg-white">Create Competition</a-button>
+            ><a-button class="bg-white">{{ $t("competitions.create") }}</a-button>
           </inertia-link>
         </div>
       </div>
@@ -22,18 +22,18 @@
         <a-table :dataSource="competitions" :columns="columns">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 'operation'">
-              <a-button :href="route('manage.competitions.edit', record.id)"
-                >Edit</a-button
-              >
-              <a-button :href="route('manage.competition.athletes.index', record.id)"
-                >Athletes</a-button
-              >
-              <a-button :href="route('manage.competition.programs.index', record.id)"
-                >Manage</a-button
-              >
-              <a-button :href="route('manage.competition.progress', record.id)"
-                >Progress</a-button
-              >
+              <a-button :href="route('manage.competitions.edit', record.id)">{{
+                $t("action.edit")
+              }}</a-button>
+              <a-button :href="route('manage.competition.athletes.index', record.id)">{{
+                $t("athletes")
+              }}</a-button>
+              <a-button :href="route('manage.competition.programs.index', record.id)">{{
+                $t("action.manage")
+              }}</a-button>
+              <a-button :href="route('manage.competition.progress', record.id)">{{
+                $t("action.progress")
+              }}</a-button>
             </template>
             <template v-else>
               {{ record[column.dataIndex] }}

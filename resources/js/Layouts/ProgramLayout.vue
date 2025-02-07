@@ -91,13 +91,26 @@
             </inertia-link>
           </div>
         </a-menu-item>
+        <a-menu-item key="competition.referees.index">
+          <div class="flex items-center">
+            <div class="flex items-center gap-2">
+              <div class="pb-1"><flag-outlined /></div>
+              <div v-if="!collapsed">Referees</div>
+              <inertia-link
+                class="mx-2"
+                :href="route('manage.competition.referees.index', competition.id)"
+              >
+              </inertia-link>
+            </div>
+          </div>
+        </a-menu-item>
         <a-menu-item key="competition.teams.index">
           <div class="flex items-center">
             <div class="flex items-center gap-2">
               <div class="pb-1">
-                <flag-outlined />
+                <team-outlined />
               </div>
-              <div v-if="!collapsed">Team</div>
+              <div v-if="!collapsed">Teams</div>
             </div>
             <inertia-link
               class="mx-2"
@@ -150,6 +163,7 @@ import {
   UploadOutlined,
   MenuUnfoldOutlined,
   MenuFoldOutlined,
+  TeamOutlined,
 } from "@ant-design/icons-vue";
 import JudokaLogo from "@/Svgs/judoka-logo.svg";
 
@@ -163,6 +177,7 @@ export default {
     UploadOutlined,
     MenuUnfoldOutlined,
     MenuFoldOutlined,
+    TeamOutlined,
     JudokaLogo,
   },
   setup() {

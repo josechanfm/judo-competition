@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('competitions', function (Blueprint $table) {
             $table->id();
-
+            $table->char('uuid',36);
             $table->date('date_start');
             $table->date('date_end');
             $table->string('country');

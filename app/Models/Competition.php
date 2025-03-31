@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Support\Str;
 
 class Competition extends Model implements HasMedia
 {
@@ -30,6 +31,15 @@ class Competition extends Model implements HasMedia
         'is_language_secondary_enabled' => 'boolean',
         'small_system' => 'json'
     ];
+
+    public static function boot(){
+        parent::boot();
+        self::creating(function($model){
+            $model->uuid=Str::uuid();            
+            $model->token=rand(100000,999999);
+        });
+    }
+ 
     public function programs()
     {
         return $this->hasManyThrough(Program::class, CompetitionCategory::class);
@@ -42,6 +52,7 @@ class Competition extends Model implements HasMedia
     {
         $programIds = $this->programs->pluck('id');
         return Bout::whereIn('program_id', $programIds);
+        // return $this->hasManyThrough(Bout::class, Program::class);
     }
 
     public function athletes()

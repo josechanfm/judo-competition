@@ -33,12 +33,18 @@ Route::get('manage/system/description', function () {
     return Inertia::render('System/Index');
 })->name('manage.system.index');
 
+
+Route::get('competition/{competition}/get_qr_code', [App\Http\Controllers\CompetitionController::class,'getQrCode'])->name('competition.getQrCode');
+Route::get('competition/{competition}/show', [App\Http\Controllers\CompetitionController::class,'show'])->name('competition.show');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('manage/game_types', App\Http\Controllers\Manage\GameTypeController::class)->names('manage.gameTypes');
     Route::resource('manage/competitions', App\Http\Controllers\Manage\CompetitionController::class)->names('manage.competitions');
+    Route::get('manage/competition/{competition}/qr_code', [App\Http\Controllers\Manage\CompetitionController::class, 'qrCode'])->name('manage.competition.qrCode');
+
     Route::resource('manage/competition/{competition}/programs', App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
     Route::resource('manage/competition/{competition}/teams', App\Http\Controllers\Manage\TeamController::class)->names('manage.competition.teams');
     Route::resource('manage/competition/{competition}/referees', App\Http\Controllers\Manage\RefereeController::class)->names('manage.competition.referees');

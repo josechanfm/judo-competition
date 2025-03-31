@@ -4,6 +4,12 @@ import vue from '@vitejs/plugin-vue';
 import svgLoader from 'vite-svg-loader';
 
 export default defineConfig({
+    server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: process.env.VITE_HOST ?? '127.0.0.1',
+        },
+    },
     plugins: [
         laravel({
             input: 'resources/js/app.js',

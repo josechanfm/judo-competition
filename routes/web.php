@@ -48,13 +48,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('manage/competition/{competition}/programs', App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
     Route::resource('manage/competition/{competition}/teams', App\Http\Controllers\Manage\TeamController::class)->names('manage.competition.teams');
     Route::resource('manage/competition/{competition}/referees', App\Http\Controllers\Manage\RefereeController::class)->names('manage.competition.referees');
+    Route::get('manage/competition/{competition}/athletes/generate-id-cards', [App\Http\Controllers\Manage\AthleteController::class, 'generateIdCards'])->name('athletes.generateIdCards');
+    Route::get('manage/competition/{competition}/athletes/generate-weighIn-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllWeighInTable'])->name('generate.all.weighIn.table');
     Route::get('manage/competition/{competition}/athletes/drawControl', [App\Http\Controllers\Manage\AthleteController::class, 'drawControl'])->name('manage.competition.athletes.drawControl');
     Route::get('manage/competition/{competition}/athletes/weights', [App\Http\Controllers\Manage\AthleteController::class, 'Weights'])->name('manage.competition.athletes.weights');
     Route::get('manage/competition/{competition}/drawScreen', [App\Http\Controllers\Manage\AthleteController::class, 'drawScreen'])->name('manage.competition.athletes.draw-screen');
+    Route::get('manage/competition/{competition}/generate-all-online-table', [App\Http\Controllers\Manage\ProgramController::class, 'generateAllProgramsOnlineTable'])->name('manage.competition.generateAllProgramsOnlineTable');
     Route::resource('manage/competition/{competition}/athletes', App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
     Route::post('manage/competition/{competition}/programsUpdate', [\App\Http\Controllers\Manage\ProgramController::class, 'programsUpdate'])->name('manage.competition.programs-update');
     Route::post('manage/competition/{competition}/program/{program}/draw', [App\Http\Controllers\Manage\ProgramController::class, 'draw'])->name('manage.competition.program.draw');
     Route::post('manage/competition/{competition}/program/{program}/reset-draw', [App\Http\Controllers\Manage\ProgramController::class, 'resetDraw'])->name('manage.competition.program.reset');
+    Route::get('manage/competition/{competition}/program/{program}/generate-online-table', [App\Http\Controllers\Manage\ProgramController::class, 'generateOnlineTable'])->name('manage.competition.program.generateOnlineTable');
     Route::get('manage/competition/{competition}/program/{program}/athletes', [App\Http\Controllers\Manage\ProgramController::class, 'athletes'])->name('manage.competition.program.athletes');
     Route::post('manage/competition/{competition}/program/update-sequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.program.sequence.update');
     Route::post('manage/competition/{competition}/program/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.program.lock');
@@ -70,7 +74,11 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/competition/{competition}/chart_pdf', [App\Http\Controllers\Manage\ProgramController::class, 'chartPdf'])->name('manage.competition.chartPdf');
     Route::post('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'joinAthlete'])->name('manage.program.joinAthlete');
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
-
+    Route::get('manage/competition/{competition}/result-table/{blankMedals}', [App\Http\Controllers\Manage\CompetitionController::class, 'resultTable'])->name('manage.competition.result-table');
+    // Route::get('/pdf/simple', [PdfController::class, 'generatePdfWithRoundedHeader'])->name('simplepdf');
+    Route::get('importname',[App\Http\Controllers\Manage\AthleteController::class , 'importExcel']);
+    Route::get('manage/competition/{competition}/export/medal_quantity', [App\Http\Controllers\Manage\ProgramController::class, 'medalQuantityExport'])->name('manage.competition.program.export.medal-quantity');    
+    Route::get('manage/competition/{competition}/export/program_time', [App\Http\Controllers\Manage\ProgramController::class, 'programTimeExport'])->name('manage.competition.program.export.program-time');    
     Route::get('manage/print/demo', [App\Http\Controllers\Manage\Printer\PrinterController::class, 'demo'])->name('manage.print.demo');
     Route::get('manage/print/{competition}/programs', [App\Http\Controllers\Manage\Printer\PrinterController::class, 'programs'])->name('manage.print.programs');
     Route::get('manage/print/tournament_quarter', [App\Http\Controllers\Manage\Printer\TournamentQuarterController::class, 'printPdf'])->name('manage.print.tournament_quarter');
@@ -84,6 +92,8 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/print/program_schedule', [App\Http\Controllers\Manage\Printer\ProgramScheduleController::class, 'printPdf'])->name('manage.print.program_schedule');
     Route::get('manage/print/weight_in_list', [App\Http\Controllers\Manage\Printer\WeightInController::class, 'printPdf']);
     Route::get('manage/print/referee_list', [App\Http\Controllers\Manage\Printer\RefereeController::class, 'printPdf']);
+
+    Route::get('competition/{competition}/reset',[App\Http\Controllers\Manage\AthleteController::class, 'resetBoutQuence']);
 });
 
 

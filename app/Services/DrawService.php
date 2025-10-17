@@ -86,7 +86,7 @@ class DrawService
     private function getAthletes(): array
     {
         return $this->program
-            ->programsAthletes()
+            ->programAthletes()
             ->with('athlete.team')
             ->get()
             ->toArray();
@@ -156,9 +156,7 @@ class DrawService
     private function drawKOS()
     {
         $players = $this->shuffle($this->getAthletes());
-        $playerCount = sizeof($players);
-        $gameSize = $this->getChartSize($players);
-        $seedCount = $this->getSeedSize($players);
+        $gameSize = $this->getChartSize();
 
         $playList = array_fill(0, $gameSize - 1, null);
         $playSequence = $this->getEMap($gameSize);

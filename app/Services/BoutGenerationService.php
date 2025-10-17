@@ -9,6 +9,7 @@ use App\Models\Program;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class BoutGenerationService
 {
@@ -257,7 +258,7 @@ class BoutGenerationService
 
         $sections->each(function ($section) {
             $programs = $this->getProgramsUnderSection(...$section);
-
+            // dd($programs);
             $programs->each(function ($program) {
                 $this->generateForProgram($program);
             });
@@ -265,7 +266,16 @@ class BoutGenerationService
             $this->setSequenceAndQueueForBoutsInSection($programs, ...$section);
         });
     }
+    public function resetSequenceAndQueue(){
+    
+        $sections = $this->getSections();
 
+        $sections->each(function ($section) {
+            $programs = $this->getProgramsUnderSection(...$section);
+
+            $this->setSequenceAndQueueForBoutsInSection($programs, ...$section);
+        });
+    }
     /**
      * Reset queue when bout is deleted
      *
@@ -284,7 +294,7 @@ class BoutGenerationService
     public function assignAthletesToBouts(Program $program): void
     {
 
-        $athletes = $program->programsAthletes();
+        $athletes = $program->programAthletes();
         // dd($athletes);
         switch ($program->competition_system) {
             case Program::KOS:
@@ -470,34 +480,45 @@ class BoutGenerationService
      * @param $repCount int 決賽前穿插的復活賽場次數
      * @return void
      */
-    private function generateForKos(Program $program, $repCount = 0, $isRepechage = 0): void
+    private function generateForKos(Program $program, $repCount = 0, $isRepechage = false): void
     {
-        // sequence in ascending order, starts with 2;
+        // 驗證 chart_size 是 2 的冪次方
+        if (($program->chart_size & ($program->chart_size - 1)) !== 0) {
+            throw new InvalidArgumentException("chart_size must be a power of 2");
+        }
+
         $sequence = 1;
-        if ($isRepechage == 1) {
+        
+        if ($isRepechage) {
             $maxRound = 2;
             $maxBout = $program->chart_size + 4;
         } else {
             $maxRound = 0;
             $maxBout = $program->chart_size;
         }
-        for ($chart_size = $program->chart_size; $chart_size !== 1; $chart_size = $chart_size / 2) {
+
+        // 計算最大輪數
+        $tempSize = $program->chart_size;
+        while ($tempSize > 1) {
             $maxRound++;
+            $tempSize /= 2;
         }
+
         $boutsInPrevDepth = $program->chart_size;
         $boutsInThisDepth = $program->chart_size / 2;
         $firstInThisDepth = 1;
 
-
         while ($sequence < $maxBout) {
             $riseFrom = $sequence - $boutsInPrevDepth;
-            if ($isRepechage == 1 && $boutsInThisDepth <= 2) {
-                $riseFrom = $riseFrom - 2;
+            
+            // 修正復活賽邏輯
+            if ($isRepechage && $boutsInThisDepth <= 2) {
+                $riseFrom = max($riseFrom - 2, 0);
             }
 
-            Log::debug("rnd{$boutsInPrevDepth} seq${sequence} bipd${boutsInPrevDepth} bitd${boutsInThisDepth} ${firstInThisDepth}");
+            Log::debug("Round: {$boutsInPrevDepth}, Sequence: {$sequence}, BoutsPrev: {$boutsInPrevDepth}, BoutsThis: {$boutsInThisDepth}");
 
-            for ($i = 0; $i != $boutsInThisDepth; ++$i) {
+            for ($i = 0; $i < $boutsInThisDepth; $i++) {
                 $bout = Bout::fromProgram($program);
                 $bout->in_program_sequence = $sequence;
                 $bout->sequence = 0;
@@ -506,35 +527,50 @@ class BoutGenerationService
                 $bout->turn = $maxRound;
                 $bout->white = 0;
                 $bout->blue = 0;
-                $bout->white_rise_from = max($riseFrom++, 0);
-                $bout->blue_rise_from = max($riseFrom++, 0);
+                
+                // 確保 riseFrom 不會是負數
+                $bout->white_rise_from = max($riseFrom, 0);
+                $riseFrom++;
+                $bout->blue_rise_from = max($riseFrom, 0);
+                $riseFrom++;
+                
                 $bout->winner_rise_to = 0;
                 $bout->loser_rise_to = 0;
                 $bout->save();
-                ++$sequence;
+                
+                $sequence++;
 
-                Log::debug("\tgenerating $sequence wrf$bout->white_rise_from brf $bout->blue_rise_from WRT $bout->winner_rise_to");
+                Log::debug("Generated bout {$sequence}: white_rise_from={$bout->white_rise_from}, blue_rise_from={$bout->blue_rise_from}");
             }
-            if ($boutsInThisDepth == 4 & $isRepechage == 1) {
-                $this->generateRepechage($program, 1);
-                $maxRound--;
-                $sequence = $sequence + 2;
-            } else if ($boutsInThisDepth == 2 & $isRepechage == 1) {
-                $this->generateRepechage($program, 2);
-                $maxRound--;
-                $sequence = $sequence + 2;
+
+            // 修正條件判斷，使用邏輯運算符
+            if ($isRepechage) {
+                if ($boutsInThisDepth == 4) {
+                    $this->generateRepechage($program, 1);
+                    $maxRound--;
+                    $sequence += 2;
+                } elseif ($boutsInThisDepth == 2) {
+                    $this->generateRepechage($program, 2);
+                    $maxRound--;
+                    $sequence += 2;
+                }
             }
+
             $maxRound--;
-            // we advance to next level
+            
+            // 前進到下一輪
             $boutsInPrevDepth = $boutsInThisDepth;
-            // shrink to half the round
-            $boutsInThisDepth /= 2;
+            $boutsInThisDepth = (int)($boutsInThisDepth / 2); // 確保是整數
             $firstInThisDepth = $sequence;
-        };
+            
+            // 安全檢查，避免無限迴圈
+            if ($boutsInThisDepth < 1) {
+                break;
+            }
+        }
+
         $this->moveFinalToLast($program, $repCount);
-        // forward winner to next
         $this->PreviousGeneratedBouts($program, $program->bouts);
-        // forward loser to next
         $this->touchPreviousGeneratedBouts($program, $program->bouts);
     }
 

@@ -2,10 +2,10 @@
     "2": {
         "startX": 25,
         "startY": 35,
-        "boxW": 60,
-        "boxH": 20,
+        "boxW": 95,
+        "boxH": 22,
         "boxGap": 6,
-        "arcW": 20,
+        "arcW": 30,
         "arcWFirst": 4,
         "repechageBoxH": 5,
         "repechageDistance": 15,
@@ -13,7 +13,13 @@
         "repechageSectionGap": 10,
         "circleSize": 3,
         "circleFontSize": 10,
-        "playerFontSize": 14,
+        "playerFontSize": 11,
+        "winners": [ 
+            [0]
+        ],
+        "sequences": [
+            [1]
+        ],
         "resultXY": [
             120,
             120
@@ -22,10 +28,10 @@
     "4": {
         "startX": 25,
         "startY": 35,
-        "boxW": 60,
-        "boxH": 20,
+        "boxW": 95,
+        "boxH": 22,
         "boxGap": 6,
-        "arcW": 20,
+        "arcW": 30,
         "arcWFirst": 4,
         "repechageBoxH": 5,
         "repechageDistance": 15,
@@ -33,7 +39,15 @@
         "repechageSectionGap": 10,
         "circleSize": 3,
         "circleFontSize": 10,
-        "playerFontSize": 14,
+        "playerFontSize": 11,
+        "winners": [ 
+            [0, 0],
+            [1]
+        ],
+        "sequences": [
+            [1, 2],
+            [3]
+        ],
         "resultXY": [
             120,
             120
@@ -42,10 +56,10 @@
     "8": {
         "startX": 25,
         "startY": 35,
-        "boxW": 60,
-        "boxH": 20,
+        "boxW": 80,
+        "boxH": 22,
         "boxGap": 6,
-        "arcW": 20,
+        "arcW": 30,
         "arcWFirst": 4,
         "repechageBoxH": 5,
         "repechageDistance": 15,
@@ -53,7 +67,17 @@
         "repechageSectionGap": 5,
         "circleSize": 3,
         "circleFontSize": 10,
-        "playerFontSize": 14,
+        "playerFontSize": 11,
+        "winners": [ 
+            [2, 2, 2, 2],
+            [0, 0],
+            [0]
+        ],
+        "sequences": [
+            [1, 2, 3, 4],
+            [5, 6],
+            [7]
+        ],
         "resultXY": [
             140,
             130
@@ -74,6 +98,18 @@
         "circleSize": 3,
         "circleFontSize": 10,
         "playerFontSize": 12,
+        "winners": [ 
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0],
+            [0]
+        ],
+        "sequences": [
+            [1, 2, 3, 4, 5, 6, 7, 8],
+            [9, 10, 11, 12],
+            [13, 14],
+            [15]
+        ],
         "resultXY": [
             145,
             170

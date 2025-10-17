@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Manage;
 
+use App\Imports\NameSecondaryImport;
 use App\Http\Controllers\Controller;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AthletesImport;
 use App\Models\Athlete;
 use App\Models\Competition;
@@ -15,6 +17,8 @@ use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\Filters\Filter;
 use Spatie\QueryBuilder\QueryBuilder;
+use App\Services\Printer\AthletePdfService;
+use App\Services\Printer\AthleteWeighInService;
 use Inertia\Inertia;
 
 
@@ -29,7 +33,7 @@ class AthleteController extends Controller
         $competition->athletes;
         $programs = $competition->programs;
         $teams = $competition->teams;
-
+        // dd($competition->programAthletes);
         return Inertia::render('Manage/Athletes', [
             'competition' => $competition,
             'programs' => $programs,
@@ -236,9 +240,9 @@ class AthleteController extends Controller
     public function Weights(Request $request, Competition $competition)
     {
         $competition->categories;
-        // dd($competition->programsAthletes);
+        // dd($competition->programAthletes);
         return Inertia::render('Manage/Weights', [
-            'programs_athletes' => $competition->programsAthletes,
+            'programs_athletes' => $competition->programAthletes,
             'competition' => $competition,
         ]);
     }
@@ -293,4 +297,94 @@ class AthleteController extends Controller
         
         return redirect()->back();
     }
+
+    public function resetBoutQuence(Competition $competition){
+
+        $service = (new BoutGenerationService($competition));
+
+        $service->resetSequenceAndQueue();
+
+        $service->invalidateByeBouts();
+        // dd('aaaa');
+        $service->resequence();
+    }
+    
+    public function generateIdCards(Competition $competition)
+    {
+        // 直接使用传入的 competition 实例，加载完整关系链
+        $competition->load([
+            'categories.programs.programAthletes.athlete'
+        ]);
+
+        $programAthletes = $competition->categories->flatMap(function ($category) {
+            return $category->programs->flatMap(function ($program) use ($category) {
+                return $program->programAthletes->map(function ($programAthlete) use ($program, $category) {
+                    // 複製運動員對象
+                    $athlete = clone $programAthlete->athlete;
+                    
+                    // 添加項目特定信息
+                    $athlete->program_name = $program->name;
+                    $athlete->programCategoryWeight = $program->converGender() . $program->competitionCategory->name . $program->convertWeight();
+                    $athlete->team = $athlete->team;
+                    $athlete->original_program_id = $program->id; // 標記原始項目
+                    
+                    return $athlete;
+                });
+            });
+        });
+        // dd($programAthletes[0]);
+        if ($programAthletes->isEmpty()) {
+            return back()->with('error', '该比赛没有参赛运动员');
+        }
+
+        $pdfService = new AthletePdfService();
+        $pdf = $pdfService->generateIdCard($programAthletes);
+
+        return response($pdf->Output("{$competition->name}_id_cards.pdf", 'I'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    public function generateAllWeighInTable(Competition $competition)
+    {
+        $programs = $competition->programs()->with(['athletes.team'])->get();
+        
+        if ($programs->isEmpty()) {
+            return response()->json(['error' => '沒有找到任何量級'], 404);
+        }
+
+        $weighInService = new AthleteWeighInService();
+        
+        // 可以自定義標題和logo
+        $weighInService->setTitle(
+            $competition->name
+        );
+        
+        $pdf = $weighInService->generateAllWeighInTable($programs);
+
+        // 輸出 PDF
+        return response($pdf->Output("{$competition->name}過磅表.pdf", 'I'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    public function importExcel()
+    {
+        try {
+            $filePath = public_path('name_secondary.xlsx');
+            
+            // 检查文件是否存在
+            if (!file_exists($filePath)) {
+                return redirect()->back()->with('error', '文件不存在：' . $filePath);
+            }
+            
+            // 执行导入
+            Excel::import(new NameSecondaryImport, $filePath);
+            
+            $result = session('import_result', '数据导入完成！');
+            return redirect()->back()->with('success', $result);
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', '导入失败：' . $e->getMessage());
+        }
+    }
 }
+

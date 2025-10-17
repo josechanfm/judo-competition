@@ -14,6 +14,7 @@ use App\Models\GameType;
 use App\Models\Country;
 use App\Models\GameCategory;
 use App\Models\Program;
+use App\Services\Printer\CompetitionResultService;
 
 class CompetitionController extends Controller
 {
@@ -184,5 +185,31 @@ class CompetitionController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function resultTable(Competition $competition, $blankMedals = false)
+    {    
+        $programsByCategory = $competition->programs()
+        ->with(['athletes.team', 'competitionCategory'])
+        ->get()
+        ->groupBy('competition_category_id');
+    
+        if ($programsByCategory->isEmpty()) {
+            return response()->json(['error' => '沒有找到任何賽程'], 404);
+        }
+
+        $resultService = new CompetitionResultService(); // 假設您有對應的賽果服務
+        
+        // 可以自定義標題和logo
+        $resultService->setTitle(
+            $competition->name
+        );
+        
+        // 生成按分類的賽果表格 PDF
+        $pdf = $resultService->generateAllResultTableByCategory($programsByCategory, $blankMedals);
+
+        // 輸出 PDF
+        return response($pdf->Output("{$competition->name}賽果表格.pdf", 'I'))
+            ->header('Content-Type', 'application/pdf');
     }
 }

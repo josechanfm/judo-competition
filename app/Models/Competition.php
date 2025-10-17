@@ -32,18 +32,11 @@ class Competition extends Model implements HasMedia
         'small_system' => 'json'
     ];
 
-    public static function boot(){
-        parent::boot();
-        self::creating(function($model){
-            $model->uuid=Str::uuid();            
-            $model->token=rand(100000,999999);
-        });
-    }
- 
     public function programs()
     {
         return $this->hasManyThrough(Program::class, CompetitionCategory::class);
     }
+
     public function programsBouts()
     {
         return $this->hasManyThrough(Program::class, CompetitionCategory::class)->with('bouts');
@@ -55,19 +48,26 @@ class Competition extends Model implements HasMedia
         // return $this->hasManyThrough(Bout::class, Program::class);
     }
 
+    public function filterAthletes()
+    {
+        return $this->hasMany(Athlete::class);
+    }
+
+    public function programAthletes()
+    {
+        return $this->hasManyThrough(ProgramAthlete::class, Program::class, 'competition_category_id', 'program_id', 'id', 'id');
+    }
+
     public function athletes()
     {
         return $this->hasMany(Athlete::class);
     }
-    public function programsAthletes()
-    {
-        return $this->hasManyThrough(Program::class, CompetitionCategory::class)->with('athletes');
-    }
+
     public function referees()
     {
         return $this->hasMany(CompetitionReferee::class);
     }
-    // public function programsAthletes()
+    // public function programAthletes()
     // {
     //     return $this->hasMany(ProgramAthlete::class);
     // }

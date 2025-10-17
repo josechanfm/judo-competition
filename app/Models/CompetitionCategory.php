@@ -15,7 +15,14 @@ class CompetitionCategory extends Model
     {
         return $this->belongsTo(Competition::class);
     }
-    public function programs(){
+
+    public function programs()
+    {
         return $this->hasMany(Program::class);
+    }
+
+    public function programAthletes()
+    {
+        return $this->hasManyThrough(ProgramAthlete::class, Program::class);
     }
 }

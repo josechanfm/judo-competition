@@ -116,6 +116,7 @@ class TournamentQuarterController extends Controller
         }
         $this->gameSheet->pdf($players, $winners,  $sequences, $winnerList);
     }
+    
     private function players8($players = null, $winners = null, $repechagePlayers = null)
     {
         if ($players == null) {

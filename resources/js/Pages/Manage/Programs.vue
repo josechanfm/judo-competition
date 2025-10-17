@@ -404,14 +404,18 @@
               <div class="flex flex-col gap-2"><a>View Bouts</a></div>
             </div>
             <div class="">
-              <h3 class="font-bold text-lg mb-3">Pritn Files</h3>
-              <!-- <div class="flex flex-col gap-2">
-                <a>比賽秩序表</a>
-                <a>各場地安排</a>
-                <a>各組別項目表</a>
+              <h3 class="font-bold text-lg mb-3">Print Files</h3>
+              <div class="flex flex-col gap-2">
+                <a class="text-blue-500" target="_blank" :href="route('manage.competition.program.export.medal-quantity', competition.id)">預計獎牌數量表(EXCEL)</a>
+                <a class="text-blue-500" target="_blank" :href="route('manage.competition.program.export.program-time', competition.id)">各組別項目表</a>
+                <a class="text-blue-500" target="_blank" :href="route('manage.competition.generateAllProgramsOnlineTable', competition.id)">所有上線表</a>
+                <a class="text-blue-500" target="_blank" :href="route('manage.competition.result-table', {'competition':competition.id,'blankMedals':false})">賽果表(未完成)</a>
+                <!-- <a>比賽秩序表</a> -->
+                <!-- <a>各場地安排</a>
+                
                 <a>全部賽程表</a>
-                <a>全部上線表</a>
-              </div> -->
+                <a>全部上線表</a> -->
+              </div>
             </div>
           </div>
         </div>

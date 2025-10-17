@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers\Manage;
 
+use App\Exports\MedalQuantity;
+use App\Exports\ProgramTimeExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Competition;
 use App\Models\Program;
 use App\Services\BoutGenerationService;
+use App\Services\Printer\TournamentQuarterService;
 use App\Models\Bout;
 use App\Models\Athlete;
 use App\Models\ProgramAthlete;
+use App\Services\Printer\RoundRobbinOption1Service;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\File;
+use PgSql\Lob;
 use PhpOffice\PhpSpreadsheet\Reader\Xls\RC4;
 
 class ProgramController extends Controller
@@ -19,6 +26,7 @@ class ProgramController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index(Competition $competition)
     {
         //$competition->categories;
@@ -62,11 +70,11 @@ class ProgramController extends Controller
         if (request()->wantsJson()) {
             return response()->json([
                 'program' => $program,
-                'program_athletes' => $program->programsAthletes
+                'program_athletes' => $program->programAthletes
             ]);
         }
         return Inertia::render('Manage/Program', [
-            'program' => $program->load(['programsAthletes.athlete', 'programsAthletes.athlete.team', 'bouts']),
+            'program' => $program->load(['programAthletes.athlete', 'programAthletes.athlete.team', 'bouts']),
             'athletes' => $program->athletes,
             'competition' => $competition
         ]);
@@ -110,7 +118,7 @@ class ProgramController extends Controller
     }
     public function progress(Competition $competition)
     {
-        $competition->programsAthletes;
+        $competition->programAthletes;
         $competition->programsBouts;
 
         $competition->bouts = $competition->bouts()->where('queue', '!=', 0)->orderBy('queue')->get();
@@ -135,7 +143,7 @@ class ProgramController extends Controller
     {
         $program->update(['status' => 0]);
 
-        $program->programsAthletes()->update(['seat' => 0]);
+        $program->programAthletes()->update(['seat' => 0]);
 
         $program->bouts()->update(['white' => 0, 'queue' => 1, 'blue' => 0, 'winner' => 0, 'status' => 0]);
 
@@ -144,7 +152,7 @@ class ProgramController extends Controller
         $service->resequence();
 
         return response()->json([
-            'athletes' => $program->programsAthletes
+            'athletes' => $program->programAthletes
         ]);
     }
 
@@ -172,7 +180,7 @@ class ProgramController extends Controller
     {
         // remove previously generated bouts
         $competition->programsBouts;
-        // dd($competition);
+        
         $competition->bouts()->delete();
         // TODO: generate bouts
         $competition->generateBouts();
@@ -526,8 +534,210 @@ class ProgramController extends Controller
     public function programsUpdate(Competition $competition, Request $request)
     {
         $programs = $request->all();
+        // dd($programs);
         foreach ($programs as $p) {
-            Program::where('id', $p['id'])->update(['competition_system' => $p['competition_system']]);
+            $program = Program::where('id', $p['id'])->first();
+            $program->update(['competition_system' => $p['competition_system']]);
+            $program->updateChartSize();
+            $program->save();
         }
+    }
+
+    public function medalQuantityExport(Competition $competition)
+    {        
+        $fileName = '獎牌數量表_' . now()->format('Y-m-d') . '.xlsx';
+        
+        return Excel::download(new MedalQuantity($competition), $fileName);
+    }
+
+    public function programTimeExport(Competition $competition)
+    {
+        $fileName = '項目時間表_' . now()->format('Y-m-d') . '.xlsx';
+
+        return Excel::download(new ProgramTimeExport($competition), $fileName);
+    }
+
+    public function generateOnlineTable(Competition $competition, Program $program)
+    {
+        $size = $program->chart_size;
+
+        switch($program->competition_system){
+            case 'kos':
+                $settings = File::json(storage_path('setting/game_tournament_knockout.json'));
+                $service = new TournamentQuarterService($settings);
+                break;
+            case 'rrb':
+                $settings = File::json(storage_path('setting/game_round_robbin_option1.json'));
+                $service = new RoundRobbinOption1Service($settings);
+        }
+        
+        $players = $program?->bouts->map(function ($bout, $index) use ($size) {
+            if ($index > ($size / 2 - 1)) {
+                return;
+            } else {
+                return [
+                    'white' => ['name' => $bout->white_player->name ?? '' , 'name_secondary' => $bout->white_player->name_secondary ?? '', 'team' => $bout->white_player->team->name],
+                    'blue' => ['name' => $bout->blue_player->name ?? '', 'name_secondary' => $bout->blue_player->name_secondary ?? '', 'team' => $bout->blue_player->team->name]
+                ];
+            }
+        })->reject(function ($bout) {
+            return empty($bout);
+        }) ?? null;
+
+        $service->setFonts('NotoSerifTC', 'NotoSerifTC', 'cid0ct');
+        $service->setTitles($program->competition->name, null);
+
+        $service->pdf(
+            $players,
+            [
+                [1, 1, 1, 1],
+                [1, 1],
+                [1],
+            ],
+            [],
+            $this->generateWinnerList($competition,$program->athletes),
+            [ 
+                'program' => $program->converGender() . $program->competitionCategory->name ,
+                'athletes_count' => $program->athletes->count(),
+                'weight' => $program->convertWeight()
+            ]
+        );
+    }
+
+    // CompetitionController.php
+    public function generateAllProgramsOnlineTable(Competition $competition)
+    {
+        $programs = $competition->programs;
+        
+        if ($programs->isEmpty()) {
+            return response()->json(['error' => '沒有找到任何量級'], 404);
+        }
+        
+        $firstProgram = $programs->first();
+        $settings = $this->getSettingsBySystem($firstProgram->competition_system);
+        $service = $this->getServiceBySystem($firstProgram->competition_system, $settings);
+        
+        $service->setFonts('NotoSerifTC', 'NotoSerifTC', 'NotoSerifTC');
+        $service->setTitles($competition->name,null);
+        
+        // 準備所有 program 的數據
+        $allProgramsData = [];
+        foreach ($programs as $program) {
+            $players = $this->getPlayersFromProgram($program);
+            $allProgramsData[] = [
+                'players' => $players->toArray(),
+                'winners' => [],
+                'sequences' => [],
+                'winnerList' => $this->generateWinnerList($competition, $program->athletes),
+                'ellipseData' => [ 
+                    'program' => $program->converGender() . $program->competitionCategory->name,
+                    'athletes_count' => $program->athletes->count(),
+                    'weight' => $program->convertWeight()
+                ],
+                'repechagePlayers' => [],
+                'repechage' => false
+            ];
+            // dd($allProgramsData);
+        }
+        // dd($allProgramsData);
+        // 如果 service 有 multiplePrograms 方法就使用，否則使用第一個
+        if (method_exists($service, 'pdfForMultiplePrograms')) {
+            $service->pdfForMultiplePrograms($allProgramsData);
+        } else {
+            // 回退方案：只生成第一個 program
+            $firstProgramData = $allProgramsData[0];
+            $service->pdf(
+                $firstProgramData['players'],
+                $firstProgramData['winners'],
+                $firstProgramData['sequences'],
+                $firstProgramData['winnerList'],
+                $firstProgramData['ellipseData'],
+                $firstProgramData['repechagePlayers'],
+                $firstProgramData['repechage']
+            );
+        }
+    }
+    /**
+     * 生成序列號
+     */
+    public function generateWinnerList($competition, $athletes)
+    {
+        $winner_list = [];
+        $athlete_count = count($athletes);
+        
+        // 根據 awarding_method 決定獲獎人數
+        if ($competition->competition_type->awarding_methods == 0) {
+            // awarding_method == 0: 運動員數量 - 1，最大為4
+            $award_count = min($athlete_count - 1, 4);
+        } else {
+            // awarding_method == 1: 運動員數量，最大為4
+            $award_count = min($athlete_count, 4);
+        }
+
+        // 確保至少有一個獲獎者
+        $award_count = max($award_count, 1);
+        
+        // 生成獲獎者列表
+        for ($i = 0; $i < $award_count; $i++) {
+            $award = $i + 1;
+            
+            // 如果是第4個且award_count為4，則獎項設為3（並列第三）
+            if ($i == 3 && $award_count == 4) {
+                $award = 3;
+            }
+            
+            $winner_list[] = [
+                'award' => $award,
+                'name' => ''
+            ];
+        }
+        
+        return $winner_list;
+    }
+
+    private function getSettingsBySystem($system)
+    {
+        switch($system) {
+            case 'kos':
+                return File::json(storage_path('setting/game_tournament_knockout.json'));
+            case 'rrb':
+                return File::json(storage_path('setting/game_round_robbin_option1.json'));
+            default:
+                return File::json(storage_path('setting/game_tournament_knockout.json'));
+        }
+    }
+
+    /**
+     * 根據競賽系統取得服務
+     */
+    private function getServiceBySystem($system, $settings)
+    {
+        switch($system) {
+            case 'kos':
+                return new TournamentQuarterService($settings);
+            case 'rrb':
+                return new RoundRobbinOption1Service($settings);
+            default:
+                return new TournamentQuarterService($settings);
+        }
+    }
+
+    /**
+     * 從 program 取得選手資料
+     */
+    private function getPlayersFromProgram(Program $program)
+    {
+        return $program?->bouts->map(function ($bout, $index) use ($program) {
+            if ($index > ($program->chart_size / 2 - 1)) {
+                return;
+            } else {
+                return [
+                    'white' => ['name' => $bout->white_player->name ?? '' , 'name_secondary' => $bout->white_player->name_secondary ?? '', 'team' => $bout->white_player->team->name ?? ''],
+                    'blue' => ['name' => $bout->blue_player->name ?? '', 'name_secondary' => $bout->blue_player->name_secondary ?? '', 'team' => $bout->blue_player->team->name ?? '']
+                ];
+            }
+        })->reject(function ($bout) {
+            return empty($bout);
+        }) ?? collect([]);
     }
 }

@@ -5,13 +5,105 @@ namespace App\Services\Printer;
 use App\Helpers\PdfHelper;
 use TCPDF;
 
-class TournamentQuarterService
+class TournamentService
 {
-    protected $gameSetting;
+
+    protected $gameSetting = array(
+        '2' => array(
+            'startX' => 25,
+            'startY' => 35,
+            'boxW' => 60, //運動員名牌高度
+            'boxH' => 20, //運動員名牌寛度
+            'boxGap' => 6, //運動員名牌之間距離
+            'arcW' => 20, //上線曲線寛度
+            'arcWFirst' => 4, //第一輪上線曲線
+            'repechageDistance' => 15,
+            'repechageBoxGap' => 6,
+            'repechageSectionGap' => 10,
+            'circleSize' => 3,
+            'circleFontSize' => 10,
+            'playerFontSize' => 14
+        ),
+        '4' => array(
+            'startX' => 25,
+            'startY' => 35,
+            'boxW' => 60, //運動員名牌高度
+            'boxH' => 20, //運動員名牌寛度
+            'boxGap' => 6, //運動員名牌之間距離
+            'arcW' => 20, //上線曲線寛度
+            'arcWFirst' => 4, //第一輪上線曲線
+            'repechageDistance' => 15,
+            'repechageBoxGap' => 6,
+            'repechageSectionGap' => 10,
+            'circleSize' => 3,
+            'circleFontSize' => 10,
+            'playerFontSize' => 12
+        ),
+        '8' => array(
+            'startX' => 25,
+            'startY' => 35,
+            'boxW' => 60, //運動員名牌高度
+            'boxH' => 20, //運動員名牌寛度
+            'boxGap' => 6, //運動員名牌之間距離
+            'arcW' => 20, //上線曲線寛度
+            'arcWFirst' => 4, //第一輪上線曲線
+            'repechageDistance' => 15,
+            'repechageBoxGap' => 2,
+            'repechageSectionGap' => 5,
+            'circleSize' => 3,
+            'circleFontSize' => 10,
+            'playerFontSize' => 14
+        ),
+        '16' => array(
+            'startX' => 25,
+            'startY' => 35,
+            'boxW' => 60, //運動員名牌高度
+            'boxH' => 15, //運動員名牌寛度
+            'boxGap' => 6, //運動員名牌之間距離
+            'arcW' => 20, //上線曲線寛度
+            'arcWFirst' => 4, //第一輪上線曲線
+            'repechageDistance' => 10,
+            'repechageBoxGap' => 2,
+            'repechageSectionGap' => 5,
+            'circleSize' => 3,
+            'circleFontSize' => 10,
+            'playerFontSize' => 12
+        ),
+        '32' => array(
+            'startX' => 25,
+            'startY' => 35,
+            'boxW' => 60, //運動員名牌高度
+            'boxH' => 10, //運動員名牌寛度
+            'boxGap' => 2, //運動員名牌之間距離
+            'arcW' => 20, //上線曲線寛度
+            'arcWFirst' => 4, //第一輪上線曲線
+            'repechageDistance' => 5,
+            'repechageBoxGap' => 2,
+            'repechageSectionGap' => 5,
+            'circleSize' => 3,
+            'circleFontSize' => 10,
+            'playerFontSize' => 10
+        ),
+        '64' => array(
+            'startX' => 25,
+            'startY' => 23,
+            'boxW' => 55, //運動員名牌高度
+            'boxH' => 6.2, //運動員名牌寛度
+            'boxGap' => 1, //運動員名牌之間距離
+            'arcW' => 20, //上線曲線寛度
+            'arcWFirst' => 4, //第一輪上線曲線
+            'repechageDistance' => 1,
+            'repechageBoxGap' => 1,
+            'repechageSectionGap' => 1,
+            'circleSize' => 2,
+            'circleFontSize' => 10,
+            'playerFontSize' => 8
+        ),
+    );
     protected $pdf = null;
     protected $title = 'Judo Competition of Asia Pacific';
     protected $title_sub = 'Judo Union of Asia';
-    protected $logo_primary = 'images/mja_logo.png';
+    protected $logo_primary = 'images/jua_logo.png';
     protected $logo_secondary = null;
 
     protected $startX = 25; //面頁基點X軸
@@ -26,7 +118,7 @@ class TournamentQuarterService
     protected $repechageSectionGap = 5; //復活賽表, second
     protected $circleSize = 3;
     protected $circleFontSize = 10;
-    protected $playerFontSize = 8;
+    protected $playerFontSize = 9;
 
     protected $round = 0;
     protected $playerCount = 0;
@@ -52,10 +144,8 @@ class TournamentQuarterService
         ['name' => 'Pool C', 'color' => array(122, 184, 42)],
         ['name' => 'Pool D', 'color' => array(98, 197, 230)]
     ];
-    protected $winners = [];
-    protected $sequences = [];
     protected $resultColor1 = array(200, 200, 200);
-    protected $resultColor2 = array(255, 255, 255);
+    protected $resultColor2 = array(250, 250, 250);
     protected $resultXY = [120, 120];
 
     public function __construct($settings)
@@ -105,160 +195,59 @@ class TournamentQuarterService
         $this->winnerLineDraw = $winnerLineDraw;
     }
 
-    public function pdf($players = [], $winners = [],  $sequences = [], $winnerList = [], $ellipseData = [], $repechagePlayers = [], $repechage = true)
+    public function pdf($players = [], $winners = [],  $sequences = [], $winnerList = [], $repechagePlayers = [], $repechage = true)
     {
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-        
-        // 設定邊距和其他屬性
+        // set margins
+        //$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        //$this->pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
         $this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        //$this->pdf->SetFooterMargin(0);
         $this->pdf->SetPrintHeader(false);
+        // $this->pdf->SetPrintFooter(false);
         $this->pdf->SetMargins(15, 10, 15);
         $this->pdf->SetAutoPageBreak(TRUE, 0);
         $this->pdf->AddPage();
-        
         $this->playerCount = count($players) * 2;
-        
-        // 載入遊戲設定
         foreach ($this->gameSetting[$this->playerCount] as $key => $value) {
             $this->$key = $value;
         }
-        
         $this->round = strlen((string)decbin($this->playerCount / 2));
-        
-        // 處理 winners 參數
-        if (empty($winners) && isset($this->winners)) {
-            $winners = $this->winners;
-        } else {
-            $winners = is_array($winners) ? $winners : [];
-        }
-        
-        // 處理 sequences 參數
-        if (empty($sequences) && isset($this->sequences)) {
-            $sequences = $this->sequences;
-        } else {
-            $sequences = is_array($sequences) ? $sequences : [];
-        }
-        
         $helper = new PdfHelper($this->pdf);
-
-        $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont, $ellipseData);
-        $this->mainChart($players, $sequences, $winners); // 主上線表包括運動員名牌和上線曲線
-        
+        $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary);
+        $this->mainChart($players, $sequences, $winners); //主上線表包括運動員名牌和上線曲線
         if ($this->playerCount > 4 && $this->poolLabel != null) {
             $this->boxPool($this->poolLabel);
         }
-        
         if ($repechagePlayers) {
-            $this->repechageChart(count($players), $repechagePlayers, $sequences, $winners); // 復活賽上線表包括運動員名牌和上線曲線
+            $this->repechageChart(count($players), $repechagePlayers, $sequences, $winners); //復活賽上線表包括運動員名牌和上線曲線
         }
-        
         $this->resultBox($winnerList);
-        $this->pdf->Output($ellipseData['program'] . $ellipseData['weight'] . '上線表.pdf', 'I');
+        $this->pdf->Output('myfile.pdf', 'I');
     }
-
-    public function pdfForMultiplePrograms($programsData)
-    {
-        // 初始化 PDF
-        $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-        $this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
-        $this->pdf->SetPrintHeader(false);
-        $this->pdf->SetMargins(15, 10, 15);
-        $this->pdf->SetAutoPageBreak(TRUE, 0);
-        
-        foreach ($programsData as $index => $programData) {
-            // dd($programData);
-            if ($index >= 0) {
-                $this->pdf->AddPage();
-            }
-            
-            $this->playerCount = count($programData['players']) * 2;
-            
-            // 載入遊戲設定
-            foreach ($this->gameSetting[$this->playerCount] as $key => $value) {
-                $this->$key = $value;
-            }
-            
-            $this->round = strlen((string)decbin($this->playerCount / 2));
-            
-            $helper = new PdfHelper($this->pdf);
-            $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont, $programData['ellipseData']);
-
-            $this->mainChart($programData['players'], $this->sequences, $this->winners);
-            
-            if ($this->playerCount > 4 && $this->poolLabel != null) {
-                $this->boxPool($this->poolLabel);
-            }
-            
-            if (!empty($programData['repechagePlayers'])) {
-                $this->repechageChart(count($programData['players']), $programData['repechagePlayers'], $programData['sequences'] ?? [], $programData['winners'] ?? []);
-            }
-            // dd($this->sequences);
-            $this->resultBox($programData['winnerList']);
-        }
-        
-        $this->pdf->Output($this->title . '所有上線表.pdf', 'I');
-    }
-
     private function boxPool($poolLabel)
     {
         $this->pdf->setFont($this->generalFont, '', $this->playerFontSize);
         $x = $this->startX - 10;
-        $y = $this->startY;
-        $h = ($this->boxH + $this->boxGap) * ($this->playerCount / 8) - $this->boxGap;
-        
+        $y = $this->startY; //+($this->boxH/4);
+        $h = ($this->boxH + $this->boxGap) * ($this->playerCount / 8) - $this->boxGap; //-($this->boxH)+($this->repechageBoxGap/2);
         for ($i = 3; $i >= 0; $i--) {
             $this->pdf->RoundedRect($x, $y, 6.5, $h, 3.25, '1111', 'DF', $this->styleCircle, $poolLabel[$i]['color']);
             $y += ($this->boxH + $this->boxGap) * ($this->playerCount / 8);
         }
 
+        //$x=$this->startX-10;
         $y = $this->startY + (($this->boxH + $this->boxGap) * $this->playerCount / 2) - ($this->boxGap / 2);
         $w = (($this->boxH + $this->boxGap) * $this->playerCount / 8);
-        
+        $this->pdf->setFont($this->playerFont, '', $this->playerFontSize);
         $this->pdf->StartTransform();
         $this->pdf->setXY($x, $y);
         $this->pdf->Rotate(90);
-        
         for ($i = 3; $i >= 0; $i--) {
-            $name = $poolLabel[$i]['name'];
-            
-            // 使用精確的文字寬度計算
-            $fontSize = $this->calculateOptimalFontSize($name, $this->playerFont, $w, $this->playerFontSize);
-            
-            $this->pdf->setFont($this->playerFont, '', $fontSize);
-            $this->pdf->Cell($w, 0, $name, 0, 0, 'C', 0, '');
+            $this->pdf->Cell($w, 0, $poolLabel[$i]['name'], 0, 0, 'C', 0, '');
         }
-        
         $this->pdf->StopTransform();
     }
-
-    /**
-     * 計算最適合的字型大小
-     * 
-     * @param string $text 文字內容
-     * @param string $font 字型名稱
-     * @param float $maxWidth 最大允許寬度
-     * @param int $preferredSize 首選字型大小
-     * @return int 最佳字型大小
-     */
-    private function calculateOptimalFontSize($text, $font, $maxWidth, $preferredSize)
-    {
-        // 設定初始字型大小
-        $fontSize = $preferredSize;
-        
-        // 檢查文字寬度
-        $this->pdf->setFont($font, '', $fontSize);
-        $textWidth = $this->pdf->GetStringWidth($text);
-        
-        // 如果文字太寬，逐步減小字型大小
-        while ($textWidth > $maxWidth * 0.9 && $fontSize > 6) {
-            $fontSize--;
-            $this->pdf->setFont($font, '', $fontSize);
-            $textWidth = $this->pdf->GetStringWidth($text);
-        }
-        
-        return $fontSize;
-    }
-
     private function mainChart($players, $sequences, $winners)
     {
         /* 運動員名牌 */
@@ -358,64 +347,25 @@ class TournamentQuarterService
         }
     }
     /* the following are repeated object, might change the variabled values, accordingly, not suggest to use globale variabled. */
-    private function boxPlayers($x, $y, $w, $h, $players = ['white' => ['name' => 'white' , 'name_secondary' => '1'], 'blue' => ['name' => 'blue' , 'name_secondary' => '1']])
+    private function boxPlayers($x, $y, $w, $h, $players = ['white' => ['name_display' => 'white'], 'blue' => ['name_display' => 'blue']])
     {
         $this->pdf->setFont($this->playerFont, '', $this->playerFontSize);
+        //$this->pdf->SetFont('DroidSansFallback', '', 8, '', false);
         $r = 2.0;
         $h = $h / 2;
-        
-        // 定義漸變顏色 - 使用銀白色調
-        $silver = [220, 220, 220];  // 較亮的銀色
-        $white = [255, 255, 255];   // 純白
-        
         if (isset($players['white'])) {
-            // 上半部使用漸變銀色
-            $gradientHeight = $h;
-            $steps = 15;
-            
-            // 先繪製漸變背景
-            for ($i = 0; $i < $steps; $i++) {
-                $stepY = $y + ($gradientHeight / $steps) * $i;
-                $stepHeight = $gradientHeight / $steps;
-                
-                // 從白漸變到銀
-                $ratio = $i / $steps;
-                $rColor = $white[0] - ($white[0] - $silver[0]) * $ratio;
-                $gColor = $white[1] - ($white[1] - $silver[1]) * $ratio;
-                $bColor = $white[2] - ($white[2] - $silver[2]) * $ratio;
-                
-                if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-                    $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-                    $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
-                } else {
-                    $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-                    $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
-                }
-            }
-            
-            // 繪製上半部圓角邊框（只繪製邊框，不填充）
-            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'D', $this->styleBoxLine, $this->boxWhiteColor);
-            
-            // 下半部保持原本的藍色
+            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
             $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
-            // dd($players['white']);
-            $this->pdf->setXY($x, $y - 2.5);
-            $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['white']['name']) . ' ' . $this->smartTruncate($players['white']['name_secondary']) , 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x, $y + 2.5);
-            $this->pdf->Cell($this->boxW, $h, $players['white']['team'] , 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x, $y + $h - 2.5);
-            $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . ' ' . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x, $y + $h + 2.5);
-            $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
+            $this->pdf->setXY($x, $y);
+            $this->pdf->Cell($this->boxW, $h, $players['white']['name_display'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->setXY($x, $y + $h);
+            $this->pdf->Cell($this->boxW, $h, $players['blue']['name_display'], 0, 1, 'L', 0, '', 0);
         } else {
             $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxBlueColor);
             $this->pdf->setXY($x, $y);
-            $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x, $y + 2.5);
-            $this->pdf->Cell($this->boxW, $h, $players['white']['team'] , 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h, $players['blue']['name_display'], 0, 1, 'L', 0, '', 0);
         }
     }
-    
     private function arcLine($x, $y, $arcW, $h, $num = 0, $winner = 0, $first = false, $players = null)
     {
         $size = $this->circleSize;
@@ -489,6 +439,7 @@ class TournamentQuarterService
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult2, $this->resultColor2);
         $x1 = $x;
         $y1 = $y;
+        $w1 = $w;
         $h1 = 6;
         for ($i = 0; $i < count($winnerList); $i++) {
             $this->pdf->setXY($x1, $y1 + 5);
@@ -496,7 +447,7 @@ class TournamentQuarterService
             $this->pdf->Cell(0, 0, $winnerList[$i]['award'] . ':', 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x1 + 15, $y1 + 5);
             $this->pdf->SetFont($this->playerFont, 'B', 10);
-            $this->pdf->Cell($w - 15, 0, $winnerList[$i]['name'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($w - 15, 0, $winnerList[$i]['name'] . ':', 0, 1, 'L', 0, '', 0);
             $y1 += $h1;
         }
 
@@ -509,45 +460,6 @@ class TournamentQuarterService
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
         $this->pdf->setXY($x, $y);
         $this->pdf->SetFont($this->generalFont, 'B', 14);
-        $this->pdf->Cell(35, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
-    }
-
-    private function smartTruncate($name, $maxLength = 21)
-    {
-        if (mb_strlen($name) <= $maxLength) {
-            return $name;
-        }
-        
-        // 葡文名字通常格式：名 姓
-        $parts = explode(' ', $name);
-        
-        if (count($parts) >= 2) {
-            // 先嘗試：前面的部分都只保留首字母，最後一個部分保持完整
-            $shortName = '';
-            for ($i = 0; $i < count($parts) - 1; $i++) {
-                if (!empty($parts[$i])) {
-                    $shortName .= mb_substr($parts[$i], 0, 1) . '.';
-                }
-            }
-            
-            // 加上完整的姓氏
-            $shortName .= ' ' . end($parts);
-            
-            if (mb_strlen($shortName) <= $maxLength) {
-                return $shortName;
-            }
-            
-            // 如果還是太長，使用最簡格式：第一個名字的首字母 + 完整姓氏
-            $firstName = mb_substr($parts[0], 0, 1) . '.';
-            $lastName = end($parts);
-            $simplestName = $firstName . ' ' . $lastName;
-            
-            if (mb_strlen($simplestName) <= $maxLength) {
-                return $simplestName;
-            }
-        }
-        
-        // 如果還是太長，直接截斷
-        return mb_substr($name, 0, $maxLength - 3) . '...';
+        $this->pdf->Cell(35, 10, 'Results', 0, 1, 'C', 0, '', 0);
     }
 }

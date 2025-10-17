@@ -128,6 +128,15 @@
               </template>
               <template #extra>
                 <div class="flex gap-3">
+                  <template v-if="activeProgram.status > 0">
+                  <a :href="route('manage.competition.program.generateOnlineTable', [
+                      competition.id,
+                      activeProgramId,
+                    ])" 
+                      target="_blank">
+                    <a-button type="link" @click="download">上線表</a-button>
+                  </a>
+                  </template>
                   <template v-if="competition.status < COMPETITION_STATUS.seat_locked">
                     <div class="flex gap-3" v-if="activeProgram.status > 0">
                       <a-button type="link" danger @click="reset">Reset</a-button>
@@ -452,8 +461,17 @@ export default {
           ])
         )
         .then(({ data }) => {
-          this.activeProgram.status = 0;
-          this.athletes = data.athletes;
+        });
+    },
+    download(){
+      return window.axios
+        .get(
+          route("manage.competition.program.generateOnlineTable", [
+            this.competition.id,
+            this.activeProgramId,
+          ])
+        )
+        .then(({ data }) => {
         });
     },
     closeDisplay() {

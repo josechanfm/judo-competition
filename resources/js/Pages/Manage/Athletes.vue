@@ -57,9 +57,63 @@
                 @click="visible = true"
                 >Import Athletes</a-button
               >
+              <a :href="route('athletes.generateIdCards', competition.id)" target="_blank"><a-button type="text">download athletes id cards</a-button></a>
             </div>
           </div>
-          <a-table :dataSource="competition.athletes" :columns="columns">
+          
+          <!-- 添加筛选功能 -->
+          <div class="mb-4 p-4 bg-gray-50 rounded-lg">
+            <div class="text-lg font-semibold mb-3">Filter Athletes</div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Team</label>
+                <a-select
+                  v-model:value="filters.team"
+                  placeholder="Select Team"
+                  allowClear
+                  style="width: 100%"
+                  :options="teamOptions"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                <a-select
+                  v-model:value="filters.gender"
+                  placeholder="Select Gender"
+                  allowClear
+                  style="width: 100%"
+                  :options="[
+                    { value: 'M', label: 'Male' },
+                    { value: 'F', label: 'Female' }
+                  ]"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+                <a-select
+                  v-model:value="filters.program"
+                  placeholder="Select Program"
+                  allowClear
+                  style="width: 100%"
+                  :options="programOptions"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <a-input
+                  v-model:value="filters.name"
+                  placeholder="Search by name"
+                  allow-clear
+                />
+              </div>
+            </div>
+            <div class="flex justify-end mt-3 gap-2">
+              <a-button @click="resetFilters">Reset</a-button>
+              <a-button type="primary" class="bg-blue-500" @click="applyFilters">Apply Filters</a-button>
+            </div>
+          </div>
+
+          <a-table :dataSource="filteredAthletes" :columns="columns">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'operation'">
                 <a-button @click="onEditRecord(record)">Edit</a-button>
@@ -237,6 +291,7 @@ import {
   WarningOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
+
 export default {
   components: {
     ExclamationCircleOutlined,
@@ -255,6 +310,13 @@ export default {
         mode: null,
         title: "Record Modal",
         data: {},
+      },
+      // 添加筛选状态
+      filters: {
+        team: null,
+        gender: null,
+        program: null,
+        name: '',
       },
       columns: [
         {
@@ -301,10 +363,78 @@ export default {
       imported: false,
     };
   },
+  computed: {
+    // 计算筛选后的运动员列表
+    filteredAthletes() {
+      let athletes = this.competition.athletes;
+
+      // 按队伍筛选
+      if (this.filters.team) {
+        athletes = athletes.filter(athlete => 
+          athlete.team && athlete.team.id === this.filters.team
+        );
+      }
+
+      // 按性别筛选
+      if (this.filters.gender) {
+        athletes = athletes.filter(athlete => 
+          athlete.gender === this.filters.gender
+        );
+      }
+
+      // 按项目筛选
+      if (this.filters.program) {
+        athletes = athletes.filter(athlete =>
+          athlete.programs.some(program => program.id === this.filters.program)
+        );
+      }
+
+      // 按姓名筛选
+      if (this.filters.name) {
+        const searchTerm = this.filters.name.toLowerCase();
+        athletes = athletes.filter(athlete =>
+          athlete.name_display?.toLowerCase().includes(searchTerm) ||
+          athlete.name?.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      return athletes;
+    },
+    // 队伍选项
+    teamOptions() {
+      return this.teams.map(team => ({
+        value: team.id,
+        label: team.name
+      }));
+    },
+    // 项目选项
+    programOptions() {
+      return this.programs.map(program => ({
+        value: program.id,
+        label: program.weight_code
+      }));
+    }
+  },
   created() {
     this.filter_programs = this.programs;
   },
   methods: {
+    // 应用筛选
+    applyFilters() {
+      // 计算属性会自动更新，这里可以添加其他逻辑
+      message.success('Filters applied');
+    },
+    // 重置筛选
+    resetFilters() {
+      this.filters = {
+        team: null,
+        gender: null,
+        program: null,
+        name: '',
+      };
+      message.info('Filters reset');
+    },
+    // 其他方法保持不变
     onCreateRecord() {
       this.modal.title = "Create";
       this.modal.data = {
@@ -383,7 +513,6 @@ export default {
       const formData = new FormData();
       formData.append("file", this.files[0].originFileObj);
 
-      // TODO: handle import athlete list
       window.axios
         .post(
           route("manage.competition.athletes.import", this.$page.props.competition.id),

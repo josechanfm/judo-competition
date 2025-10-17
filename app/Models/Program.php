@@ -45,18 +45,24 @@ class Program extends Model
         return $this->hasMany(Bout::class)->orderBy('in_program_sequence');
     }
 
+    public function category()
+    {
+        return $this->belongsTo(CompetitionCategory::class, 'competition_category_id');
+    }
+    
     public function competition()
     {
         return $this->competitionCategory->competition();
     }
-    public function athletes()
+
+    public function programAthletes()
     {
-        return $this->belongsToMany(Athlete::class, 'program_athlete')->withPivot(['id','seed', 'seat', 'weight', 'is_weight_passed', 'rank', 'score', 'confirm']);
+        return $this->hasMany(ProgramAthlete::class, 'program_id');
     }
 
-    public function programsAthletes()
+    public function athletes()
     {
-        return $this->hasMany(ProgramAthlete::class);
+        return $this->belongsToMany(Athlete::class, 'program_athlete', 'program_id', 'athlete_id');
     }
 
     public function competitionCategory()
@@ -88,7 +94,7 @@ class Program extends Model
         $athletesCount = $this->athletes()->count();
 
         $chartSize = pow(2, strlen(decbin($athletesCount - 1)));
-
+        
         switch ($this->competition_system) {
             case self::ERM:
             case self::KOS:
@@ -145,7 +151,7 @@ class Program extends Model
         $athletes = (new DrawService($this))->draw();
 
         foreach ($athletes as $athlete) {
-            $this->programsAthletes()->where('id', $athlete['id'])->update([
+            $this->programAthletes()->where('id', $athlete['id'])->update([
                 'seat' => $athlete['seat'],
             ]);
         }
@@ -164,7 +170,17 @@ class Program extends Model
     public function convertWeight()
     {
         $weight = $this->weight_code;
-        if (preg_match('/^MW(\d+)([+-])$/', $weight, $matches)) {
+        
+        // 如果是 MWULW 或 FWULW，轉換為 OPEN
+        if (in_array(strtoupper($weight), ['MWULW', 'FWULW', 'ULW'])) {
+            return '無限量級';
+        }
+        
+        // 去除 MW 或 FW 前綴
+        $cleanedWeight = preg_replace('/^(MW|FW)/i', '', $weight);
+        
+        // 處理帶有 +/- 符號的體重級別
+        if (preg_match('/^(\d+)([+-])$/', $cleanedWeight, $matches)) {
             $sign = $matches[2];
             $value = $matches[1];
 
@@ -174,6 +190,25 @@ class Program extends Model
                 return "+{$value}kg";
             }
         }
-        return $weight;
+        
+        // 如果是純數字，加上 kg
+        if (is_numeric($cleanedWeight)) {
+            return "{$cleanedWeight}kg";
+        }
+        
+        // 其他情況返回原始值（去除前綴後的）
+        return $cleanedWeight;
     }
+
+    public function converGender()
+    {
+        $firstChar = strtoupper(substr($this->weight_code ?? '', 0, 1));
+        
+        return match($firstChar) {
+            'M' => '男子',
+            'F' => '女子',
+            default => '未知'
+        };
+    }
+    
 }

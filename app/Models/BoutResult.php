@@ -9,6 +9,24 @@ class BoutResult extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'bout_id',
+        'status',
+        'w_ippon',
+        'w_wazari',
+        'w_yuko',
+        'w_shido',
+        'b_ippon',
+        'b_wazari',
+        'b_yuko',
+        'b_shido',
+        'w_score',
+        'b_score',
+        'time',
+        'device_uuid',
+        'actions',
+    ];
+
     public const STATUS_CANCELLED = -1;
 
     // 白方勝利
@@ -26,4 +44,10 @@ class BoutResult extends Model
     public const STATUS_BLUE_ABSTAIN = 21;
     public const STATUS_BLUE_MEDICAL = 31;
     public const STATUS_BLUE_HANSOKUMAKE = 41;
+
+
+    public function bout()
+    {
+        return $this->belongsTo(Bout::class);
+    }
 }

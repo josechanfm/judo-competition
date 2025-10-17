@@ -27,6 +27,30 @@ class ProgramAthlete extends Model
         return $this->belongsTo(Program::class);
     }
 
+    public function category()
+    {
+        return $this->hasOneThrough(
+            CompetitionCategory::class,
+            Program::class,
+            'id', 
+            'id',
+            'program_id', 
+            'competition_category_id' 
+        );
+    }
+    
+    public function competition()
+    {
+        return $this->hasOneThrough(
+            Competition::class,
+            Program::class,
+            'id', 
+            'id', 
+            'program_id', 
+            'competition_id'
+        );
+    }
+
     public function setRank(int $rank)
     {
         $this->rank = $rank;

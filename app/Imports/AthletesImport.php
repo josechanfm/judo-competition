@@ -55,7 +55,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
                 continue;
             }
             $categories = $this->competition->categories()->pluck('id', 'code');
-
+            // dd($row);
             $validator = Validator::make($row->toArray(), [
                 'gender' => 'required|in:M,F',
 
@@ -79,7 +79,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
                     }
                 }],
                 'team_name' => 'required',
-                'team_abbreviation' => 'required',
+                'team_abbreviation' => 'nullable|string',
                 'name' => 'nullable|string',
                 'name_secondary' => 'nullable|string',
                 'seed' => 'nullable|integer|min:0|max:32',
@@ -102,7 +102,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
             //                if ($program === null) {
             //                    dd($row);
             //                }
-
+            // dd($row);
             // 創建代表隊資料
             $team = $this->createTeam($row);
             // 創建選手資料
@@ -118,7 +118,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         return Team::firstOrCreate([
             'competition_id' => $this->competition->id,
             'name' => $row['team_name'],
-            'abbreviation' => $row['team_abbreviation'],
+            'abbreviation' => $row['team_name'],
         ]);
     }
 

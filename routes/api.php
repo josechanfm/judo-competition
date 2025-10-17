@@ -28,3 +28,8 @@ Route::prefix('/v2')->group(function () {
         Route::get('/weightIn', [App\Http\Controllers\Api\Competition\V2\WeightInController::class, 'get']);
     });
 });
+
+Route::get('/competition/{token}',[App\Http\Controllers\Api\CompetitionController::class ,'getCompetition']);
+Route::get('/competition/{token}/bouts',[App\Http\Controllers\Api\CompetitionController::class, 'getCompetitionBouts']);
+Route::get('/competition/{token}/bout', [App\Http\Controllers\Api\BoutController::class, 'getCompetitionBout']);
+Route::post('/competition/{token}/bout/{bout}/result', [App\Http\Controllers\Api\BoutController::class, 'postBoutResult']);

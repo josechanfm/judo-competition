@@ -16,8 +16,15 @@ class Athlete extends Model
     {
         return $this->belongsTo(Team::class);
     }
+
+    public function programAthletes()
+    {
+        return $this->hasMany(ProgramAthlete::class);
+    }
+
     public function programs()
     {
-        return $this->belongsToMany(Program::class, 'program_athlete');
+        return $this->belongsToMany(Program::class, 'program_athlete', 'athlete_id', 'program_id');
     }
+    
 }

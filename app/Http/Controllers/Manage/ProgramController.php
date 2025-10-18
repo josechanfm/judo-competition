@@ -19,6 +19,7 @@ use App\Services\Printer\RoundRobbinOption1Service;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\File;
 use PgSql\Lob;
+use TCPDF;
 use PhpOffice\PhpSpreadsheet\Reader\Xls\RC4;
 
 class ProgramController extends Controller
@@ -584,17 +585,15 @@ class ProgramController extends Controller
             return empty($bout);
         }) ?? null;
 
-        $service->setFonts('NotoSerifTC', 'NotoSerifTC', 'cid0ct');
-        $service->setTitles($program->competition->name, null);
+        $service->setWinnerLine(false);
 
+        $service->setFonts('NotoSerifTC', 'NotoSerifTC', 'NotoSerifTC');
+        $service->setTitles($program->competition->name, null);
+        
         $service->pdf(
             $players,
-            [
-                [1, 1, 1, 1],
-                [1, 1],
-                [1],
-            ],
-            [],
+            $this->generateWinnersArray($program),
+            $this->generateSequencesArray($program),
             $this->generateWinnerList($competition,$program->athletes),
             [ 
                 'program' => $program->converGender() . $program->competitionCategory->name ,
@@ -605,7 +604,7 @@ class ProgramController extends Controller
     }
 
     // CompetitionController.php
-    public function generateAllProgramsOnlineTable(Competition $competition)
+    public function generateAllProgramsOnlineTable(Competition $competition,$winnerLine = false)
     {
         $programs = $competition->programs;
         
@@ -626,9 +625,9 @@ class ProgramController extends Controller
             $players = $this->getPlayersFromProgram($program);
             $allProgramsData[] = [
                 'players' => $players->toArray(),
-                'winners' => [],
-                'sequences' => [],
-                'winnerList' => $this->generateWinnerList($competition, $program->athletes),
+                'winners' => $this->generateWinnersArray($program),
+                'sequences' => $this->generateSequencesArray($program),
+                'winnerList' => $this->generateWinnerList($competition, $program->programAthletes),
                 'ellipseData' => [ 
                     'program' => $program->converGender() . $program->competitionCategory->name,
                     'athletes_count' => $program->athletes->count(),
@@ -663,20 +662,21 @@ class ProgramController extends Controller
     public function generateWinnerList($competition, $athletes)
     {
         $winner_list = [];
-        $athlete_count = count($athletes);
+        $athlete_count = $athletes->count();
         
         // 根據 awarding_method 決定獲獎人數
         if ($competition->competition_type->awarding_methods == 0) {
-            // awarding_method == 0: 運動員數量 - 1，最大為4
             $award_count = min($athlete_count - 1, 4);
         } else {
-            // awarding_method == 1: 運動員數量，最大為4
             $award_count = min($athlete_count, 4);
         }
 
-        // 確保至少有一個獲獎者
         $award_count = max($award_count, 1);
         
+        // 使用 Collection 的 filter 方法過濾已確定排名的運動員
+        $ranked_athletes = $athletes->filter(function($athlete) {
+            return isset($athlete->rank) && $athlete->rank > 0;
+        })->sortBy('rank'); // 按最終排名排序
         // 生成獲獎者列表
         for ($i = 0; $i < $award_count; $i++) {
             $award = $i + 1;
@@ -686,9 +686,24 @@ class ProgramController extends Controller
                 $award = 3;
             }
             
+            $athlete_name = '';
+            $is_determined = false;
+            
+            // 檢查是否有對應排名的已確定運動員
+            $ranked_athlete = $ranked_athletes->where('rank', $award)->first();
+            // dd($ranked_athlete);
+            if ($ranked_athlete) {
+                $athlete_name = $this->smartTruncate($ranked_athlete->athlete->name) . $this->smartTruncate($ranked_athlete->athlete->name_secondary);
+                $is_determined = true;
+            } else {
+                // 如果該名次尚未確定，顯示待定或空白
+                $athlete_name = '待定';
+            }
+            
             $winner_list[] = [
                 'award' => $award,
-                'name' => ''
+                'name' => $athlete_name,
+                'is_determined' => $is_determined
             ];
         }
         
@@ -739,5 +754,183 @@ class ProgramController extends Controller
         })->reject(function ($bout) {
             return empty($bout);
         }) ?? collect([]);
+    }
+
+    private function generateWinnersArray(Program $program)
+    {
+        $bouts = $program->bouts()->orderBy('in_program_sequence')->get();
+        
+        if ($bouts->isEmpty()) {
+            return $this->getDefaultWinnersArray($program->chart_size);
+        }
+        
+        $rounds = $bouts->groupBy('round');
+        $winners = [];
+        
+        // 按輪次降序排序（round大的在上面）
+        $sortedRounds = $rounds->sortKeysDesc();
+        
+        foreach ($sortedRounds as $round => $roundBouts) {
+            $roundWinners = [];
+            
+            // 在每個輪次內按照 in_program_sequence 排序
+            $sortedBouts = $roundBouts->sortBy('in_program_sequence');
+            
+            foreach ($sortedBouts as $bout) {
+                if ($bout->status != 0 && $bout->winner === $bout->white) {
+                    $roundWinners[] = 1;
+                } elseif ($bout->status != 0 && $bout->winner === $bout->blue) {
+                    $roundWinners[] = 2;
+                } else {
+                    $roundWinners[] = 0;
+                }
+            }
+            
+            $winners[] = $roundWinners;
+        }
+        
+        return $winners;
+    }
+
+    /**
+     * 生成預設的勝者陣列（當沒有比賽資料時使用）
+     */
+    private function getDefaultWinnersArray($chartSize)
+    {
+        // 根據圖表大小生成預設結構
+        $rounds = log($chartSize, 2);
+        $winners = [];
+        
+        $matchesInRound = $chartSize / 2;
+        for ($i = 0; $i < $rounds; $i++) {
+            $roundWinners = array_fill(0, $matchesInRound, 0); // 全部設為0（無結果）
+            $winners[] = $roundWinners;
+            $matchesInRound /= 2;
+        }
+        
+        return $winners;
+    }
+
+    private function generateSequencesArray(Program $program)
+    {
+        // 根據比賽輪次生成序列號
+        $size = $program->chart_size;
+        $rounds = log($size, 2); // 計算輪次
+        
+        $sequences = [];
+        $currentNum = 1;
+        
+        for ($round = 0; $round < $rounds; $round++) {
+            $matchesInRound = $size / pow(2, $round + 1);
+            $roundSequences = [];
+            
+            for ($match = 0; $match < $matchesInRound; $match++) {
+                $roundSequences[] = $currentNum++;
+            }
+            
+            $sequences[] = $roundSequences;
+        }
+        
+        return $sequences;
+    }
+
+    public function generateCert(Competition $competition, Program $program)
+{
+    // 获取排名 1-3 的运动员
+    $athletes = $program->programAthletes()
+        ->whereIn('rank', [1, 2, 3])
+        ->orderBy('rank')
+        ->get();
+
+    // 创建 PDF - 改為縱向 (P)
+    $pdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8', false);
+    
+    $pdf->setPrintHeader(false);
+    $pdf->setPrintFooter(false);
+    $pdf->SetAutoPageBreak(false);
+    $pdf->SetFont('msungstdlight', '', 30);
+    
+    $pageWidth = 595; // A4 纵向宽度 (pt)
+    
+    foreach ($athletes as $athlete) {
+        $pdf->AddPage();
+        
+        $weight = $program->convertWeight();
+        $rank = match((int)$athlete->rank) {
+            1 => '一', 2 => '二', 3 => '三', default => (string)$athlete->rank
+        };
+        
+        $gender = $athlete->athlete?->gender == 'M' ? '男子' : '女子';
+        $categoryName = $program->competitionCategory->name ?? '';
+        $athleteName = $athlete->athlete?->name ?? '';
+        
+        // 第一行：組別（置中）
+        $firstLineText = '組別：' . $gender . $categoryName;
+        $firstLineWidth = $pdf->GetStringWidth($firstLineText);
+        $firstLineX = ($pageWidth - $firstLineWidth) / 2;
+        
+        $pdf->SetXY($firstLineX, 200);
+        $pdf->Cell($firstLineWidth, 40, $firstLineText, 0, 0, 'L');
+        
+        // 下面三行跟隨第一行的 X 座標
+        $followX = $firstLineX;
+        
+        // 第二行：級別
+        $secondLineText = '級別：' . strtoupper($weight);
+        $pdf->SetXY($followX, 280);
+        $pdf->Cell($pdf->GetStringWidth($secondLineText), 40, $secondLineText, 0, 0, 'L');
+        
+        // 第三行：姓名
+        $thirdLineText = '姓名：' . $athleteName;
+        $pdf->SetXY($followX, 360);
+        $pdf->Cell($pdf->GetStringWidth($thirdLineText), 40, $thirdLineText, 0, 0, 'L');
+        
+        // 第四行：名次
+        $fourthLineText = '名次：第' . $rank . '名';
+        $pdf->SetXY($followX, 440);
+        $pdf->Cell($pdf->GetStringWidth($fourthLineText), 40, $fourthLineText, 0, 0, 'L');
+    }
+    
+    $filename = 'certificates_' . $program->id . '_' . date('YmdHis') . '.pdf';
+    $pdf->Output($filename, 'I');
+    exit;
+}
+    private function smartTruncate($name, $maxLength = 21)
+    {
+        if (mb_strlen($name) <= $maxLength) {
+            return $name;
+        }
+        
+        // 葡文名字通常格式：名 姓
+        $parts = explode(' ', $name);
+        
+        if (count($parts) >= 2) {
+            // 先嘗試：前面的部分都只保留首字母，最後一個部分保持完整
+            $shortName = '';
+            for ($i = 0; $i < count($parts) - 1; $i++) {
+                if (!empty($parts[$i])) {
+                    $shortName .= mb_substr($parts[$i], 0, 1) . '.';
+                }
+            }
+            
+            // 加上完整的姓氏
+            $shortName .= ' ' . end($parts);
+            
+            if (mb_strlen($shortName) <= $maxLength) {
+                return $shortName;
+            }
+            
+            // 如果還是太長，使用最簡格式：第一個名字的首字母 + 完整姓氏
+            $firstName = mb_substr($parts[0], 0, 1) . '.';
+            $lastName = end($parts);
+            $simplestName = $firstName . ' ' . $lastName;
+            
+            if (mb_strlen($simplestName) <= $maxLength) {
+                return $simplestName;
+            }
+        }
+        
+        // 如果還是太長，直接截斷
+        return mb_substr($name, 0, $maxLength - 3) . '...';
     }
 }

@@ -31,6 +31,7 @@ class CompetitionController extends Controller
             ->where('mat', $request->mat)
             ->where('section', $request->section)
             ->where('queue', '!=', 0)
+            ->where('status', 0)
             ->orderBy('queue')
             ->get();
 

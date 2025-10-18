@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::post('manage/competition/{competition}/program/{program}/draw', [App\Http\Controllers\Manage\ProgramController::class, 'draw'])->name('manage.competition.program.draw');
     Route::post('manage/competition/{competition}/program/{program}/reset-draw', [App\Http\Controllers\Manage\ProgramController::class, 'resetDraw'])->name('manage.competition.program.reset');
     Route::get('manage/competition/{competition}/program/{program}/generate-online-table', [App\Http\Controllers\Manage\ProgramController::class, 'generateOnlineTable'])->name('manage.competition.program.generateOnlineTable');
+    Route::get('manage/competition/{competition}/program/{program}/generate-cert', [App\Http\Controllers\Manage\ProgramController::class, 'generateCert'])->name('manage.competition.program.generateCert');
     Route::get('manage/competition/{competition}/program/{program}/athletes', [App\Http\Controllers\Manage\ProgramController::class, 'athletes'])->name('manage.competition.program.athletes');
     Route::post('manage/competition/{competition}/program/update-sequence', [App\Http\Controllers\Manage\ProgramController::class, 'updateSequence'])->name('manage.competition.program.sequence.update');
     Route::post('manage/competition/{competition}/program/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.program.lock');

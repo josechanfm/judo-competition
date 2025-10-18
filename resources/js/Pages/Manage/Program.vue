@@ -75,7 +75,9 @@
           <div class="col-span-2 flex flex-col gap-6">
             <a-card class="w-full">
               <template #title
-                ><div class="font-normal">Competition result</div></template
+                ><div class="flex justify-between"><div class="font-normal">Competition result</div>
+                <a class="text-blue-500" target="_blank" :href="route('manage.competition.program.generateCert', {'competition':competition.id ,'program':program.id})">下載證書</a>
+                </div></template
               >
             </a-card>
             <a-card class="w-full" v-if="program.competition_system">

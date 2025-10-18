@@ -13,7 +13,7 @@ class CompetitionResultService
     private $logo_primary = 'images/mja_logo.png';
     private $title_sub = null;
     private $logo_secondary;
-    private $titleFont = 'NotoSerifTC';
+    private $titleFont = 'cid0ct';
     private $blankMedals = false; // 新增參數控制是否空白
 
     public function __construct()
@@ -63,14 +63,14 @@ class CompetitionResultService
 
         // 顯示分類標題
         $this->pdf->SetY($currentY);
-        $this->pdf->SetFont('NotoSerifTC', 'B', 16);
+        $this->pdf->SetFont('cid0ct', 'B', 16);
         $this->pdf->Cell(0, 10, $category->name, 0, 1, 'C');
         $currentY = $this->pdf->GetY() + 5;
 
         // 顯示男子項目
         if ($malePrograms->count() > 0) {
             $this->pdf->SetY($currentY);
-            $this->pdf->SetFont('NotoSerifTC', 'B', 14);
+            $this->pdf->SetFont('cid0ct', 'B', 14);
             $this->pdf->Cell(0, 8, '男子組', 0, 1, 'L');
             $currentY = $this->pdf->GetY();
             
@@ -93,13 +93,13 @@ class CompetitionResultService
                 
                 // 重新添加分類標題
                 $this->pdf->SetY($currentY);
-                $this->pdf->SetFont('NotoSerifTC', 'B', 16);
+                $this->pdf->SetFont('cid0ct', 'B', 16);
                 $this->pdf->Cell(0, 10, $category->name . ' (續)', 0, 1, 'C');
                 $currentY = $this->pdf->GetY() + 5;
             }
             
             $this->pdf->SetY($currentY);
-            $this->pdf->SetFont('NotoSerifTC', 'B', 14);
+            $this->pdf->SetFont('cid0ct', 'B', 14);
             $this->pdf->Cell(0, 8, '女子組', 0, 1, 'L');
             $currentY = $this->pdf->GetY();
             
@@ -145,12 +145,12 @@ class CompetitionResultService
                 
                 // 重新添加分類標題和組別標題
                 $this->pdf->SetY($currentY);
-                $this->pdf->SetFont('NotoSerifTC', 'B', 16);
+                $this->pdf->SetFont('cid0ct', 'B', 16);
                 $this->pdf->Cell(0, 10, $category->name . ' (續)', 0, 1, 'C');
                 $currentY = $this->pdf->GetY() + 5;
                 
                 $this->pdf->SetY($currentY);
-                $this->pdf->SetFont('NotoSerifTC', 'B', 14);
+                $this->pdf->SetFont('cid0ct', 'B', 14);
                 $this->pdf->Cell(0, 8, $groupName . ' (續)', 0, 1, 'L');
                 $currentY = $this->pdf->GetY();
                 
@@ -171,7 +171,7 @@ class CompetitionResultService
         $this->pdf->SetX(15);
         $this->pdf->SetFillColor(200, 200, 200);
         $this->pdf->SetTextColor(0, 0, 0);
-        $this->pdf->SetFont('NotoSerifTC', 'B', 10);
+        $this->pdf->SetFont('cid0ct', 'B', 10);
 
         foreach ($headers as $key => $header) {
             $this->pdf->Cell($columnWidths[$key], $height, $header, 1, 0, 'C', true);
@@ -189,7 +189,7 @@ class CompetitionResultService
         $this->pdf->SetX(15);
         
         // 第一格：公斤級 - 加大字體
-        $this->pdf->SetFont('NotoSerifTC', 'B', 12); // 從 10 加大到 12
+        $this->pdf->SetFont('cid0ct', 'B', 12); // 從 10 加大到 12
         $this->pdf->Cell($columnWidths[0], $rowHeight, $weight, 1, 0, 'C');
         
         // 金牌格
@@ -228,17 +228,17 @@ class CompetitionResultService
                 
                 // 選手姓名 - 增大字體，減少間隙
                 $this->pdf->SetXY($startX, $startY + $startOffset);
-                $this->pdf->SetFont('NotoSerifTC', 'B', 10); // 增大字體
+                $this->pdf->SetFont('cid0ct', 'B', 10); // 增大字體
                 $this->pdf->Cell($width, $lineHeight, $this->truncateText($athlete->name, 10), 0, 0, 'C');
                 
                 // 外文姓名 - 增大字體，減少間隙
                 $this->pdf->SetXY($startX, $startY + $startOffset + $lineHeight);
-                $this->pdf->SetFont('NotoSerifTC', '', 9); // 增大字體
+                $this->pdf->SetFont('cid0ct', '', 9); // 增大字體
                 $this->pdf->Cell($width, $lineHeight, $this->smartTruncate($athlete->name_secondary ?? '', 15), 0, 0, 'C');
                 
                 // 隊伍 - 增大字體，減少間隙
                 $this->pdf->SetXY($startX, $startY + $startOffset + ($lineHeight * 2));
-                $this->pdf->SetFont('NotoSerifTC', '', 9); // 增大字體
+                $this->pdf->SetFont('cid0ct', '', 9); // 增大字體
                 $this->pdf->Cell($width, $lineHeight, $this->truncateText($athlete->team->name ?? '', 12), 0, 0, 'C');
                 
                 // 恢復到正確位置繼續下一格
@@ -250,7 +250,7 @@ class CompetitionResultService
                 
                 // 顯示"空缺"文字
                 $this->pdf->SetTextColor(100, 100, 100);
-                $this->pdf->SetFont('NotoSerifTC', '', 9); // 增大字體
+                $this->pdf->SetFont('cid0ct', '', 9); // 增大字體
                 
                 // 在灰色格子上顯示文字
                 $startX = $this->pdf->GetX() - $width;

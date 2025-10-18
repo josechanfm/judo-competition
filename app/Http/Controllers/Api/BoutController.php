@@ -26,7 +26,6 @@ class BoutController extends Controller
             ->where('mat', $request->mat)
             ->where('section', $request->section)
             ->where('queue', $request->queue)
-            ->where('status' ,0)
             ->first();
 
         if (!$bout) {

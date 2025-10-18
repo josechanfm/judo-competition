@@ -133,6 +133,7 @@ class TournamentQuarterService
         }
         
         // 處理 sequences 參數
+        
         if (empty($sequences) && isset($this->sequences)) {
             $sequences = $this->sequences;
         } else {
@@ -477,31 +478,37 @@ class TournamentQuarterService
             $this->pdf->Cell($size * 2, $size * 2, $num, 0, 1, 'C', 0, '', 0);
         }
     }
+
     private function resultBox($winnerList)
     {
         $x = $this->resultXY[0];
         $y = $this->resultXY[1];
-        // $x=145;
-        // $y=$this->startY+($this->boxH+$this->boxGap)* ($this->playerCount/2)-$this->boxH;
         $w = 45;
-        $h = 30;
+        $h = 35;
         $r = 3.50;
+        
+        // 繪製結果框
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult2, $this->resultColor2);
+        
         $x1 = $x;
         $y1 = $y;
-        $h1 = 6;
+        $h1 = 7;
+        
         for ($i = 0; $i < count($winnerList); $i++) {
-            $this->pdf->setXY($x1, $y1 + 5);
+            // 排名部分
+            $this->pdf->setXY($x1, $y1 + 6);
             $this->pdf->SetFont($this->generalFont, 'B', 10);
             $this->pdf->Cell(0, 0, $winnerList[$i]['award'] . ':', 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x1 + 15, $y1 + 5);
+            
+            // 運動員名字部分（置左對齊）
+            $this->pdf->setXY($x1 + 5, $y1 + 5);
             $this->pdf->SetFont($this->playerFont, 'B', 10);
             $this->pdf->Cell($w - 15, 0, $winnerList[$i]['name'], 0, 1, 'L', 0, '', 0);
+            
             $y1 += $h1;
         }
 
-        //$this->pdf->Cell($w, $h-5, $winnerList[0]['award'], 1, 1, 'L', 0, '', 0);
-
+        // 標題框
         $x = $x + 5;
         $y = $y - 5;
         $w = $w - 10;
@@ -509,7 +516,7 @@ class TournamentQuarterService
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
         $this->pdf->setXY($x, $y);
         $this->pdf->SetFont($this->generalFont, 'B', 14);
-        $this->pdf->Cell(35, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
+        $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
     }
 
     private function smartTruncate($name, $maxLength = 21)

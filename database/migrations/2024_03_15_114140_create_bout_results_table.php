@@ -19,10 +19,12 @@ return new class extends Migration
 
             $table->unsignedTinyInteger('w_ippon')->default(0);
             $table->unsignedTinyInteger('w_wazari')->default(0);
+            $table->unsignedTinyInteger('w_yuko')->default(0);
             $table->unsignedTinyInteger('w_shido')->default(0);
 
             $table->unsignedTinyInteger('b_ippon')->default(0);
             $table->unsignedTinyInteger('b_wazari')->default(0);
+            $table->unsignedTinyInteger('b_yuko')->default(0);
             $table->unsignedTinyInteger('b_shido')->default(0);
 
             $table->unsignedTinyInteger('w_score')->default(0);

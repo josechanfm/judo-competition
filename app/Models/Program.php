@@ -62,7 +62,7 @@ class Program extends Model
 
     public function athletes()
     {
-        return $this->belongsToMany(Athlete::class, 'program_athlete', 'program_id', 'athlete_id');
+        return $this->belongsToMany(Athlete::class, 'program_athlete', 'program_id', 'athlete_id')->withPivot('id');
     }
 
     public function competitionCategory()

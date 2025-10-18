@@ -240,18 +240,19 @@ class AthleteController extends Controller
     public function Weights(Request $request, Competition $competition)
     {
         $competition->categories;
-        // dd($competition->programAthletes);
+        // dd($competition->programAthletes[0]);
         return Inertia::render('Manage/Weights', [
-            'programs_athletes' => $competition->programAthletes,
+            'programs'=>$competition->programs()->with('programAthletes')->get(),
             'competition' => $competition,
         ]);
     }
+
     public function weightChecked(Request $request, Competition $competition, ProgramAthlete $programAthlete)
     {
         // dd('aaa');
         $programAthlete->weight = $request->weight;
 
-        $programAthlete->is_weight_passed = 1;
+        $programAthlete->is_weight_passed = $request->is_weight_passed;
 
         $programAthlete->save();
 

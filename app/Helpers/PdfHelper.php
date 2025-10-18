@@ -213,59 +213,206 @@ class PdfHelper
             $this->pdf->Cell($maxWidth, 8, $programText, 0, 0, 'C'); // 水平置中
         }
     }
-    public function header2($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $extra = null)
+    public function header2($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
     {
-        $x = 10;
-        $y = 5;
-        $w = 180;
-        $h = 14;
-        $r = 5;
+        $w = 190;
+        $h = 18;
+        $r = 3;
+        
+        // 計算置中的 x 座標 (假設頁面寬度為 210mm A4)
+        $pageWidth = 210;
+        $centeredX = ($pageWidth - $w) / 2;
+        
+        // 對於 mPDF，使用不同的方法來限制繪圖區域
         if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+            // mPDF 的方法：先繪製圓角矩形背景，再繪製邊框
+            
+            // 創建更自然的漸變背景 - 直接繪製在整個圓角矩形區域
+            $steps = 50;
+            $silver = [220, 220, 220];
+            $white = [255, 255, 255];
+            $lightSilver = [240, 240, 240];
+            
+            // 繪製漸變背景 - 使用整個區域，不留邊距
+            for ($i = 0; $i < $steps; $i++) {
+                $stepX = $centeredX + ($w / $steps) * $i;
+                $stepWidth = $w / $steps;
+                
+                // 計算漸變顏色
+                if ($i < $steps * 0.3) {
+                    $ratio = $i / ($steps * 0.3);
+                    $rColor = $silver[0] + ($lightSilver[0] - $silver[0]) * $ratio;
+                    $gColor = $silver[1] + ($lightSilver[1] - $silver[1]) * $ratio;
+                    $bColor = $silver[2] + ($lightSilver[2] - $silver[2]) * $ratio;
+                } elseif ($i < $steps * 0.7) {
+                    $midRatio = ($i - $steps * 0.3) / ($steps * 0.4);
+                    if ($midRatio < 0.5) {
+                        $ratio = $midRatio * 2;
+                        $rColor = $lightSilver[0] + ($white[0] - $lightSilver[0]) * $ratio;
+                        $gColor = $lightSilver[1] + ($white[1] - $lightSilver[1]) * $ratio;
+                        $bColor = $lightSilver[2] + ($white[2] - $lightSilver[2]) * $ratio;
+                    } else {
+                        $ratio = ($midRatio - 0.5) * 2;
+                        $rColor = $white[0] - ($white[0] - $lightSilver[0]) * $ratio;
+                        $gColor = $white[1] - ($white[1] - $lightSilver[1]) * $ratio;
+                        $bColor = $white[2] - ($white[2] - $lightSilver[2]) * $ratio;
+                    }
+                } else {
+                    $ratio = ($i - $steps * 0.7) / ($steps * 0.3);
+                    $rColor = $lightSilver[0] - ($lightSilver[0] - $silver[0]) * $ratio;
+                    $gColor = $lightSilver[1] - ($lightSilver[1] - $silver[1]) * $ratio;
+                    $bColor = $lightSilver[2] - ($lightSilver[2] - $silver[2]) * $ratio;
+                }
+                
+                // 繪製漸變矩形 - 使用整個高度和寬度
+                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                $this->pdf->Rect($stepX, $y, $stepWidth, $h, 'F');
+            }
+            
+            // 最後繪製圓角邊框
             $this->pdf->SetLineWidth(0.2);
-            $this->pdf->SetFillColor($this->boxColor[0], $this->boxColor[1], $this->boxColor[2]);
-            $this->pdf->RoundedRect($x, $y, $w, $h, $r, 'DF');
+            $this->pdf->SetDrawColor(180, 180, 180);
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'D');
+            
         } else {
-            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->boxLine, $this->boxColor);
+            // TCPDF 的原有邏輯
+            $this->pdf->StartTransform();
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'CNZ');
+            
+            // 漸變背景邏輯...
+            $steps = 50;
+            $silver = [220, 220, 220];
+            $white = [255, 255, 255];
+            $lightSilver = [240, 240, 240];
+            
+            for ($i = 0; $i < $steps; $i++) {
+                $stepX = $centeredX + ($w / $steps) * $i;
+                $stepWidth = $w / $steps;
+                
+                if ($i < $steps * 0.3) {
+                    $ratio = $i / ($steps * 0.3);
+                    $rColor = $silver[0] + ($lightSilver[0] - $silver[0]) * $ratio;
+                    $gColor = $silver[1] + ($lightSilver[1] - $silver[1]) * $ratio;
+                    $bColor = $silver[2] + ($lightSilver[2] - $silver[2]) * $ratio;
+                } elseif ($i < $steps * 0.7) {
+                    $midRatio = ($i - $steps * 0.3) / ($steps * 0.4);
+                    if ($midRatio < 0.5) {
+                        $ratio = $midRatio * 2;
+                        $rColor = $lightSilver[0] + ($white[0] - $lightSilver[0]) * $ratio;
+                        $gColor = $lightSilver[1] + ($white[1] - $lightSilver[1]) * $ratio;
+                        $bColor = $lightSilver[2] + ($white[2] - $lightSilver[2]) * $ratio;
+                    } else {
+                        $ratio = ($midRatio - 0.5) * 2;
+                        $rColor = $white[0] - ($white[0] - $lightSilver[0]) * $ratio;
+                        $gColor = $white[1] - ($white[1] - $lightSilver[1]) * $ratio;
+                        $bColor = $white[2] - ($white[2] - $lightSilver[2]) * $ratio;
+                    }
+                } else {
+                    $ratio = ($i - $steps * 0.7) / ($steps * 0.3);
+                    $rColor = $lightSilver[0] - ($lightSilver[0] - $silver[0]) * $ratio;
+                    $gColor = $lightSilver[1] - ($lightSilver[1] - $silver[1]) * $ratio;
+                    $bColor = $lightSilver[2] - ($lightSilver[2] - $silver[2]) * $ratio;
+                }
+                
+                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                $this->pdf->Rect($stepX, $y, $stepWidth, $h, 'F');
+            }
+            
+            $this->pdf->StopTransform();
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'D', $this->boxLine, [180, 180, 180]);
         }
+        
+        // 圖片放在左邊
+        $leftMargin = 5;
+        $logoSpacing = 2;
+
         if ($logo_primary) {
-            $this->pdf->image($logo_primary, $x + 2, $y + 2, 10, 10, 'png');
+            $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 2, 14, 14, 'png');
         }
         if ($logo_secondary) {
-            $this->pdf->image($logo_secondary, $x + $w - 13, $y + 2, 10, 10, 'png');
+            $primaryWidth = $logo_primary ? 14 + $logoSpacing : 0;
+            $this->pdf->image($logo_secondary, $centeredX + $leftMargin + $primaryWidth, $y + 2, 14, 14, 'png');
         }
+        
+        // 先計算右側內容的寬度，以便確定分隔線位置
+        $rightContentWidth = 0;
+        if ($ellipseData !== null) {
+            $ellipseTitle = $ellipseData["title"];
+            $ellipseTitleSub = $ellipseData["title_sub"];
 
-        $x = 45;
-        $w = 115;
-        $this->pdf->setFont('times', 'B', 18);
-        $this->pdf->setXY($x, $y);
-        $this->pdf->Cell($w, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
-        $this->pdf->setFont('times', 'B', 11);
-        $this->pdf->setXY($x, $y + ($h / 1.6));
-        $this->pdf->Cell($w, $h - ($h / 1.6), $title_sub, 0, 0, 'C', 0, '', 0);
-        if ($extra) {
-            $x = 160;
-            $w = 43;
-            $h = 20;
-            $r = 9;
-            if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-                $this->pdf->SetLineWidth(0.2);
-                $this->pdf->SetFillColor($this->boxColor2[0], $this->boxColor2[1], $this->boxColor2[2]);
-                $this->pdf->RoundedRect($x, $y, $w, $h, $r, 'DF', $this->boxLine, array(197, 192, 139));
-                $this->pdf->setFont('courier', 'B', 28);
-                $this->pdf->setXY($x, $y + 6);
-                $this->pdf->Cell($w, 0, $extra['title'], 0, 0, 'C', 0, '', 0);
-                $this->pdf->setFont('times', '', 12);
-                $this->pdf->setXY($x, $y + 15);
-                $this->pdf->Cell($w, 0, $extra['title_sub'], 0, 0, 'C', 0, '', 0);
-            } else {
-                $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->boxLine, array(197, 192, 139));
-                $this->pdf->setFont('courier', 'B', 35);
-                $this->pdf->setXY($x, $y);
-                $this->pdf->Cell($w, 0, $extra['title'], 0, 0, 'C', 0, '', 0);
-                $this->pdf->setFont('times', 'B', 16);
-                $this->pdf->setXY($x, $y + 12);
-                $this->pdf->Cell($w, 0, $extra['title_sub'], 0, 0, 'C', 0, '', 0);
-            }
+            $this->pdf->setFont($titleFont, 'B', 8);
+            $weightWidth = $this->pdf->GetStringWidth($ellipseTitle);
+            
+            $this->pdf->setFont($titleFont, 'B', 8);
+            $programWidth = $this->pdf->GetStringWidth($ellipseTitleSub);
+            
+            $rightContentWidth = max($weightWidth, $programWidth) + 15;
+        }
+        
+        // 繪製分隔線 - 在標題和右側內容之間
+        $lineMargin = 10;
+        $lineX = $centeredX + $w - $rightContentWidth - $lineMargin;
+        $lineTopMargin = 3;
+        $lineY1 = $y + $lineTopMargin;
+        $lineY2 = $y + $h - $lineTopMargin;
+        
+        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+            $this->pdf->SetDrawColor(150, 150, 150);
+            $this->pdf->SetLineWidth(0.1);
+            $this->pdf->Line($lineX, $lineY1, $lineX, $lineY2);
+        } else {
+            $this->pdf->SetDrawColor(150, 150, 150);
+            $this->pdf->SetLineWidth(0.1);
+            $this->pdf->Line($lineX, $lineY1, $lineX, $lineY2);
+        }
+        
+        // 標題放在中間（但限制寬度避免與右側內容重疊）
+        $titleWidth = $lineX - $centeredX - 10;
+        
+        if($title_sub == null){
+            $this->pdf->setFont($titleFont, 'B', 24);
+            $this->pdf->setXY($centeredX, $y);
+            $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
+        } else {
+            $this->pdf->setFont($titleFont, 'B', 20);
+            $this->pdf->setXY($centeredX, $y);
+            $this->pdf->Cell($titleWidth, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
+            $this->pdf->setFont($titleFont, 'B', 13);
+            $this->pdf->setXY($centeredX, $y + ($h / 1.6));
+            $this->pdf->Cell($titleWidth, $h - ($h / 1.6), $title_sub, 0, 0, 'C', 0, '', 0);
+        }
+        
+        // 其他內容（橢圓數據）放在右邊並垂直置中
+        if ($ellipseData !== null) {
+            $this->pdf->SetTextColor(0, 0, 0);
+            
+            $ellipseTitle = $ellipseData["title"];
+            $ellipseTitleSub = $ellipseData["title_sub"];
+        
+            // 計算文字寬度
+            $this->pdf->setFont($titleFont, 'B', 11);
+            $weightWidth = $this->pdf->GetStringWidth($ellipseTitle);
+            
+            $this->pdf->setFont($titleFont, 'B', 11);
+            $programWidth = $this->pdf->GetStringWidth($ellipseTitleSub);
+            
+            $maxWidth = max($weightWidth, $programWidth);
+            
+            // 右側起始位置
+            $rightStartX = $lineX + $lineMargin;
+            
+            // 計算垂直置中的 Y 位置
+            $totalTextHeight = 16;
+            $startY = $y + ($h - $totalTextHeight) / 2;
+            
+            // 繪製右側內容
+            $this->pdf->setFont($titleFont, 'B', 11);
+            $this->pdf->SetXY($rightStartX, $startY);
+            $this->pdf->Cell($maxWidth, 8, $ellipseTitle, 0, 1, 'C');
+            
+            $this->pdf->setFont($titleFont, 'B', 11);
+            $this->pdf->SetXY($rightStartX, $startY + 8);
+            $this->pdf->Cell($maxWidth, 8, $ellipseTitleSub, 0, 0, 'C');
         }
     }
     public function header3($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)

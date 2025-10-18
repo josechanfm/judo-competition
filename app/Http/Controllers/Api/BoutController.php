@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bout;
 use App\Models\Competition;
 use App\Models\BoutResult;
+use App\Models\ProgramAthlete;
 use Illuminate\Http\Request;
 
 class BoutController extends Controller
@@ -25,6 +26,7 @@ class BoutController extends Controller
             ->where('mat', $request->mat)
             ->where('section', $request->section)
             ->where('queue', $request->queue)
+            ->where('status' ,0)
             ->first();
 
         if (!$bout) {
@@ -165,6 +167,54 @@ class BoutController extends Controller
             $this->updateNextBoutFighter($bout, $winner);
         }
 
+
+        if ($bout->competition_system === 'kos' && in_array($bout->turn, [1, 2])) {
+
+            $winnerFighterId = $winner === $bout->white ? $bout->white : $bout->blue;
+            $loserFighterId = $winner === $bout->white ? $bout->blue : $bout->white;
+
+            // 確保有選手ID
+            if (!$winnerFighterId || !$loserFighterId) {
+                return;
+            }
+
+            // 查找對應的 program_athlete 記錄
+            $winnerProgramAthlete = ProgramAthlete::where('id', $winnerFighterId)->first();
+            
+            $loserProgramAthlete = ProgramAthlete::where('id', $loserFighterId)->first();
+            
+            if (!$winnerProgramAthlete || !$loserProgramAthlete) {
+                return;
+            }
+
+            // 根據 turn 設置排名
+            if ($bout->turn == 2) {
+                // 季軍賽：負方為第3名
+                $loserProgramAthlete->update(['rank' => 3]);
+                
+                \Log::info('KOS 季軍排名設置', [
+                    'bout_id' => $bout->id,
+                    'turn' => $bout->turn,
+                    'loser_athlete_id' => $loserFighterId,
+                    'rank' => 3
+                ]);
+                
+            } elseif ($bout->turn == 1) {
+                // 冠軍賽：勝方為第1名，負方為第2名
+                $winnerProgramAthlete->update(['rank' => 1]);
+                $loserProgramAthlete->update(['rank' => 2]);
+                
+                \Log::info('KOS 冠亞軍排名設置', [
+                    'bout_id' => $bout->id,
+                    'turn' => $bout->turn,
+                    'winner_athlete_id' => $winnerFighterId,
+                    'winner_rank' => 1,
+                    'loser_athlete_id' => $loserFighterId,
+                    'loser_rank' => 2
+                ]);
+            }
+        }
+
         return response()->json([
             'success' => true,
             'message' => '比賽結果保存成功',
@@ -214,6 +264,57 @@ class BoutController extends Controller
                 'next_bout_id' => $nextBout->id,
                 'next_sequence' => $nextBout->in_program_sequence,
                 'updated_fields' => array_keys($updateData)
+            ]);
+        }
+    }
+
+    public function updateKOSRanking(Bout $bout, string $winner)
+    {
+        $winnerFighterId = $winner === $bout->white ? $bout->white : $bout->blue;
+        $loserFighterId = $winner === $bout->white ? $bout->blue : $bout->white;
+        
+        // 確保有選手ID
+        if (!$winnerFighterId || !$loserFighterId) {
+            return;
+        }
+        
+        // 查找對應的 program_athlete 記錄
+        $winnerProgramAthlete = ProgramAthlete::where('program_id', $bout->program_id)
+            ->where('athlete_id', $winnerFighterId)
+            ->first();
+        
+        $loserProgramAthlete = ProgramAthlete::where('program_id', $bout->program_id)
+            ->where('athlete_id', $loserFighterId)
+            ->first();
+        
+        if (!$winnerProgramAthlete || !$loserProgramAthlete) {
+            return;
+        }
+        
+        // 根據 turn 設置排名
+        if ($bout->turn == 2) {
+            // 季軍賽：負方為第3名
+            $loserProgramAthlete->update(['rank' => 3]);
+            
+            \Log::info('KOS 季軍排名設置', [
+                'bout_id' => $bout->id,
+                'turn' => $bout->turn,
+                'loser_athlete_id' => $loserFighterId,
+                'rank' => 3
+            ]);
+            
+        } elseif ($bout->turn == 1) {
+            // 冠軍賽：勝方為第1名，負方為第2名
+            $winnerProgramAthlete->update(['rank' => 1]);
+            $loserProgramAthlete->update(['rank' => 2]);
+            
+            \Log::info('KOS 冠亞軍排名設置', [
+                'bout_id' => $bout->id,
+                'turn' => $bout->turn,
+                'winner_athlete_id' => $winnerFighterId,
+                'winner_rank' => 1,
+                'loser_athlete_id' => $loserFighterId,
+                'loser_rank' => 2
             ]);
         }
     }

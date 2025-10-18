@@ -21,7 +21,7 @@
             </a-form-item>
             <a-form-item label="Program" name="program">
               <a-select
-                :options="programs"
+                :options="select_programs"
                 v-model:value="programId"
                 :fieldNames="{ value: 'id', label: 'weight_code' }"
                 @change="onChangeProgram"
@@ -29,11 +29,11 @@
             </a-form-item>
           </a-form>
         </div>
-        <div v-if="program.athletes != null">
+        <div v-if="program.program_athletes != null">
           <a-button
             v-if="
-              this.program.athletes.find(
-                (x) => x.pivot.confirm == 0 && x.pivot.is_weight_passed == null
+              this.program.program_athletes.find(
+                (x) => x.confirm == 0 && x.is_weight_passed == null
               ) != undefined
             "
             type="link"
@@ -43,7 +43,7 @@
 
           <a-button
             v-else-if="
-              this.program.athletes.find((x) => x.pivot.confirm == 1) == undefined
+              this.program.program_athletes.find((x) => x.confirm == 1) == undefined
             "
             type="primary"
             class="bg-blue-500"
@@ -56,20 +56,25 @@
             <a-button type="primary" @click="cancelLockWeighIn">Cancel Lock</a-button>
           </div>
         </div>
-        <a-table :dataSource="program.athletes" :columns="columns">
+        <a-table :dataSource="program.program_athletes" :columns="columns">
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 'result'">
               <CheckCircleOutlined
-                v-if="record.pivot.is_weight_passed == 1"
+                v-if="record.is_weight_passed == 1"
                 class="!text-green-800 dark:!text-green-400"
               />
               <CloseCircleOutlined
-                v-else-if="record.pivot.is_weight_passed == 0"
+                v-else-if="record.is_weight_passed == 0"
                 class="!text-red-800 dark:!text-red-400"
               />
               <QuestionCircleOutlined v-else />
             </template>
-            <template v-if="column.key === 'program'">
+            <template v-if="column.key === 'athlete'">
+              <span>
+                {{ record.athlete.name }}
+              </span>
+            </template>
+            <template v-else-if="column.key === 'program'">
               <span>
                 {{ program.weight_code }}
                 {{ program.competition_category.name }}
@@ -79,10 +84,10 @@
               <div class="flex gap-3 justify-end">
                 <div
                   class="font-bold flex gap-1 items-center"
-                  v-if="!record.pivot.confirm"
+                  v-if="!record.confirm"
                 >
                   <a-input-number
-                    v-model:value="record.pivot.weight"
+                    v-model:value="record.weight"
                     :default-value="0"
                     name="weight"
                     :min="0"
@@ -92,15 +97,25 @@
                   ></a-input-number
                   >kg
                 </div>
-                <span v-else class="font-bold"> {{ record.pivot.weight }} kg </span>
+                <span v-else class="font-bold"> {{ record.weight }} kg </span>
                 <a-button
-                  @click="passWeight(record)"
+                  @click="passWeight(record,1)"
                   name="pass"
                   shape="circle"
-                  v-if="!record.pivot.confirm"
+                  v-if="!record.confirm"
                 >
                   <template #icon>
                     <CheckOutlined />
+                  </template>
+                </a-button>
+                <a-button
+                  @click="passWeight(record,0)"
+                  name="pass"
+                  shape="circle"
+                  v-if="!record.confirm"
+                >
+                  <template #icon>
+                    <CloseOutlined />
                   </template>
                 </a-button>
               </div>
@@ -159,7 +174,7 @@ export default {
     CloseOutlined,
     QuestionCircleOutlined,
   },
-  props: ["competition", "programs_athletes"],
+  props: ["competition", "programs"],
   // programs: {
   //   type: Object,
   //   required: true,
@@ -168,14 +183,14 @@ export default {
     return {
       categoryId: null,
       programId: null,
-      programs: [],
+      select_programs:[],
       program: {},
       athletes: [],
       columns: [
         {
-          key: "name_display",
+          key: "athlete",
           title: "Athletes",
-          dataIndex: "name_display",
+          dataIndex: "athlete",
         },
         {
           key: "result",
@@ -198,29 +213,29 @@ export default {
   },
   methods: {
     onChangeCategory(event) {
-      this.programs = this.programs_athletes.filter(
+      this.select_programs = this.programs.filter(
         (p) => p.competition_category_id == event.target.value
       );
       this.programId = null;
       this.program = [];
-      console.log(event.target.value);
+      console.log(this.programs);
     },
     onChangeProgram(event) {
-      this.program = this.programs_athletes.find((p) => p.id == event);
-      console.log(this.program);
+      this.program = this.programs.find((p)=> p.id == event)
     },
 
-    passWeight(record) {
-      if (record.pivot.weight === null) {
+    passWeight(record,is_weight_passed) {
+      if (record.weight === null) {
         this.$message.error("Weight not input");
         return;
       }
 
       this.$inertia.post(
         route("manage.competition.programAthlete.weightChecked", {
-          weight: record.pivot.weight,
+          weight: record.weight,
           competition: this.competition.id,
-          programAthlete: record.pivot.id,
+          programAthlete: record.id,
+          is_weight_passed: is_weight_passed,
         }),
         null,
         {

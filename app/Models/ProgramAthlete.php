@@ -9,7 +9,14 @@ class ProgramAthlete extends Model
 {
     protected $fillable = [
         'program_id',
-        'athlete_id'
+        'athlete_id',
+        'seed',
+        'seat',
+        'weight',
+        'is_weight_passed',
+        'rank',
+        'score',
+        'confirm'
     ];
     use HasFactory;
 

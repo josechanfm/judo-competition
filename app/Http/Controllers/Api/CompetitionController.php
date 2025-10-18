@@ -40,9 +40,11 @@ class CompetitionController extends Controller
                 'queue' => $bout->queue,
                 'white_player' => [
                     'name_display' => ($bout->white_player->name ?? null) . ($bout->white_player->name_secondary ?? null),
+                    'team' => $bout->white_player->team->name ?? null,
                 ],
                 'blue_player' => [
                     'name_display' => ($bout->blue_player->name ?? null) . ($bout->blue_player->name_secondary ?? null),
+                    'team' => $bout->blue_player->team->name ?? null,
                 ],
                 'category' => $bout->program->competitionCategory->name ?? null,
                 'weight' => $bout->program ? $bout->program->convertWeight() : null,

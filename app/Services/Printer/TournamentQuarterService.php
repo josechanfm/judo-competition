@@ -37,7 +37,7 @@ class TournamentQuarterService
     protected $generalFont = 'times';
 
     protected $arcColor = array(50, 50, 127);
-    protected $boxWhiteColor = array(240, 240, 255);
+    protected $boxWhiteColor = array(255, 255, 255);
     protected $boxBlueColor = array(255, 255, 255);
     protected $circleColor = array(240, 240, 240);
     protected $styleWinnerLine = null;
@@ -182,9 +182,9 @@ class TournamentQuarterService
             $this->round = strlen((string)decbin($this->playerCount / 2));
             
             $helper = new PdfHelper($this->pdf);
-            $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont, $programData['ellipseData']);
+            $helper->header1(12, 4, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont, $programData['ellipseData']);
 
-            $this->mainChart($programData['players'], $this->sequences, $this->winners);
+            $this->mainChart($programData['players'], $this->sequences, $programData['winners']);
             
             if ($this->playerCount > 4 && $this->poolLabel != null) {
                 $this->boxPool($this->poolLabel);
@@ -376,7 +376,7 @@ class TournamentQuarterService
             
             // 先繪製漸變背景
             for ($i = 0; $i < $steps; $i++) {
-                $stepY = $y + ($gradientHeight / $steps) * $i;
+                $stepY = $y + $h + ($gradientHeight / $steps) * $i;
                 $stepHeight = $gradientHeight / $steps;
                 
                 // 從白漸變到銀
@@ -395,17 +395,25 @@ class TournamentQuarterService
             }
             
             // 繪製上半部圓角邊框（只繪製邊框，不填充）
-            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'D', $this->styleBoxLine, $this->boxWhiteColor);
+            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
             
             // 下半部保持原本的藍色
-            $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
+            $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'D', $this->styleBoxLine, $this->boxBlueColor);
             // dd($players['white']);
             $this->pdf->setXY($x, $y - 2.5);
+            if($players['white']['is_weight_passed'] == 0){
+                $this->pdf->setFont($this->generalFont, 'D', $this->circleFontSize);
+            }
             $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['white']['name']) . ' ' . $this->smartTruncate($players['white']['name_secondary']) , 0, 1, 'L', 0, '', 0);
+            $this->pdf->setFont($this->generalFont, '', $this->circleFontSize);
             $this->pdf->setXY($x, $y + 2.5);
             $this->pdf->Cell($this->boxW, $h, $players['white']['team'] , 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x, $y + $h - 2.5);
+            if($players['blue']['is_weight_passed'] == 0){
+                $this->pdf->setFont($this->generalFont, 'D', $this->circleFontSize);
+            }
             $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . ' ' . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
+            $this->pdf->setFont($this->generalFont, '', $this->circleFontSize); 
             $this->pdf->setXY($x, $y + $h + 2.5);
             $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
         } else {
@@ -413,7 +421,7 @@ class TournamentQuarterService
             $this->pdf->setXY($x, $y);
             $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x, $y + 2.5);
-            $this->pdf->Cell($this->boxW, $h, $players['white']['team'] , 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
         }
     }
     
@@ -483,7 +491,7 @@ class TournamentQuarterService
     {
         $x = $this->resultXY[0];
         $y = $this->resultXY[1];
-        $w = 45;
+        $w = 60;
         $h = 35;
         $r = 3.50;
         

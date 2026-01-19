@@ -19,6 +19,7 @@ use Spatie\QueryBuilder\Filters\Filter;
 use Spatie\QueryBuilder\QueryBuilder;
 use App\Services\Printer\AthletePdfService;
 use App\Services\Printer\AthleteWeighInService;
+use App\Services\Printer\TeamAthletesService;
 use Inertia\Inertia;
 
 
@@ -166,7 +167,7 @@ class AthleteController extends Controller
         });
 
         $competition->athletes()->delete();
-
+        $competition->teams()->delete();
         // remove all athletes in programs
 
         $import = new AthletesImport($competition);
@@ -386,6 +387,26 @@ class AthleteController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', '导入失败：' . $e->getMessage());
         }
+    }
+
+    public function generateAllTeamsAthletes(Competition $competition)
+    {
+        $teams = $competition->teams()->with(['athletes' => function ($query) {
+            $query->orderBy('gender');
+        }])->get();
+
+        $TeamAthletesService = new TeamAthletesService();
+
+        $TeamAthletesService->setTitle(
+            $competition->name,
+            $competition->name_secondary
+        );
+        
+        $pdf = $TeamAthletesService->generateAllTeamsAthletes($competition,$teams);
+
+
+        return response($pdf->Output("{$competition->name}運動員名單.pdf", 'I'))
+            ->header('Content-Type', 'application/pdf');
     }
 }
 

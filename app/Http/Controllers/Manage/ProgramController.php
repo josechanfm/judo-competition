@@ -123,7 +123,7 @@ class ProgramController extends Controller
         $competition->programsBouts;
 
         $competition->bouts = $competition->bouts()->where('queue', '!=', 0)->orderBy('queue')->get();
-
+        // dd($competition->bouts);
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
         ]);
@@ -572,18 +572,7 @@ class ProgramController extends Controller
                 $service = new RoundRobbinOption1Service($settings);
         }
         
-        $players = $program?->bouts->map(function ($bout, $index) use ($size) {
-            if ($index > ($size / 2 - 1)) {
-                return;
-            } else {
-                return [
-                    'white' => ['name' => $bout->white_player->name ?? '' , 'name_secondary' => $bout->white_player->name_secondary ?? '', 'team' => $bout->white_player->team->name],
-                    'blue' => ['name' => $bout->blue_player->name ?? '', 'name_secondary' => $bout->blue_player->name_secondary ?? '', 'team' => $bout->blue_player->team->name]
-                ];
-            }
-        })->reject(function ($bout) {
-            return empty($bout);
-        }) ?? null;
+        $players = $this->getPlayersFromProgram($program);
 
         $service->setWinnerLine(false);
 
@@ -598,7 +587,8 @@ class ProgramController extends Controller
             [ 
                 'program' => $program->converGender() . $program->competitionCategory->name ,
                 'athletes_count' => $program->athletes->count(),
-                'weight' => $program->convertWeight()
+                'weight' => $program->convertWeight(),
+                'mat' => $program->mat,
             ]
         );
     }
@@ -616,20 +606,25 @@ class ProgramController extends Controller
         $settings = $this->getSettingsBySystem($firstProgram->competition_system);
         $service = $this->getServiceBySystem($firstProgram->competition_system, $settings);
         
+        $service->setWinnerLine(true);
+        
         $service->setFonts('NotoSerifTC', 'NotoSerifTC', 'NotoSerifTC');
         $service->setTitles($competition->name,null);
         
         // 準備所有 program 的數據
         $allProgramsData = [];
+   
         foreach ($programs as $program) {
+            // dd($this->generateWinnersArray($program));
             $players = $this->getPlayersFromProgram($program);
             $allProgramsData[] = [
                 'players' => $players->toArray(),
                 'winners' => $this->generateWinnersArray($program),
                 'sequences' => $this->generateSequencesArray($program),
-                'winnerList' => $this->generateWinnerList($competition, $program->programAthletes),
+                'winnerList' => $this->generateWinnerList($program),
                 'ellipseData' => [ 
                     'program' => $program->converGender() . $program->competitionCategory->name,
+                    'mat' => $program->mat,
                     'athletes_count' => $program->athletes->count(),
                     'weight' => $program->convertWeight()
                 ],
@@ -659,41 +654,26 @@ class ProgramController extends Controller
     /**
      * 生成序列號
      */
-    public function generateWinnerList($competition, $athletes)
+    public function generateWinnerList($program)
     {
         $winner_list = [];
-        $athlete_count = $athletes->count();
-        
-        // 根據 awarding_method 決定獲獎人數
-        if ($competition->competition_type->awarding_methods == 0) {
-            $award_count = min($athlete_count - 1, 4);
-        } else {
-            $award_count = min($athlete_count, 4);
-        }
-
-        $award_count = max($award_count, 1);
         
         // 使用 Collection 的 filter 方法過濾已確定排名的運動員
-        $ranked_athletes = $athletes->filter(function($athlete) {
-            return isset($athlete->rank) && $athlete->rank > 0;
-        })->sortBy('rank'); // 按最終排名排序
+        $programAthletes = $program->programAthletes()->whereIn('rank',[1,2,3])->where('is_weight_passed',1)->orderBy('rank')->get();
         // 生成獲獎者列表
-        for ($i = 0; $i < $award_count; $i++) {
+        for ($i = 0; $i < count($programAthletes); $i++) {
             $award = $i + 1;
             
             // 如果是第4個且award_count為4，則獎項設為3（並列第三）
-            if ($i == 3 && $award_count == 4) {
+            if ($i == 3 && count($programAthletes) == 4) {
                 $award = 3;
             }
             
             $athlete_name = '';
             $is_determined = false;
             
-            // 檢查是否有對應排名的已確定運動員
-            $ranked_athlete = $ranked_athletes->where('rank', $award)->first();
-            // dd($ranked_athlete);
-            if ($ranked_athlete) {
-                $athlete_name = $this->smartTruncate($ranked_athlete->athlete->name) . $this->smartTruncate($ranked_athlete->athlete->name_secondary);
+            if ($programAthletes[$i]) {
+                $athlete_name = $this->smartTruncate($programAthletes[$i]->athlete->name) . $this->smartTruncate($programAthletes[$i]->athlete->name_secondary);
                 $is_determined = true;
             } else {
                 // 如果該名次尚未確定，顯示待定或空白
@@ -747,8 +727,8 @@ class ProgramController extends Controller
                 return;
             } else {
                 return [
-                    'white' => ['name' => $bout->white_player->name ?? '' , 'name_secondary' => $bout->white_player->name_secondary ?? '', 'team' => $bout->white_player->team->name ?? ''],
-                    'blue' => ['name' => $bout->blue_player->name ?? '', 'name_secondary' => $bout->blue_player->name_secondary ?? '', 'team' => $bout->blue_player->team->name ?? '']
+                    'white' => ['name' => $bout->white_player->name ?? '' , 'name_secondary' => $bout->white_player->name_secondary ?? '', 'team' => $bout->white_player->team->name ?? '' , 'is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? ''],
+                    'blue' => ['name' => $bout->blue_player->name ?? '', 'name_secondary' => $bout->blue_player->name_secondary ?? '', 'team' => $bout->blue_player->team->name ?? '' , 'is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '']
                 ];
             }
         })->reject(function ($bout) {
@@ -835,66 +815,76 @@ class ProgramController extends Controller
     }
 
     public function generateCert(Competition $competition, Program $program)
-{
-    // 获取排名 1-3 的运动员
-    $athletes = $program->programAthletes()
-        ->whereIn('rank', [1, 2, 3])
-        ->orderBy('rank')
-        ->get();
+    {
+        // 获取排名 1-3 的运动员
+        $athletes = $program->programAthletes()
+            ->whereIn('rank', [1, 2, 3])
+            ->where('is_weight_passed', 1)
+            ->orderBy('rank')
+            ->get();
 
-    // 创建 PDF - 改為縱向 (P)
-    $pdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8', false);
-    
-    $pdf->setPrintHeader(false);
-    $pdf->setPrintFooter(false);
-    $pdf->SetAutoPageBreak(false);
-    $pdf->SetFont('msungstdlight', '', 30);
-    
-    $pageWidth = 595; // A4 纵向宽度 (pt)
-    
-    foreach ($athletes as $athlete) {
-        $pdf->AddPage();
+        // 创建 PDF - 改為縱向 (P)
+        $pdf = new TCPDF('P', 'pt', 'A4', true, 'UTF-8', false);
         
-        $weight = $program->convertWeight();
-        $rank = match((int)$athlete->rank) {
-            1 => '一', 2 => '二', 3 => '三', default => (string)$athlete->rank
-        };
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->SetAutoPageBreak(false);
+        $pdf->SetFont('NotoSerifTC', '', 30);
         
-        $gender = $athlete->athlete?->gender == 'M' ? '男子' : '女子';
-        $categoryName = $program->competitionCategory->name ?? '';
-        $athleteName = $athlete->athlete?->name ?? '';
+        $pageWidth = 595; // A4 纵向宽度 (pt)
         
-        // 第一行：組別（置中）
-        $firstLineText = '組別：' . $gender . $categoryName;
-        $firstLineWidth = $pdf->GetStringWidth($firstLineText);
-        $firstLineX = ($pageWidth - $firstLineWidth) / 2;
+        foreach ($athletes as $athlete) {
+            $pdf->AddPage();
+            
+            $weight = $program->convertWeight();
+            $rank = match((int)$athlete->rank) {
+                1 => '一', 2 => '二', 3 => '三', default => (string)$athlete->rank
+            };
+            
+            $gender = $athlete->athlete?->gender == 'M' ? '男子' : '女子';
+            $categoryName = $program->competitionCategory->name ?? '';
+            $athleteName = $athlete->athlete?->name ?? '';
+            
+            // 第一行：組別（置中）
+            $firstLineText = '組別：' . $gender . $categoryName;
+            $firstLineWidth = $pdf->GetStringWidth($firstLineText);
+            $firstLineX = ($pageWidth - $firstLineWidth) / 2;
+            
+            $pdf->SetXY($firstLineX, 280);
+            $pdf->Cell($firstLineWidth, 40, $firstLineText, 0, 0, 'L');
+            
+            // 下面三行跟隨第一行的 X 座標
+            $followX = $firstLineX;
+            
+            // 第二行：級別
+            $secondLineText = '級別：' . strtoupper($weight);
+            $pdf->SetXY($followX, 360);
+            $pdf->Cell($pdf->GetStringWidth($secondLineText), 40, $secondLineText, 0, 0, 'L');
+            
+            // 第三行：姓名
+            $thirdLineText = '姓名：';
+            $pdf->SetXY($followX, 440);
+            $pdf->Cell($pdf->GetStringWidth($thirdLineText), 40, $thirdLineText, 0, 0, 'L');
+
+            $pdf->SetXY($followX + 90, 440);
+            if(strlen($athleteName) > 16){
+                $pdf->SetFont('NotoSerifTC', '', 16);
+                $pdf->Cell($pdf->GetStringWidth($athleteName), 40, $athleteName , 0, 0, 'L');
+            }else {
+                $pdf->Cell($pdf->GetStringWidth($athleteName), 40, $athleteName , 0, 0, 'L');
+            }
+
+            $pdf->SetFont('NotoSerifTC', '', 30);
+            // 第四行：名次
+            $fourthLineText = '名次：第' . $rank . '名';
+            $pdf->SetXY($followX, 520);
+            $pdf->Cell($pdf->GetStringWidth($fourthLineText), 40, $fourthLineText, 0, 0, 'L');
+        }
         
-        $pdf->SetXY($firstLineX, 200);
-        $pdf->Cell($firstLineWidth, 40, $firstLineText, 0, 0, 'L');
-        
-        // 下面三行跟隨第一行的 X 座標
-        $followX = $firstLineX;
-        
-        // 第二行：級別
-        $secondLineText = '級別：' . strtoupper($weight);
-        $pdf->SetXY($followX, 280);
-        $pdf->Cell($pdf->GetStringWidth($secondLineText), 40, $secondLineText, 0, 0, 'L');
-        
-        // 第三行：姓名
-        $thirdLineText = '姓名：' . $athleteName;
-        $pdf->SetXY($followX, 360);
-        $pdf->Cell($pdf->GetStringWidth($thirdLineText), 40, $thirdLineText, 0, 0, 'L');
-        
-        // 第四行：名次
-        $fourthLineText = '名次：第' . $rank . '名';
-        $pdf->SetXY($followX, 440);
-        $pdf->Cell($pdf->GetStringWidth($fourthLineText), 40, $fourthLineText, 0, 0, 'L');
+        $filename = 'certificates_' . $program->id . '_' . date('YmdHis') . '.pdf';
+        $pdf->Output($filename, 'I');
+        exit;
     }
-    
-    $filename = 'certificates_' . $program->id . '_' . date('YmdHis') . '.pdf';
-    $pdf->Output($filename, 'I');
-    exit;
-}
     private function smartTruncate($name, $maxLength = 21)
     {
         if (mb_strlen($name) <= $maxLength) {

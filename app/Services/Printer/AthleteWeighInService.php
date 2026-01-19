@@ -9,7 +9,7 @@ use App\Helpers\PdfHelper;
 class AthleteWeighInService
 {
     private $pdf;
-    private $title = "運動員過磅總表";
+    private $title = null;
     private $logo_primary = 'images/mja_logo.png';
     private $title_sub = null;
     private $logo_secondary;
@@ -190,7 +190,7 @@ class AthleteWeighInService
         }
     }
 
-        private function addSignatures()
+    private function addSignatures()
     {
         // 直接設置簽名區域的 Y 座標
         $this->pdf->SetY(175);

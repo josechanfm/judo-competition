@@ -7,7 +7,7 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         hmr: {
-            host: process.env.VITE_HOST ?? '192.168.1.102',
+            host: process.env.VITE_HOST ?? 'localhost',
         },
     },
     plugins: [

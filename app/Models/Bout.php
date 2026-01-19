@@ -211,7 +211,7 @@ class Bout extends Model
     {
         $riseBout = DB::table('bouts')->where('program_id', $bout->program_id)
             ->where('in_program_sequence', abs($bout->blue_rise_from))->first();
-        if ($riseBout->status === -1 && $riseBout->winner === 0) {
+        if ($riseBout?->status === -1 && $riseBout->winner === 0) {
             if ($riseBout->white === -1) {
                 $riseBout = DB::table('bouts')->where('program_id', $riseBout->program_id)
                     ->where('in_program_sequence', abs($riseBout->blue_rise_from))->first();
@@ -226,7 +226,7 @@ class Bout extends Model
     {
         $riseBout = DB::table('bouts')->where('program_id', $bout->program_id)
             ->where('in_program_sequence', abs($bout->{$color . '_rise_from'}))->first();
-        if ($riseBout->status === -1 && $riseBout->winner === 0) {
+        if ($riseBout?->status === -1 && $riseBout->winner === 0) {
             return '負方';
         } else {
             return $bout->{$color . '_rise_from'} > 0 ? '勝方' : '負方';
@@ -237,7 +237,7 @@ class Bout extends Model
     {
         $riseBout = DB::table('bouts')->where('program_id', $bout->program_id)
             ->where('in_program_sequence', abs($bout->white_rise_from))->first();
-        if ($riseBout->status === -1 && $riseBout->winner === 0) {
+        if ($riseBout?->status === -1 && $riseBout->winner === 0) {
             if ($riseBout->white === -1) {
                 $riseBout = DB::table('bouts')->where('program_id', $riseBout->program_id)
                     ->where('in_program_sequence', abs($riseBout->blue_rise_from))->first();
@@ -679,14 +679,22 @@ class Bout extends Model
         $this->save();
     }
 
-    public function whiteRiseFromQueue($bout): int
+    public function whiteRiseFromQueue($bout)
     {
-        return $this->whiteRiseFrom($bout)->queue;
+        if($this->whiteRiseFrom($bout)?->queue == 0){
+            return '無人晉級';
+        }else {
+            return '第' . ($this->whiteRiseFrom($bout)->queue ?? '') . '場勝者';
+        }
     }
 
-    public function blueRiseFromQueue($bout): int
+    public function blueRiseFromQueue($bout)
     {
-        return $this->blueRiseFrom($bout)->queue;
+        if($this->blueRiseFrom($bout)?->queue == 0){
+            return '無人晉級';
+        }else {
+            return '第' . ($this->blueRiseFrom($bout)->queue ?? '') . '場勝者';
+        }
     }
 
     public function referees()

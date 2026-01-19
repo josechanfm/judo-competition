@@ -48,6 +48,15 @@ Route::middleware('auth')->group(function () {
     Route::resource('manage/competition/{competition}/programs', App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
     Route::resource('manage/competition/{competition}/teams', App\Http\Controllers\Manage\TeamController::class)->names('manage.competition.teams');
     Route::resource('manage/competition/{competition}/referees', App\Http\Controllers\Manage\RefereeController::class)->names('manage.competition.referees');
+    Route::prefix('manage/competition/{competition}/setting')->name('manage.competition.setting.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Manage\SettingController::class, 'index'])->name('index');
+        Route::put('/logo', [App\Http\Controllers\Manage\SettingController::class, 'updateLogo'])->name('update-logo');
+        Route::post('/draw-background', [App\Http\Controllers\Manage\SettingController::class, 'updateDrawBackground'])->name('update-draw-background');
+        Route::post('/draw-cover', [App\Http\Controllers\Manage\SettingController::class, 'updateDrawCover'])->name('update-draw-cover');
+        Route::post('/certificate', [App\Http\Controllers\Manage\SettingController::class, 'updateCertificate'])->name('update-certificate');
+        Route::post('/language', [App\Http\Controllers\Manage\SettingController::class, 'updateLanguage'])->name('update-language');
+        Route::delete('/device/{uuid}', [App\Http\Controllers\Manage\SettingController::class, 'removeDevice'])->name('remove-device');
+    });
     Route::get('manage/competition/{competition}/athletes/generate-id-cards', [App\Http\Controllers\Manage\AthleteController::class, 'generateIdCards'])->name('athletes.generateIdCards');
     Route::get('manage/competition/{competition}/athletes/generate-weighIn-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllWeighInTable'])->name('generate.all.weighIn.table');
     Route::get('manage/competition/{competition}/athletes/drawControl', [App\Http\Controllers\Manage\AthleteController::class, 'drawControl'])->name('manage.competition.athletes.drawControl');
@@ -78,6 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
     Route::get('manage/competition/{competition}/result-table/{blankMedals}', [App\Http\Controllers\Manage\CompetitionController::class, 'resultTable'])->name('manage.competition.result-table');
     // Route::get('/pdf/simple', [PdfController::class, 'generatePdfWithRoundedHeader'])->name('simplepdf');
+    Route::get('manage/competition/{competition}/teams-athletes-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllTeamsAthletes'])->name('manage.competition.teams-athletes-table');
     Route::get('importname',[App\Http\Controllers\Manage\AthleteController::class , 'importExcel']);
     Route::get('manage/competition/{competition}/export/medal_quantity', [App\Http\Controllers\Manage\ProgramController::class, 'medalQuantityExport'])->name('manage.competition.program.export.medal-quantity');    
     Route::get('manage/competition/{competition}/export/program_time', [App\Http\Controllers\Manage\ProgramController::class, 'programTimeExport'])->name('manage.competition.program.export.program-time');    

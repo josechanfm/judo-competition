@@ -77,15 +77,30 @@ class MedalQuantity implements FromCollection, WithHeadings, WithMapping, Should
      */
     protected function calculateMedals($participantCount)
     {
-        if ($participantCount >= 4) {
-            return ['1', '1', '2']; // 1金, 1银, 2铜
-        } elseif ($participantCount == 3) {
-            return ['1', '1', '1']; // 1金, 1银, 1铜
-        } elseif ($participantCount == 2) {
-            return ['1', '1', '0']; // 1金, 1银, 0铜
-        } else {
-            return ['0', '0', '0']; // 其他情况无奖牌
+        if($this->competition->competition_type->awarding_methods){
+            if ($participantCount >= 4) {
+                return ['1', '1', '2']; // 1金, 1银, 2铜
+            } elseif ($participantCount == 3) {
+                return ['1', '1', '1']; // 1金, 1银, 1铜
+            } elseif ($participantCount == 2) {
+                return ['1', '1', '0']; // 1金, 1银, 0铜
+            } else {
+                return ['0', '0', '0']; // 其他情况无奖牌
+            }
+        }else {
+            if ($participantCount >= 5) {
+                return ['1', '1', '2']; // 1金, 1银, 2铜
+            } elseif ($participantCount == 4) {
+                return ['1', '1', '1']; // 1金, 1银, 1铜
+            } elseif ($participantCount == 3) {
+                return ['1', '1', '0']; // 1金, 1银, 0铜
+            } elseif ($participantCount == 2) {
+                return ['1', '0', '0']; // 其他情况无奖牌
+            } else {
+                return ['0', '0', '0']; 
+            }
         }
+
     }
     
     public function styles(Worksheet $sheet)

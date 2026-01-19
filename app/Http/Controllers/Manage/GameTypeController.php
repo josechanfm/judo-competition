@@ -88,7 +88,7 @@ class GameTypeController extends Controller
                 [
                     'game_type_id' => $category['game_type_id'],
                     'name' => $category['name'],
-                    'name_secondary' => $category['name_secondary'],
+                    'name_secondary' => $category['name_secondary'] ?? null,
                     'code' => $category['code'],
                     'weights' => WeightUtil::sortWeights($category['weights']),
                     'duration' => $category['editDuration'],

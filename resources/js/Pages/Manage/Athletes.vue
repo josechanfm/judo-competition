@@ -58,6 +58,7 @@
                 >Import Athletes</a-button
               >
               <a :href="route('athletes.generateIdCards', competition.id)" target="_blank"><a-button type="text">download athletes id cards</a-button></a>
+              <a :href="route('manage.competition.teams-athletes-table', competition.id)" target="_blank"><a-button type="text">download all teams athletes</a-button></a>
             </div>
           </div>
           
@@ -122,9 +123,7 @@
                 {{ record?.team?.name }}
               </template>
               <template v-else-if="column.dataIndex === 'program'">
-                <span v-for="program in record.programs" :key="program.id">{{
-                  program.weight_code
-                }}</span>
+                {{ record.programs.map(program => program.weight_code).join(', ') }}
               </template>
               <template v-else>
                 {{ record[column.dataIndex] }}

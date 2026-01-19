@@ -126,8 +126,9 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
     {
         return Athlete::firstOrCreate([
             'gender' => $row['gender'],
-            'name' => $row['name'],
-            'name_display' => $row['name'] . $row['name_secondary'],
+            'name' => $row['name'] ?? null,
+            'name_secondary' => $row['name_secondary'] ?? null,
+            'name_display' => $row['name'] ?? '' . $row['name_secondary'] ?? '',
             'competition_id' => $this->competition->id,
             'team_id' => $team->id,
         ]);

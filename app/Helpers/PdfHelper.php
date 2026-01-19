@@ -122,24 +122,30 @@ class PdfHelper
             $program = $ellipseData["program"];
             $weight = $ellipseData["weight"];
             $athletes_count = isset($ellipseData["athletes_count"]) ? $ellipseData["athletes_count"] : "";
+            $mat = $ellipseData['mat'];
             
             $programText = $program;
             if (!empty($athletes_count)) {
-                $programText .= " (" . $athletes_count . ")";
+                $programText .= " (場地" . $mat . ")";
+            }
+            
+            $weightText = $weight;
+            if (!empty($athletes_count)) {
+                $weightText .= " (人數" . $athletes_count . ")";
             }
             
             // 計算文字寬度
-            $this->pdf->setFont($titleFont, 'B', 20); // weight 字型
-            $weightWidth = $this->pdf->GetStringWidth($weight);
+            $this->pdf->setFont($titleFont, 'B', 14); // weight 字型
+            $weightWidth = $this->pdf->GetStringWidth($programText);
             
-            $this->pdf->setFont($titleFont, 'B', 11); // program 字型
-            $programWidth = $this->pdf->GetStringWidth($programText);
+            $this->pdf->setFont($titleFont, 'B', 12); // program 字型
+            $programWidth = $this->pdf->GetStringWidth($weightText);
             
-            $rightContentWidth = max($weightWidth, $programWidth) + 15; // 加上額外間距
+            $rightContentWidth = max($weightWidth, $programWidth) + 5; // 加上額外間距
         }
         
         // 繪製分隔線 - 在標題和右側內容之間
-        $lineMargin = 10; // 分隔線距離右側內容的間距
+        $lineMargin = 5; // 分隔線距離右側內容的間距
         $lineX = $centeredX + $w - $rightContentWidth - $lineMargin;
         $lineTopMargin = 3; // 上下邊距
         $lineY1 = $y + $lineTopMargin;
@@ -160,7 +166,7 @@ class PdfHelper
         
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);
-            $this->pdf->setXY($centeredX, $y);
+            $this->pdf->setXY($centeredX + 5.8, $y - 0.7);
             $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
         } else {
             $this->pdf->setFont($titleFont, 'B', 20);
@@ -178,21 +184,25 @@ class PdfHelper
             $program = $ellipseData["program"];
             $weight = $ellipseData["weight"];
             $athletes_count = isset($ellipseData["athletes_count"]) ? $ellipseData["athletes_count"] : "";
-            
-            $rightMargin = 10;
+            $mat = $ellipseData['mat'];
             
             // 組合 program 和 athletes_count
             $programText = $program;
+            if (!empty($mat)) {
+                $programText .= " (場地" . $mat . ")";
+            }
+
+            $weightText = $weight;
             if (!empty($athletes_count)) {
-                $programText .= " (" . $athletes_count . ")";
+                $weightText .= " (人數" . $athletes_count . ")";
             }
             
             // 計算文字寬度
-            $this->pdf->setFont($titleFont, 'B', 20); // weight 字型
-            $weightWidth = $this->pdf->GetStringWidth($weight);
+            $this->pdf->setFont($titleFont, 'B', 14); // weight 字型
+            $weightWidth = $this->pdf->GetStringWidth($programText);
             
-            $this->pdf->setFont($titleFont, 'B', 11); // program 字型
-            $programWidth = $this->pdf->GetStringWidth($programText);
+            $this->pdf->setFont($titleFont, 'B', 12); // program 字型
+            $programWidth = $this->pdf->GetStringWidth($weightText);
             
             $maxWidth = max($weightWidth, $programWidth);
             
@@ -204,13 +214,13 @@ class PdfHelper
             $startY = $y + ($h - $totalTextHeight) / 2;
             
             // 繪製右側內容（weight 在上面，program 在下面）
-            $this->pdf->setFont($titleFont, 'B', 20); // weight 字型
+            $this->pdf->setFont($titleFont, 'B', 14); // weight 字型
             $this->pdf->SetXY($rightStartX, $startY);
-            $this->pdf->Cell($maxWidth, 8, $weight, 0, 1, 'C'); // 水平置中
+            $this->pdf->Cell($maxWidth, 8, $programText, 0, 1, 'C'); // 水平置中
             
-            $this->pdf->setFont($titleFont, 'B', 11); // program 字型
+            $this->pdf->setFont($titleFont, 'B', 12); // program 字型
             $this->pdf->SetXY($rightStartX, $startY + 8);
-            $this->pdf->Cell($maxWidth, 8, $programText, 0, 0, 'C'); // 水平置中
+            $this->pdf->Cell($maxWidth, 8, $weightText, 0, 0, 'C'); // 水平置中
         }
     }
     public function header2($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
@@ -225,56 +235,22 @@ class PdfHelper
         
         // 對於 mPDF，使用不同的方法來限制繪圖區域
         if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-            // mPDF 的方法：先繪製圓角矩形背景，再繪製邊框
+            // 使用 CSS 方式創建水平漸變圓角背景
+            $html = '
+                <div style="
+                    width: ' . $w . 'mm;
+                    height: ' . $h . 'mm;
+                    background: linear-gradient(to right, #dcdcdc, #f0f0f0, #ffffff, #f0f0f0, #dcdcdc);
+                    border: 0.5px solid black;
+                    border-radius: ' . $r . 'mm;
+                    position: absolute;
+                    left: ' . $centeredX . 'mm;
+                    top: ' . $y . 'mm;
+                "></div>
+            ';
             
-            // 創建更自然的漸變背景 - 直接繪製在整個圓角矩形區域
-            $steps = 50;
-            $silver = [220, 220, 220];
-            $white = [255, 255, 255];
-            $lightSilver = [240, 240, 240];
-            
-            // 繪製漸變背景 - 使用整個區域，不留邊距
-            for ($i = 0; $i < $steps; $i++) {
-                $stepX = $centeredX + ($w / $steps) * $i;
-                $stepWidth = $w / $steps;
-                
-                // 計算漸變顏色
-                if ($i < $steps * 0.3) {
-                    $ratio = $i / ($steps * 0.3);
-                    $rColor = $silver[0] + ($lightSilver[0] - $silver[0]) * $ratio;
-                    $gColor = $silver[1] + ($lightSilver[1] - $silver[1]) * $ratio;
-                    $bColor = $silver[2] + ($lightSilver[2] - $silver[2]) * $ratio;
-                } elseif ($i < $steps * 0.7) {
-                    $midRatio = ($i - $steps * 0.3) / ($steps * 0.4);
-                    if ($midRatio < 0.5) {
-                        $ratio = $midRatio * 2;
-                        $rColor = $lightSilver[0] + ($white[0] - $lightSilver[0]) * $ratio;
-                        $gColor = $lightSilver[1] + ($white[1] - $lightSilver[1]) * $ratio;
-                        $bColor = $lightSilver[2] + ($white[2] - $lightSilver[2]) * $ratio;
-                    } else {
-                        $ratio = ($midRatio - 0.5) * 2;
-                        $rColor = $white[0] - ($white[0] - $lightSilver[0]) * $ratio;
-                        $gColor = $white[1] - ($white[1] - $lightSilver[1]) * $ratio;
-                        $bColor = $white[2] - ($white[2] - $lightSilver[2]) * $ratio;
-                    }
-                } else {
-                    $ratio = ($i - $steps * 0.7) / ($steps * 0.3);
-                    $rColor = $lightSilver[0] - ($lightSilver[0] - $silver[0]) * $ratio;
-                    $gColor = $lightSilver[1] - ($lightSilver[1] - $silver[1]) * $ratio;
-                    $bColor = $lightSilver[2] - ($lightSilver[2] - $silver[2]) * $ratio;
-                }
-                
-                // 繪製漸變矩形 - 使用整個高度和寬度
-                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-                $this->pdf->Rect($stepX, $y, $stepWidth, $h, 'F');
-            }
-            
-            // 最後繪製圓角邊框
-            $this->pdf->SetLineWidth(0.2);
-            $this->pdf->SetDrawColor(180, 180, 180);
-            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'D');
-            
-        } else {
+            $this->pdf->WriteHTML($html);
+        }else {
             // TCPDF 的原有邏輯
             $this->pdf->StartTransform();
             $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'CNZ');
@@ -340,13 +316,13 @@ class PdfHelper
             $ellipseTitle = $ellipseData["title"];
             $ellipseTitleSub = $ellipseData["title_sub"];
 
-            $this->pdf->setFont($titleFont, 'B', 8);
-            $weightWidth = $this->pdf->GetStringWidth($ellipseTitle);
+            $this->pdf->setFont($titleFont, 'B', 14);
+            $ellipseTitleWidth = $this->pdf->GetStringWidth($ellipseTitle);
             
-            $this->pdf->setFont($titleFont, 'B', 8);
-            $programWidth = $this->pdf->GetStringWidth($ellipseTitleSub);
+            $this->pdf->setFont($titleFont, 'B', 14);
+            $ellipseTitleSubWidth = $this->pdf->GetStringWidth($ellipseTitleSub);
             
-            $rightContentWidth = max($weightWidth, $programWidth) + 15;
+            $rightContentWidth = max($ellipseTitleWidth, $ellipseTitleSubWidth) + 5;
         }
         
         // 繪製分隔線 - 在標題和右側內容之間
@@ -368,11 +344,12 @@ class PdfHelper
         
         // 標題放在中間（但限制寬度避免與右側內容重疊）
         $titleWidth = $lineX - $centeredX - 10;
-        
+
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);
             $this->pdf->setXY($centeredX, $y);
             $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
+          
         } else {
             $this->pdf->setFont($titleFont, 'B', 20);
             $this->pdf->setXY($centeredX, $y);
@@ -406,11 +383,11 @@ class PdfHelper
             $startY = $y + ($h - $totalTextHeight) / 2;
             
             // 繪製右側內容
-            $this->pdf->setFont($titleFont, 'B', 11);
+            $this->pdf->setFont($titleFont, 'B', 14);
             $this->pdf->SetXY($rightStartX, $startY);
             $this->pdf->Cell($maxWidth, 8, $ellipseTitle, 0, 1, 'C');
             
-            $this->pdf->setFont($titleFont, 'B', 11);
+            $this->pdf->setFont($titleFont, 'B', 14);
             $this->pdf->SetXY($rightStartX, $startY + 8);
             $this->pdf->Cell($maxWidth, 8, $ellipseTitleSub, 0, 0, 'C');
         }
@@ -620,133 +597,260 @@ class PdfHelper
             $this->pdf->Cell($rightWidth + 5, 7, $programText, 0, 0, 'C'); // 水平置中
         }
     }
-public function header4($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
-{
-    $w = 190;
-    $h = 18;
-    $r = 3;
-    
-    // 計算置中的 x 座標 (假設頁面寬度為 210mm A4)
-    $pageWidth = 210;
-    $centeredX = ($pageWidth - $w) / 2;
-    
-    // 先繪製圓角邊框作為 clipping path
-    if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-        // 對於 Mpdf，使用 Save/Restore 來限制繪圖區域
-        $this->pdf->StartTransform();
-        $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'CNZ'); // CNZ 創建 clipping path
-    } else {
-        // 對於 TCPDF，使用 clipping
-        $this->pdf->StartTransform();
-        $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'CNZ');
-    }
-    
-    // 創建更自然的漸變背景（現在會被限制在圓角內）
-    $gradientWidth = $w;
-    $gradientHeight = $h;
-    $steps = 50; // 大幅增加漸變步數讓過渡更平滑
-    
-    // 定義漸變顏色 - 使用更和諧的銀白色調
-    $silver = [220, 220, 220];  // 較亮的銀色
-    $white = [255, 255, 255];   // 純白
-    $lightSilver = [240, 240, 240]; // 過渡用的亮銀色
-    
-    // 繪製漸變背景（現在會被限制在圓角內）
-    for ($i = 0; $i < $steps; $i++) {
-        $stepX = $centeredX + ($gradientWidth / $steps) * $i;
-        $stepWidth = $gradientWidth / $steps;
+    public function header4($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
+    {
+        $w = 190;
+        $h = 20;
+        $r = 3;
         
-        // 計算漸變顏色 - 使用更平滑的過渡
-        if ($i < $steps * 0.3) {
-            // 左側 30%: 銀 → 亮銀
-            $ratio = $i / ($steps * 0.3);
-            $rColor = $silver[0] + ($lightSilver[0] - $silver[0]) * $ratio;
-            $gColor = $silver[1] + ($lightSilver[1] - $silver[1]) * $ratio;
-            $bColor = $silver[2] + ($lightSilver[2] - $silver[2]) * $ratio;
-        } elseif ($i < $steps * 0.7) {
-            // 中間 40%: 亮銀 → 白 → 亮銀
-            $midRatio = ($i - $steps * 0.3) / ($steps * 0.4);
-            if ($midRatio < 0.5) {
-                // 前半: 亮銀 → 白
-                $ratio = $midRatio * 2;
-                $rColor = $lightSilver[0] + ($white[0] - $lightSilver[0]) * $ratio;
-                $gColor = $lightSilver[1] + ($white[1] - $lightSilver[1]) * $ratio;
-                $bColor = $lightSilver[2] + ($white[2] - $lightSilver[2]) * $ratio;
-            } else {
-                // 後半: 白 → 亮銀
-                $ratio = ($midRatio - 0.5) * 2;
-                $rColor = $white[0] - ($white[0] - $lightSilver[0]) * $ratio;
-                $gColor = $white[1] - ($white[1] - $lightSilver[1]) * $ratio;
-                $bColor = $white[2] - ($white[2] - $lightSilver[2]) * $ratio;
-            }
-        } else {
-            // 右側 30%: 亮銀 → 銀
-            $ratio = ($i - $steps * 0.7) / ($steps * 0.3);
-            $rColor = $lightSilver[0] - ($lightSilver[0] - $silver[0]) * $ratio;
-            $gColor = $lightSilver[1] - ($lightSilver[1] - $silver[1]) * $ratio;
-            $bColor = $lightSilver[2] - ($lightSilver[2] - $silver[2]) * $ratio;
-        }
+        // 計算置中的 x 座標 (假設頁面寬度為 210mm A4)
+        $pageWidth = 210;
+        $centeredX = ($pageWidth - $w) / 2;
         
-        // 繪製漸變矩形（現在會被限制在圓角內）
+        // 先繪製圓角邊框作為 clipping path
         if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-            $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-            $this->pdf->Rect($stepX, $y, $stepWidth, $gradientHeight, 'F');
+            // 對於 Mpdf，使用 Save/Restore 來限制繪圖區域
+            $this->pdf->StartTransform();
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'CNZ'); // CNZ 創建 clipping path
         } else {
-            $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-            $this->pdf->Rect($stepX, $y, $stepWidth, $gradientHeight, 'F');
+            // 對於 TCPDF，使用 clipping
+            $this->pdf->StartTransform();
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'CNZ');
+        }
+        
+        // 創建更自然的漸變背景（現在會被限制在圓角內）
+        $gradientWidth = $w;
+        $gradientHeight = $h;
+        $steps = 50; // 大幅增加漸變步數讓過渡更平滑
+        
+        // 定義漸變顏色 - 使用更和諧的銀白色調
+        $silver = [220, 220, 220];  // 較亮的銀色
+        $white = [255, 255, 255];   // 純白
+        $lightSilver = [240, 240, 240]; // 過渡用的亮銀色
+        
+        // 繪製漸變背景（現在會被限制在圓角內）
+        for ($i = 0; $i < $steps; $i++) {
+            $stepX = $centeredX + ($gradientWidth / $steps) * $i;
+            $stepWidth = $gradientWidth / $steps;
+            
+            // 計算漸變顏色 - 使用更平滑的過渡
+            if ($i < $steps * 0.3) {
+                // 左側 30%: 銀 → 亮銀
+                $ratio = $i / ($steps * 0.3);
+                $rColor = $silver[0] + ($lightSilver[0] - $silver[0]) * $ratio;
+                $gColor = $silver[1] + ($lightSilver[1] - $silver[1]) * $ratio;
+                $bColor = $silver[2] + ($lightSilver[2] - $silver[2]) * $ratio;
+            } elseif ($i < $steps * 0.7) {
+                // 中間 40%: 亮銀 → 白 → 亮銀
+                $midRatio = ($i - $steps * 0.3) / ($steps * 0.4);
+                if ($midRatio < 0.5) {
+                    // 前半: 亮銀 → 白
+                    $ratio = $midRatio * 2;
+                    $rColor = $lightSilver[0] + ($white[0] - $lightSilver[0]) * $ratio;
+                    $gColor = $lightSilver[1] + ($white[1] - $lightSilver[1]) * $ratio;
+                    $bColor = $lightSilver[2] + ($white[2] - $lightSilver[2]) * $ratio;
+                } else {
+                    // 後半: 白 → 亮銀
+                    $ratio = ($midRatio - 0.5) * 2;
+                    $rColor = $white[0] - ($white[0] - $lightSilver[0]) * $ratio;
+                    $gColor = $white[1] - ($white[1] - $lightSilver[1]) * $ratio;
+                    $bColor = $white[2] - ($white[2] - $lightSilver[2]) * $ratio;
+                }
+            } else {
+                // 右側 30%: 亮銀 → 銀
+                $ratio = ($i - $steps * 0.7) / ($steps * 0.3);
+                $rColor = $lightSilver[0] - ($lightSilver[0] - $silver[0]) * $ratio;
+                $gColor = $lightSilver[1] - ($lightSilver[1] - $silver[1]) * $ratio;
+                $bColor = $lightSilver[2] - ($lightSilver[2] - $silver[2]) * $ratio;
+            }
+            
+            // 繪製漸變矩形（現在會被限制在圓角內）
+            if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                $this->pdf->Rect($stepX, $y, $stepWidth, $gradientHeight, 'F');
+            } else {
+                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                $this->pdf->Rect($stepX, $y, $stepWidth, $gradientHeight, 'F');
+            }
+        }
+        
+        // 結束 clipping
+        $this->pdf->StopTransform();
+        
+        // 重新繪製邊框（在背景之上）
+        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+            $this->pdf->SetLineWidth(0.2);
+            $this->pdf->SetDrawColor(180, 180, 180);
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'D');
+        } else {
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'D', $this->boxLine, [180, 180, 180]);
+        }
+        
+        // 圖片放在左邊
+        $leftMargin = 5;
+        $logoSpacing = 2; // 圖標之間的間距
+
+        if ($logo_primary) {
+            $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 2, 18, 16, 'png');
+        }
+        if ($logo_secondary) {
+            $primaryWidth = $logo_primary ? 14 + $logoSpacing : 0;
+            $this->pdf->image($logo_secondary, $centeredX + $leftMargin + $primaryWidth, $y + 2, 14, 14, 'png');
+        }
+        
+        // 計算 logo 佔用的總寬度
+        $logoTotalWidth = 0;
+        if ($logo_primary) {
+            $logoTotalWidth += 14;
+        }
+        if ($logo_secondary) {
+            $logoTotalWidth += $logo_primary ? 14 + $logoSpacing : 14;
+        }
+        
+        // 計算標題區域的起始位置和寬度（更加置中）
+        $titleStartX = $centeredX + $leftMargin + $logoTotalWidth; // logo 右邊加上間距
+        $titleWidth = $w - ($leftMargin * 2) - $logoTotalWidth - 15; // 減去左右邊距和 logo 寬度
+        
+        if($title_sub == null){
+            $this->pdf->setFont($titleFont, 'B', 24);
+            $this->pdf->setXY($titleStartX, $y);
+            $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
+        } else {
+            $this->pdf->setFont($titleFont, 'B', 20);
+            $this->pdf->setXY($titleStartX, $y);
+            $this->pdf->Cell($titleWidth, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
+            $this->pdf->setFont($titleFont, 'B', 13);
+            $this->pdf->setXY($titleStartX, $y + ($h / 1.6));
+            $this->pdf->Cell($titleWidth, $h - ($h / 1.6), $title_sub, 0, 0, 'C', 0, '', 0);
         }
     }
-    
-    // 結束 clipping
-    $this->pdf->StopTransform();
-    
-    // 重新繪製邊框（在背景之上）
-    if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-        $this->pdf->SetLineWidth(0.2);
-        $this->pdf->SetDrawColor(180, 180, 180);
-        $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'D');
-    } else {
-        $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'D', $this->boxLine, [180, 180, 180]);
-    }
-    
-    // 圖片放在左邊
-    $leftMargin = 5;
-    $logoSpacing = 2; // 圖標之間的間距
+    public function header5($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
+    {
+        $w = 190;
+        $h = 22;
+        $r = 3;
+        
+        // 計算置中的 x 座標 (假設頁面寬度為 210mm A4)
+        $pageWidth = 210;
+        $centeredX = ($pageWidth - $w) / 2;
+        
+        // 先繪製圓角邊框作為 clipping path
+        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+            // 對於 Mpdf，使用 Save/Restore 來限制繪圖區域
+            $this->pdf->StartTransform();
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'CNZ'); // CNZ 創建 clipping path
+        } else {
+            // 對於 TCPDF，使用 clipping
+            $this->pdf->StartTransform();
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'CNZ');
+        }
+        
+        // 創建更自然的漸變背景（現在會被限制在圓角內）
+        $gradientWidth = $w;
+        $gradientHeight = $h;
+        $steps = 50; // 大幅增加漸變步數讓過渡更平滑
+        
+        // 定義漸變顏色 - 使用更和諧的銀白色調
+        $silver = [220, 220, 220];  // 較亮的銀色
+        $white = [255, 255, 255];   // 純白
+        $lightSilver = [240, 240, 240]; // 過渡用的亮銀色
+        
+        // 繪製漸變背景（現在會被限制在圓角內）
+        for ($i = 0; $i < $steps; $i++) {
+            $stepX = $centeredX + ($gradientWidth / $steps) * $i;
+            $stepWidth = $gradientWidth / $steps;
+            
+            // 計算漸變顏色 - 使用更平滑的過渡
+            if ($i < $steps * 0.3) {
+                // 左側 30%: 銀 → 亮銀
+                $ratio = $i / ($steps * 0.3);
+                $rColor = $silver[0] + ($lightSilver[0] - $silver[0]) * $ratio;
+                $gColor = $silver[1] + ($lightSilver[1] - $silver[1]) * $ratio;
+                $bColor = $silver[2] + ($lightSilver[2] - $silver[2]) * $ratio;
+            } elseif ($i < $steps * 0.7) {
+                // 中間 40%: 亮銀 → 白 → 亮銀
+                $midRatio = ($i - $steps * 0.3) / ($steps * 0.4);
+                if ($midRatio < 0.5) {
+                    // 前半: 亮銀 → 白
+                    $ratio = $midRatio * 2;
+                    $rColor = $lightSilver[0] + ($white[0] - $lightSilver[0]) * $ratio;
+                    $gColor = $lightSilver[1] + ($white[1] - $lightSilver[1]) * $ratio;
+                    $bColor = $lightSilver[2] + ($white[2] - $lightSilver[2]) * $ratio;
+                } else {
+                    // 後半: 白 → 亮銀
+                    $ratio = ($midRatio - 0.5) * 2;
+                    $rColor = $white[0] - ($white[0] - $lightSilver[0]) * $ratio;
+                    $gColor = $white[1] - ($white[1] - $lightSilver[1]) * $ratio;
+                    $bColor = $white[2] - ($white[2] - $lightSilver[2]) * $ratio;
+                }
+            } else {
+                // 右側 30%: 亮銀 → 銀
+                $ratio = ($i - $steps * 0.7) / ($steps * 0.3);
+                $rColor = $lightSilver[0] - ($lightSilver[0] - $silver[0]) * $ratio;
+                $gColor = $lightSilver[1] - ($lightSilver[1] - $silver[1]) * $ratio;
+                $bColor = $lightSilver[2] - ($lightSilver[2] - $silver[2]) * $ratio;
+            }
+            
+            // 繪製漸變矩形（現在會被限制在圓角內）
+            if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                $this->pdf->Rect($stepX, $y, $stepWidth, $gradientHeight, 'F');
+            } else {
+                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                $this->pdf->Rect($stepX, $y, $stepWidth, $gradientHeight, 'F');
+            }
+        }
+        
+        // 結束 clipping
+        $this->pdf->StopTransform();
+        
+        // 重新繪製邊框（在背景之上）
+        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+            $this->pdf->SetLineWidth(0.2);
+            $this->pdf->SetDrawColor(180, 180, 180);
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, 'D');
+        } else {
+            $this->pdf->RoundedRect($centeredX, $y, $w, $h, $r, '1111', 'D', $this->boxLine, [180, 180, 180]);
+        }
+        
+        // 圖片放在左邊
+        $leftMargin = 5;
+        $logoSpacing = 2; // 圖標之間的間距
 
-    if ($logo_primary) {
-        $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 2, 14, 14, 'png');
+        if ($logo_primary) {
+            $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 2, 14, 14, 'png');
+        }
+        if ($logo_secondary) {
+            $primaryWidth = $logo_primary ? 14 + $logoSpacing : 0;
+            $this->pdf->image($logo_secondary, $centeredX + $leftMargin + $primaryWidth, $y + 2, 14, 14, 'png');
+        }
+        
+        // 計算 logo 佔用的總寬度
+        $logoTotalWidth = 10;
+        if ($logo_primary) {
+            $logoTotalWidth += 14;
+        }
+        if ($logo_secondary) {
+            $logoTotalWidth += $logo_primary ? 14 + $logoSpacing : 14;
+        }
+        
+        // 計算標題區域的起始位置和寬度（更加置中）
+        $titleStartX = $centeredX + $leftMargin + $logoTotalWidth; // logo 右邊加上間距
+        $titleWidth = $w - ($leftMargin * 2) - $logoTotalWidth - 10; // 減去左右邊距和 logo 寬度
+        
+        if($title_sub == null){
+            $this->pdf->setFont($titleFont, 'B', 24);
+            $this->pdf->setXY($titleStartX, $y);
+            $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
+        } else {
+            $this->pdf->setFont($titleFont, 'B', 22);
+            $this->pdf->setXY($titleStartX, $y);
+            $this->pdf->Cell($titleWidth, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
+            $this->pdf->setFont($titleFont, 'B', 13);
+            $this->pdf->setXY($titleStartX, $y + ($h / 1.8));
+            $this->pdf->Cell($titleWidth, $h - ($h / 1.8), $title_sub, 0, 0, 'C', 0, '', 0);
+        }
     }
-    if ($logo_secondary) {
-        $primaryWidth = $logo_primary ? 14 + $logoSpacing : 0;
-        $this->pdf->image($logo_secondary, $centeredX + $leftMargin + $primaryWidth, $y + 2, 14, 14, 'png');
-    }
-    
-    // 計算 logo 佔用的總寬度
-    $logoTotalWidth = 0;
-    if ($logo_primary) {
-        $logoTotalWidth += 14;
-    }
-    if ($logo_secondary) {
-        $logoTotalWidth += $logo_primary ? 14 + $logoSpacing : 14;
-    }
-    
-    // 計算標題區域的起始位置和寬度（更加置中）
-    $titleStartX = $centeredX + $leftMargin + $logoTotalWidth; // logo 右邊加上間距
-    $titleWidth = $w - ($leftMargin * 2) - $logoTotalWidth -10; // 減去左右邊距和 logo 寬度
-    
-    if($title_sub == null){
-        $this->pdf->setFont($titleFont, 'B', 24);
-        $this->pdf->setXY($titleStartX, $y);
-        $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
-    } else {
-        $this->pdf->setFont($titleFont, 'B', 20);
-        $this->pdf->setXY($titleStartX, $y);
-        $this->pdf->Cell($titleWidth, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
-        $this->pdf->setFont($titleFont, 'B', 13);
-        $this->pdf->setXY($titleStartX, $y + ($h / 1.6));
-        $this->pdf->Cell($titleWidth, $h - ($h / 1.6), $title_sub, 0, 0, 'C', 0, '', 0);
-    }
-}
     /*
     public function header3($x=0, $y=0, $title=null, $title_sub=null, $logo_primary=null, $logo_secondary=null, $extra=null){
         $x=10;

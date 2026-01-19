@@ -226,7 +226,7 @@ class BoutController extends Controller
     public function updateNextBoutFighter(Bout $currentBout, string $winner)
     {
         // 獲取當前比賽的勝者對應的選手ID
-        $winnerFighterId = $winner === $currentBout->white ? $currentBout->white : $currentBout->blue;
+        $winnerFighterId = $winner;
 
         if (!$winnerFighterId) {
             return; // 如果沒有選手ID，則不處理

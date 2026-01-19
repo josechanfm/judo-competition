@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Athlete extends Model
 {
-    protected $fillable = ['competition_id', 'name', 'name_display', 'gender', 'team_id', 'member_id'];
+    protected $fillable = ['competition_id', 'name', 'name_secondary','name_display', 'gender', 'team_id', 'member_id'];
     use HasFactory;
 
     protected $with = ['team', 'programs'];

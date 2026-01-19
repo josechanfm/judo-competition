@@ -119,6 +119,21 @@
             </inertia-link>
           </div>
         </a-menu-item>
+        <a-menu-item key="competition.config.index">
+          <div class="flex items-center">
+            <div class="flex items-center gap-2">
+              <div class="pb-1">
+                <team-outlined />
+              </div>
+              <div v-if="!collapsed">Setting</div>
+            </div>
+            <inertia-link
+              class="mx-2"
+              :href="route('manage.competition.setting.index', competition.id)"
+            >
+            </inertia-link>
+          </div>
+        </a-menu-item>
       </a-menu>
     </a-layout-sider>
     <a-layout>

@@ -1,5 +1,5 @@
 <template>
-  <admin-layout :title="$t('match_settings')">
+  <ProgramLayout :competition="competition">
     <a-page-header
       :title="$t('match_settings')"
       :sub-title="$t('competition_settings_description')"
@@ -13,7 +13,6 @@
             <!-- <info /> -->
           </a-tab-pane>
           <a-tab-pane key="2" :tab="$t('draw')">
-            {{ draw }}
             <Draw :draw="draw" />
           </a-tab-pane>
           <a-tab-pane key="6" :tab="$t('certificate')">
@@ -53,11 +52,11 @@
         </a-tabs>
       </a-card>
     </div>
-  </admin-layout>
+  </ProgramLayout>
 </template>
 
 <script>
-import AdminLayout from "@/Layouts/AdminLayout.vue";
+import ProgramLayout from "@/Layouts/ProgramLayout.vue";
 // import Info from "./Info.vue";
 import Draw from "./Draw.vue";
 // import Integration from "./Integration.vue";
@@ -74,7 +73,7 @@ export default {
     };
   },
   components: {
-    AdminLayout,
+    ProgramLayout,
     // Info,
     Draw,
     // Integration,

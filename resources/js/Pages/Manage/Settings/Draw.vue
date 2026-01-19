@@ -11,6 +11,7 @@
             :multiple="false"
             name="file"
             :action="route('manage.competition.setting.update-draw-background', [competition])"
+            :headers="headers"
           >
             <a-button> 更換背景 </a-button>
           </a-upload>
@@ -26,6 +27,7 @@
             name="file"
             :multiple="false"
             :action="route('manage.competition.setting.update-draw-cover', [competition])"
+            :headers="headers"
           >
             <a-button> 更換封面 </a-button>
           </a-upload>
@@ -36,6 +38,7 @@
 </template>
 
 <script>
+import Cookie from 'js-cookie'
 
 export default {
   name: "Draw",
@@ -53,6 +56,10 @@ export default {
     };
   },
   setup() {
+    const headers =  {
+        'X-XSRF-TOKEN': Cookie.get('XSRF-TOKEN')
+    }
+    return { headers };
   },
 };
 </script>

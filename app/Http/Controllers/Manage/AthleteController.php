@@ -220,7 +220,7 @@ class AthleteController extends Controller
 
     public function drawControl(Competition $competition)
     {
-        // dd($competition->programs);
+        $competition->competition_type;
         return Inertia::render('Draw/DrawControl', [
             'competition' => fn() => $competition,
             'programs' => $competition->programs()->get(),
@@ -229,6 +229,7 @@ class AthleteController extends Controller
 
     public function drawScreen(Competition $competition)
     {
+        $competition->competition_type;
         return Inertia::render('Draw/DrawScreen', [
             'competition' => fn() => $competition,
             'draw' => [

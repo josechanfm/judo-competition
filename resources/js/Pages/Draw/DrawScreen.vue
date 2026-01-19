@@ -65,7 +65,7 @@
               <h1 class="text-4xl font-extrabold mb-2">{{ competition.name }}</h1>
               <h1
                 class="text-4xl font-extrabold mb-0"
-                v-if="competition.is_language_secondary_enabled"
+                v-if="competition.competition_type.is_language_secondary_enabled"
               >
                 {{ competition.name_secondary }}
               </h1>
@@ -125,7 +125,7 @@
               <h1 class="text-4xl font-extrabold mb-2">{{ competition.name }}</h1>
               <h1
                 class="text-4xl font-extrabold mb-0"
-                v-if="competition.is_language_secondary_enabled"
+                v-if="competition.competition_type.is_language_secondary_enabled"
               >
                 {{ competition.name_secondary }}
               </h1>
@@ -156,7 +156,7 @@
                   ></div>
                   {{ athlete.athlete.name }}
                   <span>
-                    <template v-if="competition.is_language_secondary_enabled">
+                    <template v-if="competition.competition_type.is_language_secondary_enabled">
                       {{ athlete.athlete.name_secondary }}
                     </template>
                   </span>
@@ -164,7 +164,7 @@
                 <div class="text-4xl font-medium">
                   <span>{{ athlete.athlete.team.abbreviation }}</span>
                   - {{ athlete.athlete.team.name }}
-                  <template v-if="competition.is_language_secondary_enabled">
+                  <template v-if="competition.competition_type.is_language_secondary_enabled">
                     - {{ athlete.team.name_secondary }}
                   </template>
                 </div>

@@ -71,7 +71,7 @@ class CompetitionController extends Controller
             'remark' => '',
             'competition.name' => 'required_if:competition,true',
             'competition.language' => 'required_if:competition,true',
-            'competition.is_language_secondary_enabled' => 'required_if:competition,true|boolean',
+            'competition.competition_type.is_language_secondary_enabled' => 'required_if:competition,true|boolean',
             'competition.name_secondary' => 'required_if:competition_is_language_secondary_enabled,true',
             'competition.language_secondary' => 'required_if:competition_is_language_secondary_enabled,true'
         ]);

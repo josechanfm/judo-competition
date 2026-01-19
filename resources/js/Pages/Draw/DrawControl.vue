@@ -177,7 +177,7 @@
                     <div v-if="item.athlete">
                       <div>{{ item.athlete.name }}</div>
                       <div>{{ item.athlete.team.abbreviation }}</div>
-                      <div v-if="competition.is_language_secondary_enabled">
+                      <div v-if="competition.competition_type.is_language_secondary_enabled">
                         {{ item.name_secondary }}
                       </div>
                     </div>

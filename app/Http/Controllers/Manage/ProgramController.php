@@ -570,6 +570,9 @@ class ProgramController extends Controller
             case 'rrb':
                 $settings = File::json(storage_path('setting/game_round_robbin_option1.json'));
                 $service = new RoundRobbinOption1Service($settings);
+            case 'erm':
+                $settings = File::json(storage_path('setting/game_tournament_quarter.json'));
+                $service = new TournamentQuarterService($settings);
         }
         
         $players = $this->getPlayersFromProgram($program);

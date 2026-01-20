@@ -61,6 +61,7 @@
         "boxGap": 6,
         "arcW": 30,
         "arcWFirst": 4,
+        "athleteGap": 3,
         "repechageBoxH": 5,
         "repechageDistance": 15,
         "repechageBoxGap": 2,
@@ -85,19 +86,20 @@
     },
     "16": {
         "startX": 25,
-        "startY": 20,
+        "startY": 35,
         "boxW": 60,
         "boxH": 15,
         "boxGap": 6,
         "arcW": 20,
         "arcWFirst": 4,
         "repechageBoxH": 5,
+        "athleteGap": 1.8,  
         "repechageDistance": 10,
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "circleFontSize": 10,
-        "playerFontSize": 12,
+        "circleFontSize": 9,
+        "playerFontSize": 9,
         "winners": [ 
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0],
@@ -111,28 +113,29 @@
             [15]
         ],
         "resultXY": [
-            145,
-            170
+            140,
+            175
         ]
     },
     "32": {
         "startX": 25,
-        "startY": 25,
+        "startY": 30,
         "boxW": 60,
         "boxH": 12,
         "boxGap": 2,
         "arcW": 20,
         "arcWFirst": 4,
+        "athleteGap": 1.3,
         "repechageBoxH": 5,
         "repechageDistance": 10,
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 2.5,
-        "circleFontSize": 10,
-        "playerFontSize": 10,
+        "circleFontSize": 8,
+        "playerFontSize": 8,
         "resultXY": [
             135,
-            230
+            240
         ]
     },
     "64": {

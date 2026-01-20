@@ -81,7 +81,7 @@ class RoundRobbinOption1Service{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $logo_primary='images/jua_logo.png';
+    protected $logo_primary='';
     protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
@@ -154,13 +154,8 @@ class RoundRobbinOption1Service{
         $this->title=$title;
         $this->title_sub=$title_sub;
     }
-    public function setFonts($titleFont='times', $playerFont='times',$generalFont='times'){
-        $this->titleFont=$titleFont;
-        $this->playerFont=$playerFont;
-        $this->generalFont=$generalFont;
-    }
 
-    public function pdf($players=[],$repechagePlayers=[], $winners=[], $sequences=[], $winnerList=[]){
+    public function pdf($players=[],$winners=[], $sequences=[], $winnerList=[], $ellipseData = []){
         $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         $this->playerCount=count($players);
         foreach($this->gameSetting[$this->playerCount] as $key=>$value){
@@ -177,32 +172,30 @@ class RoundRobbinOption1Service{
         $this->pdf->SetAutoPageBreak(TRUE,0);
         $this->pdf->AddPage();
         $helper=new PdfHelper($this->pdf);
-        $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary);
-        if(count($players)==5){
-            $this->gameTable5($players, $repechagePlayers);
-            $this->boxPlayers5($players, $repechagePlayers);
+         $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont, $ellipseData);
+        // dd($players);
+         if(count($players)==5){
+            // dd($players);
+            $this->gameTable5($players);
+            // dd($players);
+            $this->boxPlayers5($players);
         }else if(count($players)==4){
-            $this->boxPlayers4($players, $repechagePlayers);
+            $this->boxPlayers4($players);
         }
         $this->resultBox($winnerList);
         $this->pdf->Output('myfile.pdf', 'I');
     }
 
-    public function gameTable5($players, $repechagePlayers){
+    public function gameTable5($players){
+        
         $p1=$players;
-        unset($p1[1]);
-        unset($p1[3]);
         $x=$this->startX;
         $y=$this->startY;
         $this->drawTable5($p1, $x, $y,$this->colors['first']);
-        $p2=$players;
-        unset($p2[0]);
-        unset($p2[2]);
-        unset($p2[4]);
-        $x+=50;
-        $y+=30;
-        $this->drawTable5($p2, $x, $y,$this->colors['second']);
-
+        // $p2=$players;
+        // $x+=50;
+        // $y+=30;
+        // $this->drawTable5($p2, $x, $y,$this->colors['second']);
     }
     private function drawTable5($players, $x, $y, $colors){
 
@@ -261,7 +254,7 @@ class RoundRobbinOption1Service{
         $this->pdf->writeHTML($tbl, true, false, false, false, '');
     }
 
-    private function boxPlayers5($players, $repechagePlayers){
+    private function boxPlayers5($players){
         $style = array('L' => 0,
                 'T' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
                 'R' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
@@ -289,6 +282,7 @@ class RoundRobbinOption1Service{
             $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
             $this->pdf->RoundedRect($x, $y+$h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
             $this->pdf->setXY($x, $y);
+            // dd($players);
             $this->pdf->Cell($this->boxW, $h, $players[$g[0]]['name_display'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x, $y+$h);
             $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name_display'], 0, 1, 'L', 0, '', 0);
@@ -339,10 +333,8 @@ class RoundRobbinOption1Service{
         $x=$x;
         $y=$y+($this->boxH*1);
         $x2=$x+$this->arcW;
-        $this->pdf->text($x-20, $y-4, $repechagePlayers[0]['name_display']);
         $this->pdf->line($x, $y, $x2,$y);
         $y2=$y+$this->boxH*0.5;
-        $this->pdf->text($x-20, $y2-4, $repechagePlayers[1]['name_display']);
         $this->pdf->line($x, $y2, $x2,$y2);
         $x=$x2;
         $this->pdf->line($x, $y, $x2,$y2);
@@ -353,7 +345,7 @@ class RoundRobbinOption1Service{
         $this->pdf->circle($x+$gap, $y+$h, 2, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
         $this->pdf->text($x, $y+($h/2), '5');
     }
-    private function boxPlayers4($players, $repechagePlayers){
+    private function boxPlayers4($players){
 
         $style = array('L' => 0,
                 'T' => array('width' => 0.10, 'cap' => 'round', 'join' => 'miter', 'dash' => 0, 'color' => $this->arcColor),
@@ -377,8 +369,6 @@ class RoundRobbinOption1Service{
             if($i==2){
                 $x+=$this->boxW/3;
                 $color=explode(',',$this->colors['second'][0]);
-                $playerWhite=$repechagePlayers[0]['name_display'];
-                $playerBlue=$repechagePlayers[1]['name_display'];
                 }
 
             $this->pdf->setFont($this->playerFont,'',$this->playerFontSize);
@@ -409,39 +399,50 @@ class RoundRobbinOption1Service{
         $y1+=$this->boxH+$this->boxGap+$this->boxH;
         $this->pdf->line($x, $y1, $x+$this->arcW, $y1);
     }
-    private function resultBox($winnerList){
-        $x=$this->resultXY[0];
-        $y=$this->resultXY[1];
-        //$y=$this->pdf->getPageHeight()/2;
-        $w=45;
-        $h=30;
-        $r=3.50;
+   private function resultBox($winnerList)
+    {
+        $x = $this->resultXY[0];
+        $y = $this->resultXY[1];
+        $w = 60;
+        $h = 35;
+        $r = 3.50;
+        
+        // 繪製結果框
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult2, $this->resultColor2);
-        $x1=$x;
-        $y1=$y;
-        $w1=$w;
-        $h1=6;
-        for($i=0;$i<count($winnerList);$i++){
-            $this->pdf->setXY($x1, $y1+5);
+        
+        $x1 = $x;
+        $y1 = $y;
+        $h1 = 7;
+        
+        for ($i = 0; $i < count($winnerList); $i++) {
+            // 排名部分
+            $this->pdf->setXY($x1, $y1 + 6);
             $this->pdf->SetFont($this->generalFont, 'B', 10);
-            $this->pdf->Cell(0, 0, $winnerList[$i]['award'].':', 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x1+15, $y1+5);
+            $this->pdf->Cell(0, 0, $winnerList[$i]['award'] . ':', 0, 1, 'L', 0, '', 0);
+            
+            // 運動員名字部分（置左對齊）
+            $this->pdf->setXY($x1 + 5, $y1 + 5);
             $this->pdf->SetFont($this->playerFont, 'B', 10);
-            $this->pdf->Cell($w-15, 0, $winnerList[$i]['name'].':', 0, 1, 'L', 0, '', 0);
-            $y1+=$h1;
+            $this->pdf->Cell($w - 15, 0, $winnerList[$i]['name'], 0, 1, 'L', 0, '', 0);
+            
+            $y1 += $h1;
         }
 
-        //$this->pdf->Cell($w, $h-5, $winnerList[0]['award'], 1, 1, 'L', 0, '', 0);
-
-        $x=$x+5;
-        $y=$y-5;
-        $w=$w-10;
-        $h=10;
+        // 標題框
+        $x = $x + 5;
+        $y = $y - 5;
+        $w = $w - 10;
+        $h = 10;
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
         $this->pdf->setXY($x, $y);
         $this->pdf->SetFont($this->generalFont, 'B', 14);
-        $this->pdf->Cell(35, 10, 'Results', 0, 1, 'C', 0, '', 0);
-
+        $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
     }
 
+    public function setFonts($titleFont = 'times', $playerFont = 'times', $generalFont = 'times')
+    {
+        $this->titleFont = $titleFont;
+        $this->playerFont = $playerFont;
+        $this->generalFont = $generalFont;
+    }
 }

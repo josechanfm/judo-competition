@@ -162,11 +162,7 @@
                   </span>
                 </div>
                 <div class="text-4xl font-medium">
-                  <span>{{ athlete.athlete.team.abbreviation }}</span>
-                  - {{ athlete.athlete.team.name }}
-                  <template v-if="competition.competition_type.is_language_secondary_enabled">
-                    - {{ athlete.team.name_secondary }}
-                  </template>
+                  {{ athlete.athlete.team.name }}
                 </div>
               </div>
             </div>

@@ -11,7 +11,7 @@ class TournamentQuarterService
     protected $pdf = null;
     protected $title = 'Judo Competition of Asia Pacific';
     protected $title_sub = 'Judo Union of Asia';
-    protected $logo_primary = 'images/mja_logo.png';
+    protected $logo_primary = '';
     protected $logo_secondary = null;
 
     protected $startX = 25; //面頁基點X軸
@@ -19,6 +19,7 @@ class TournamentQuarterService
     protected $boxW = 45; //運動員名牌高度
     protected $boxH = 10; //運動員名牌寛度
     protected $boxGap = 2; //運動員名牌之間距離
+    protected $athleteGap = 2.5;
     protected $arcW = 20; //上線曲線寛度
     protected $arcWFirst = 4; //第一輪上線曲線
     protected $repechageDistance = 5; //復活賽表,運動員名牌之間距離
@@ -27,6 +28,7 @@ class TournamentQuarterService
     protected $circleSize = 3;
     protected $circleFontSize = 10;
     protected $playerFontSize = 8;
+    protected $repechageBoxH = 1;
 
     protected $round = 0;
     protected $playerCount = 0;
@@ -150,7 +152,8 @@ class TournamentQuarterService
         }
         
         if ($repechagePlayers) {
-            $this->repechageChart(count($players), $repechagePlayers, $sequences, $winners); // 復活賽上線表包括運動員名牌和上線曲線
+            // dd($repechagePlayers);
+            $this->repechageChart(count($players), $repechagePlayers, [[1,2],[3,4]], $winners); // 復活賽上線表包括運動員名牌和上線曲線
         }
         
         $this->resultBox($winnerList);
@@ -191,7 +194,7 @@ class TournamentQuarterService
             }
             
             if (!empty($programData['repechagePlayers'])) {
-                $this->repechageChart(count($programData['players']), $programData['repechagePlayers'], $programData['sequences'] ?? [], $programData['winners'] ?? []);
+                $this->repechageChart(count($programData['players']), $programData['repechagePlayers'], [[1,2],[3,4]], $programData['winners'] ?? []);
             }
             // dd($this->sequences);
             $this->resultBox($programData['winnerList']);
@@ -308,7 +311,7 @@ class TournamentQuarterService
     }
     private function repechageChart($totalPlayers, $players, $sequences, $winners)
     {
-
+        // dd($sequences);
         $x = $this->startX;
         $y = $this->startY + (($this->boxH + $this->boxGap) * $totalPlayers) - $this->boxGap + $this->repechageDistance;
         $boxGap = $this->repechageBoxGap;
@@ -320,12 +323,13 @@ class TournamentQuarterService
         $this->pdf->RoundedRect($x + $boxW + $this->arcWFirst + 5, $y - 2, 30, 6, 2, '1111', 'F', $this->styleBoxLine, array(255, 255, 255));
         $this->pdf->setXY($x + $boxW + $this->arcWFirst + 5, $y - 2);
         $this->pdf->setFont($this->titleFont, '', $this->playerFontSize);
-        $this->pdf->Cell(30, 4, 'Repechage', 0, 1, 'C', 0, '', 0);
+        $this->pdf->Cell(30, 4, '復活賽', 0, 1, 'C', 0, '', 0);
 
         $y += $this->repechageDistance;
         $x1 = $this->startX;
         $y1 = $y;
         $round = count($players);
+        // dd($sequences);
         $x = $x1;
         $y = $y;
         $x1 = $x;
@@ -344,7 +348,8 @@ class TournamentQuarterService
                 // dd($sequences[$i+$round+1][$j]);
                 // dd($winners[$i+$round+1]);
                 //$this->arcLine($x1, $y1, $w, $h, $sequences[$i+$round+1][$j], $winners[$i+$round+1][$j],$i==0, $i==0?null:$players[$i][$j]);
-                $this->arcLine($x1, $y1, $w, $h, $sequences[$i + $this->round][$j], 1, $i == 0, $i == 0 ? null : $players[$i][$j]);
+                // dd($sequences);
+                $this->arcLine($x1, $y1, $w, $h, $sequences[$i][$j], 1, $i == 0, $i == 0 ? null : $players[$i][$j]);
                 if ($players[$i][$j]) {
                     if (isset($players[$i][$j]['white'])) {
                         $this->pdf->text($x1 - 6, $y1 - ($boxH / 2) - 0.25, $players[$i][$j]['white']['from']);
@@ -400,27 +405,27 @@ class TournamentQuarterService
             // 下半部保持原本的藍色
             $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'D', $this->styleBoxLine, $this->boxBlueColor);
             // dd($players['white']);
-            $this->pdf->setXY($x, $y - 2.5);
+            $this->pdf->setXY($x, $y - $this->athleteGap);
             if($players['white']['is_weight_passed'] == 0){
                 $this->pdf->setFont($this->generalFont, 'D', $this->circleFontSize);
             }
             $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['white']['name']) . ' ' . $this->smartTruncate($players['white']['name_secondary']) , 0, 1, 'L', 0, '', 0);
             $this->pdf->setFont($this->generalFont, '', $this->circleFontSize);
-            $this->pdf->setXY($x, $y + 2.5);
+            $this->pdf->setXY($x, $y + $this->athleteGap);
             $this->pdf->Cell($this->boxW, $h, $players['white']['team'] , 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x, $y + $h - 2.5);
+            $this->pdf->setXY($x, $y + $h - $this->athleteGap);
             if($players['blue']['is_weight_passed'] == 0){
                 $this->pdf->setFont($this->generalFont, 'D', $this->circleFontSize);
             }
             $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . ' ' . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
             $this->pdf->setFont($this->generalFont, '', $this->circleFontSize); 
-            $this->pdf->setXY($x, $y + $h + 2.5);
+            $this->pdf->setXY($x, $y + $h + $this->athleteGap);
             $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
         } else {
             $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleBoxLine, $this->boxBlueColor);
             $this->pdf->setXY($x, $y);
             $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
-            $this->pdf->setXY($x, $y + 2.5);
+            $this->pdf->setXY($x, $y + $this->athleteGap);
             $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
         }
     }

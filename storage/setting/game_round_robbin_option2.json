@@ -1,6 +1,6 @@
 {
     "2": {
-        "startX": 25,
+        "startX": 20,
         "startY": 35,
         "boxW": 60,
         "boxH": 20,
@@ -16,7 +16,7 @@
         "resultXY":[120,120]
     },
     "3": {
-        "startX": 25,
+        "startX": 20,
         "startY": 35,
         "boxW": 60,
         "boxH": 20,
@@ -32,8 +32,8 @@
         "resultXY":[140,130]
     },
     "4": {
-        "startX": 25,
-        "startY": 20,
+        "startX": 20,
+        "startY": 35,
         "boxW": 60,
         "boxH": 15,
         "boxGap": 6,
@@ -48,10 +48,10 @@
         "resultXY":[145,170]
     },
     "5": {
-        "startX": 25,
-        "startY": 25,
+        "startX": 20,
+        "startY": 35,
         "boxW": 60,
-        "boxH": 10,
+        "boxH": 15,
         "boxGap": 2,
         "arcW": 20,
         "arcWFirst": 4,

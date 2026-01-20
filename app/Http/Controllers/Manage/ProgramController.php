@@ -15,7 +15,9 @@ use App\Services\Printer\TournamentQuarterService;
 use App\Models\Bout;
 use App\Models\Athlete;
 use App\Models\ProgramAthlete;
+use App\Services\FontService;
 use App\Services\Printer\RoundRobbinOption1Service;
+use App\Services\Printer\RoundRobbinOption2Service;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\File;
 use PgSql\Lob;
@@ -180,12 +182,14 @@ class ProgramController extends Controller
     public function lock(Competition $competition)
     {
         // remove previously generated bouts
+        // dd($competition);
         $competition->programsBouts;
         
         $competition->bouts()->delete();
+
         // TODO: generate bouts
         $competition->generateBouts();
-
+        // dd($competition);
         $competition->update(['status' => 2]);
 
         return redirect()->back();
@@ -561,27 +565,35 @@ class ProgramController extends Controller
     public function generateOnlineTable(Competition $competition, Program $program)
     {
         $size = $program->chart_size;
+        // dd($program->competition_system);
+        $fontService = new FontService;
 
+        $file  = $fontService->addFont('resources/fonts/NotoSerifCJKtc-VF.ttf');
+        // dd($file);
         switch($program->competition_system){
             case 'kos':
                 $settings = File::json(storage_path('setting/game_tournament_knockout.json'));
                 $service = new TournamentQuarterService($settings);
+                $players = $this->getPlayersFromProgram($program);
+                $repechagePlayers = null;
                 break;
             case 'rrb':
-                $settings = File::json(storage_path('setting/game_round_robbin_option1.json'));
-                $service = new RoundRobbinOption1Service($settings);
+                $settings = File::json(storage_path('setting/game_round_robbin_option2.json'));
+                $service = new RoundRobbinOption2Service($settings);
+                $players = $program->athletes;
+                $repechagePlayers = null;
+                break;
             case 'erm':
                 $settings = File::json(storage_path('setting/game_tournament_quarter.json'));
                 $service = new TournamentQuarterService($settings);
+                $players = $this->getPlayersFromProgram($program);
+                $repechagePlayers = $this->getRepechagePlayers($program);
+                break;
         }
-        
-        $players = $this->getPlayersFromProgram($program);
-
-        $service->setWinnerLine(false);
-
-        $service->setFonts('NotoSerifTC', 'NotoSerifTC', 'NotoSerifTC');
-        $service->setTitles($program->competition->name, null);
-        
+        // dd($repechagePlayers);
+        $service->setFonts('notoserifcjktcvf', 'notoserifcjktcvf', 'notoserifcjktcvf');
+        $service->setTitles($program->competition->name, $program->competition->name_secondary);
+        // dd($this->generateSequencesArray($program));
         $service->pdf(
             $players,
             $this->generateWinnersArray($program),
@@ -591,8 +603,9 @@ class ProgramController extends Controller
                 'program' => $program->converGender() . $program->competitionCategory->name ,
                 'athletes_count' => $program->athletes->count(),
                 'weight' => $program->convertWeight(),
-                'mat' => $program->mat,
-            ]
+                // 'mat' => $program->mat,
+            ],
+            $repechagePlayers,
         );
     }
 
@@ -662,6 +675,9 @@ class ProgramController extends Controller
         $winner_list = [];
         
         // 使用 Collection 的 filter 方法過濾已確定排名的運動員
+        if($program->status == 0){
+
+        }
         $programAthletes = $program->programAthletes()->whereIn('rank',[1,2,3])->where('is_weight_passed',1)->orderBy('rank')->get();
         // 生成獲獎者列表
         for ($i = 0; $i < count($programAthletes); $i++) {
@@ -925,5 +941,28 @@ class ProgramController extends Controller
         
         // 如果還是太長，直接截斷
         return mb_substr($name, 0, $maxLength - 3) . '...';
+    }
+
+    public function getRepechagePlayers($program){
+        $round3Bouts = $program?->bouts->filter(function ($bout) {
+            return $bout->round == 3;
+        });
+        $round2Bouts = $program?->bouts->filter(function ($bout) {
+            return $bout->round == 2;
+        });
+        return [
+            $round3Bouts->map(function ($bout) {
+                return [
+                    'white' => ['name_display' => $bout->white_player->name_display ?? '', 'from' => ''],
+                    'blue' => ['name_display' => $bout->blue_player->name_display ?? '', 'from' => ''],
+                ];
+            })->values()->all(),
+            $round2Bouts->map(function ($bout) {
+                return [
+                    'blue' => ['name_display' => $bout->white_player->name_display ?? '', 'from' => ''],
+                    'blue' => ['name_display' => $bout->blue_player->name_display ?? '', 'from' => ''],
+                ];
+            })->values()->all()
+        ];
     }
 }

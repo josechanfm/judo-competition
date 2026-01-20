@@ -26,6 +26,11 @@ class FontService
         
         $fontname = TCPDF_FONTS::addTTFfont($fullPath);
         
+        if ($fontname) {
+            return "Font converted successfully. Font name to use: " . $fontname;
+        } else {
+            return "Font conversion failed.";
+        }
         return $fontname;
     }
     

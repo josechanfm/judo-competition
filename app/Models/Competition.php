@@ -58,6 +58,16 @@ class Competition extends Model implements HasMedia
         return $this->hasManyThrough(ProgramAthlete::class, Program::class, 'competition_category_id', 'program_id', 'id', 'id');
     }
 
+    public function filterAthletes()
+    {
+        return $this->hasMany(Athlete::class);
+    }
+
+    public function programAthletes()
+    {
+        return $this->hasManyThrough(ProgramAthlete::class, Program::class, 'competition_category_id', 'program_id', 'id', 'id');
+    }
+
     public function athletes()
     {
         return $this->hasMany(Athlete::class);

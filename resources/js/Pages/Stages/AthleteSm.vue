@@ -2,22 +2,12 @@
   <div class="px-2 h-full" :class="{ seed: athlete.seed }">
     <div class="flex h-full items-center justify-between">
       <div class="text-2xl font-bold flex-1">
-        <div v-if="language === 0">
-          {{ athlete.name_zh }}
-        </div>
-        <div v-else>
-          {{ athlete.name_pt }}
-        </div>
+        
+          {{ (athlete.athlete.name ?? '') + athlete.athlete.name_secondary}}
       </div>
 
       <div class="text-gray-500 text-2xl font-medium">
-        {{ athlete.team.abbreviation }} -
-        <template v-if="language === 0">
-          {{ athlete.team.name_zh }}
-        </template>
-        <template v-else>
-          {{ athlete.team.name_pt }}
-        </template>
+          {{ athlete.athlete.team.name }}
       </div>
     </div>
   </div>

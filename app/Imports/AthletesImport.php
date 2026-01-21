@@ -47,6 +47,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
 
     public function collection(Collection $rows): void
     {
+        // dd($rows);
         foreach ($rows as $index => $row) {
             $count = count(array_filter($row->take(8)->toArray(), function ($value) {
                 return $value !== null;
@@ -139,6 +140,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         $program->athletes()->attach($athlete->id, [
             'program_id' => $program->id,
             'athlete_id' => $athlete->id,
+            'seed' => $row['seed'],
         ]);
     }
 }

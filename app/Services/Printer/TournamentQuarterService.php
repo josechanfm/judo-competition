@@ -532,7 +532,7 @@ class TournamentQuarterService
         $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
     }
 
-    private function smartTruncate($name, $maxLength = 21)
+    private function smartTruncate($name, $maxLength = 15)
     {
         if (mb_strlen($name) <= $maxLength) {
             return $name;

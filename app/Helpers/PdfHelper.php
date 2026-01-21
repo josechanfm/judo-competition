@@ -208,7 +208,7 @@ class PdfHelper
             $maxWidth = max($weightWidth, $programWidth);
             
             // 右側起始位置
-            $rightStartX = $lineX + $lineMargin + 3;
+            $rightStartX = $lineX + $lineMargin;
             
             // 計算垂直置中的 Y 位置
             $totalTextHeight = 16; // 兩行文字的總高度

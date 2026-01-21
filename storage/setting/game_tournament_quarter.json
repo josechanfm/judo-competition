@@ -84,7 +84,7 @@
     },
     "32": {
         "startX": 25,
-        "startY": 25,
+        "startY": 35,
         "boxW": 60,
         "boxH": 10,
         "boxGap": 2,
@@ -96,8 +96,8 @@
         "repechageBoxGap": 2,
         "repechageSectionGap": 5,
         "circleSize": 3,
-        "circleFontSize": 10,
-        "playerFontSize": 12,
+        "circleFontSize": 8,
+        "playerFontSize": 8,
         "resultXY": [
             145,
             210

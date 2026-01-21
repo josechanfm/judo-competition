@@ -203,13 +203,13 @@ class RoundRobbinOption2Service{
             $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
             $this->pdf->RoundedRect($x, $y+$h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
             $this->pdf->setXY($x + 1, $y);
-            $this->pdf->Cell($this->boxW , $h - 4, $players[$g[0]]['name_display'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW , $h - 4, $players[$g[0]]['name'] . $players[$g[0]]['name_secondary'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + ($h/5));
             $this->pdf->Cell($this->boxW, $h, $players[$g[0]]['team']['name'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + $h - 2);
-            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name_display'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name'] . $players[$g[0]]['name_secondary'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + $h + ($h/5));
-            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['team']['name'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['team']['name'] , 0, 1, 'L', 0, '', 0);
             $this->pdf->RoundedRect($x+$this->boxW, $y+($h/2), $gap, $h, $r, '0000', 'DF', $style, array(254,206,50));
             $this->pdf->circle($x+$this->boxW+$gap+2, $y+($h/2)+($h/2), 2, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
             $x1=$x+$this->boxW+$gap;

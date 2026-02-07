@@ -55,7 +55,11 @@ class Competition extends Model implements HasMedia
 
     public function programAthletes()
     {
-        return $this->hasManyThrough(ProgramAthlete::class, Program::class, 'competition_category_id', 'program_id', 'id', 'id');
+        // 先獲取所有相關的 programs
+        $programIds = $this->programs->pluck('id');
+        
+        // 再獲取這些 programs 的 programAthletes
+        return ProgramAthlete::whereIn('program_id', $programIds);
     }
 
     public function athletes()

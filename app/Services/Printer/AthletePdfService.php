@@ -24,7 +24,7 @@ class AthletePdfService
         $this->pdf->setPrintHeader(false);
         $this->pdf->setPrintFooter(false);
 
-        $this->bgImagePath = public_path('images/id-card-bg.jpg');
+        $this->bgImagePath = public_path('images/id-card-bg2.jpeg');
     }
 
     public function generateIdCard($athletes)
@@ -100,9 +100,6 @@ class AthletePdfService
 
         // 注意：這裡不再添加單獨的背景圖片，因為已經有整頁背景
 
-        // 設置字體
-        $this->pdf->SetFont('NotoSerifTC', 'B', 14);
-
         // 檢查是否有 name_secondary
         $hasSecondaryName = !empty($athlete->name_secondary);
 
@@ -114,27 +111,29 @@ class AthletePdfService
         // 定義字段位置和寬度 - 調整x坐標以適應左側位置
         $fields = [
             'name' => [
-                'x' => $startX + 31, 
-                'y' => $hasSecondaryName ? $startY + 77 : $nameAreaCenterY,
+                'x' => $startX + 30, 
+                'y' => $hasSecondaryName ? $startY + 60 : $nameAreaCenterY,
                 'width' => 48
             ],
             'name_secondary' => [
-                'x' => $startX + 31, 
-                'y' => $startY + 84,
+                'x' => $startX + 30, 
+                'y' => $startY + 75,
                 'width' => 48
             ],
             'programCategoryWeight' => [
                 'x' => $startX + 28, 
-                'y' => $startY + 99,
+                'y' => $startY + 90,
                 'width' => 50
             ],
             'team' => [
                 'x' => $startX + 28, 
-                'y' => $startY + 119,
+                'y' => $startY + 105,
                 'width' => 50
             ]
         ];
 
+                // 設置字體
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 18);
         // 添加運動員數據
         $this->addField($fields['name'], ($this->smartTruncate($athlete->name) ?? ''));
         
@@ -142,8 +141,14 @@ class AthletePdfService
         if ($hasSecondaryName) {
             $this->addField($fields['name_secondary'], ($this->smartTruncate($athlete->name_secondary) ?? ''));
         }
-        
+        if ($athlete->gender == 'M') {
+            $this->pdf->SetTextColor(0, 0, 255);
+        } else {
+            $this->pdf->SetTextColor(255, 0, 0);
+        }
         $this->addField($fields['programCategoryWeight'], ($athlete->programCategoryWeight ?? ''));
+        $this->pdf->setTextColor(0,0,0);
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 14);
         $this->addField($fields['team'], ($athlete->team->name ?? ''));
 
         // 添加照片和QR碼...

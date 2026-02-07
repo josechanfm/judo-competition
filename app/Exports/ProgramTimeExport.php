@@ -165,14 +165,13 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
         $maxRows = max(count($venueAData), count($venueBData));
         
         for ($i = 0; $i < $maxRows; $i++) {
-            $venueARow = isset($venueAData[$i]) ? $venueAData[$i] : array_fill(0, 8, '');
-            $venueBRow = isset($venueBData[$i]) ? $venueBData[$i] : array_fill(0, 8, '');
+            $venueARow = isset($venueAData[$i]) ? $venueAData[$i] : array_fill(0, 6, '');
+            $venueBRow = isset($venueBData[$i]) ? $venueBData[$i] : array_fill(0, 6, '');
             
             // 组合行：左侧场地A + 空分隔列 + 右侧场地B
             $combinedRow = array_merge($venueARow, [''], $venueBRow);
             $combinedData[] = $combinedRow;
         }
-        
         return $combinedData;
     }
 
@@ -219,7 +218,7 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
             ];
             
             // 添加空行分隔
-            $data[] = array_fill(0, 8, '');
+            $data[] = array_fill(0, 6, '');
         }
         
         return $data;
@@ -382,10 +381,17 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
     private function calculateMatchesCount(int $athletesCount, string $contestSystem): int
     {
         switch ($contestSystem) {
-            case 'kos': return $athletesCount - 1;
-            case 'rrb': return ($athletesCount * ($athletesCount - 1)) / 2;
-            case 'erm': return $athletesCount <= 8 ? 15 : (int) round($athletesCount * 1.8);
-            default: return 0;
+            case 'kos': // 單淘汰
+                return $athletesCount - 1;
+                
+            case 'rrb': // 循環賽
+                return ($athletesCount * ($athletesCount - 1)) / 2;
+                
+            case 'erm': // 8 強復活賽（雙敗淘汰制）
+                return $athletesCount - 1 + 4;
+
+            default:
+                return 0;
         }
     }
 

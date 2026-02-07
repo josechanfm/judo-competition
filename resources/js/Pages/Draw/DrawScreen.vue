@@ -72,8 +72,9 @@
             </div>
             <div class="text-right">
               <h2 class="text-4xl font-bold mb-2">
-                {{ stagePayload.program.competition_category.name }}
-                {{ stagePayload.program.name }}
+                {{ convertGender(stagePayload.program.weight_code) }}
+                {{ stagePayload.program.competition_category.name
+                }}{{ convertWeight(stagePayload.program.weight_code) }}
               </h2>
               <h3 class="text-4xl font-medium mb-0">
                 共 {{ stagePayload.athletes.length }} 人
@@ -97,8 +98,9 @@
         <div class="flex items-center p-16">
           <div>
             <h2 class="text-7xl font-bold leading-relaxed m-0">
-              {{ stagePayload.program.competition_category.name }}
-              {{ stagePayload.program.name }}
+                {{ convertGender(stagePayload.program.weight_code) }}
+                {{ stagePayload.program.competition_category.name
+                }}{{ convertWeight(stagePayload.program.weight_code) }}
             </h2>
             <h2 class="text-4xl font-medium leading-relaxed m-0">
               {{ stagePayload.program.weight_code }}
@@ -133,8 +135,9 @@
 
             <div class="text-right">
               <h2 class="text-4xl font-bold mb-2">
+                {{ convertGender(stagePayload.program.weight_code) }}
                 {{ stagePayload.program.competition_category.name
-                }}{{ stagePayload.program.weight_code }}
+                }}{{ convertWeight(stagePayload.program.weight_code) }}
               </h2>
               <h3 class="text-4xl font-medium mb-0">
                 共 {{ stagePayload.athletes.length }} 人
@@ -142,31 +145,38 @@
             </div>
           </div>
 
-          <div class="flex-1">
-            <div class="mt-16 grid grid-cols-2 w-full gap-6">
-              <div
-                v-for="athlete in nameListSlice"
-                :key="athlete.id"
-                class="rounded-lg bg-white/75 overflow-clip p-4 relative backdrop-blur"
-              >
-                <div class="text-4xl font-bold mb-2">
-                  <div
-                    class="absolute bg-yellow-500 rotate-45 h-16 w-16 -right-8 -top-8 transform"
-                    v-if="athlete.seed"
-                  ></div>
-                  {{ athlete.athlete.name }}
-                  <span>
-                    <template v-if="competition.competition_type.is_language_secondary_enabled">
-                      {{ athlete.athlete.name_secondary }}
-                    </template>
-                  </span>
-                </div>
-                <div class="text-4xl font-medium">
-                  {{ athlete.athlete.team.name }}
+            <div class="flex-1">
+              <div class="mt-16 grid grid-cols-2 w-full gap-6">
+                <div
+                  v-for="athlete in sortedAthletes"
+                  :key="athlete.id"
+                  class="rounded-lg bg-white/75 overflow-clip p-4 relative backdrop-blur"
+                >
+                  <div class="text-4xl font-bold mb-2">
+                    <!-- 黃色三角區域 -->
+                    <div
+                      class="absolute bg-yellow-500 rotate-45 h-16 w-16 -right-8 -top-8 transform"
+                      v-if="athlete.seed"
+                    >
+                      <!-- 添加文字 -->
+                      <span class="absolute text-white font-bold text-2xl transform -rotate-45 top-9 right-6">
+                        {{ athlete.seed }}
+                      </span>
+                    </div>
+                    
+                    {{ athlete.athlete.name }}
+                    <span>
+                      <template v-if="competition.competition_type.is_language_secondary_enabled">
+                        {{ athlete.athlete.name_secondary }}
+                      </template>
+                    </span>
+                  </div>
+                  <div class="text-4xl font-medium">
+                    {{ athlete.athlete.team.name }}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
           <div class="flex gap-4 text-3xl font-bold items-center mt-16">
             <span class="inline-block bg-yellow-500 rounded-full w-8 h-8"></span>
@@ -183,6 +193,7 @@ import { ref, computed, watch } from "vue";
 import Player from "../Stages/DrawPlayerBracket.vue";
 import DrawRrb from "../Stages/DrawRrb.vue";
 import { chunk, shuffle, flatten } from "lodash";
+import { convertGender,convertWeight } from "@/Utils/weightParser.js";
 
 const Stage = {
   EMPTY: "empty",
@@ -445,7 +456,30 @@ export default {
   mounted() {
     this.audioElement = this.$refs.audioPlayer;
   },
+  computed:{
+    sortedAthletes() {
+      // 如果 nameListSlice 是 props 或 data
+      const athletes = this.nameListSlice || [];
+      
+      // 使用 slice() 創建副本避免修改原陣列
+      return [...athletes].sort((a, b) => {
+        // 種子選手優先（seed 為 true 的排前面）
+        if (a.seed && b.seed) {
+          if (a.seed !== undefined && b.seed !== undefined) {
+            return a.seed- b.seed;
+          }
+        }
+        if (a.seed && !b.seed) return -1;
+        if (!a.seed && b.seed) return 1;
+        
+        // 如果都是種子或都不是種子，保持原有順序
+        return 0;
+      })
+    }
+  },
   methods: {
+    convertGender,
+    convertWeight,
     playAudio() {
       this.playingAudio = true;
       this.audioElement.play();

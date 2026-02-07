@@ -17,7 +17,6 @@ class PdfHelper
 
     public function header1($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
     {
-        // dd($title_sub);
         $w = 190;
         $h = 22;
         $r = 3;
@@ -26,6 +25,86 @@ class PdfHelper
         $pageWidth = 210;
         $centeredX = ($pageWidth - $w) / 2;
         
+        // 先在左下角和右下角添加圓角邊框
+        $borderHeight = 6; // 邊框高度
+        $borderWidth = 25; // 邊框寬度
+        $borderMargin = 5; // 邊框距離邊緣的距離
+        $borderRadius = 2; // 圓角半徑
+        
+        // 左下角日期邊框
+        $leftBorderX = $centeredX + $borderMargin;
+        $leftBorderY = $y + $h + 3; // 在大header下方
+        
+        // 右下角場地/時段邊框
+        $rightBorderX = $centeredX + $w - $borderWidth - $borderMargin;
+        $rightBorderY = $y + $h + 3; // 在大header下方
+        
+        // 繪製左下角日期邊框（淺灰色背景 + 黑色邊框）
+        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+            // 繪製淺灰色背景（圓角矩形填充）
+            $this->pdf->SetFillColor(245, 245, 245); // 淺灰色
+            $this->pdf->SetDrawColor(245, 245, 245); // 填充顏色
+            $this->pdf->SetLineWidth(0);
+            $this->pdf->RoundedRect($leftBorderX, $leftBorderY, $borderWidth, $borderHeight, $borderRadius, 'F');
+            
+            // 繪製黑色邊框（圓角矩形邊框）
+            $this->pdf->SetDrawColor(0, 0, 0); // 黑色邊框
+            $this->pdf->SetLineWidth(0.3);
+            $this->pdf->RoundedRect($leftBorderX, $leftBorderY, $borderWidth, $borderHeight, $borderRadius, 'D');
+        } else {
+            // 繪製淺灰色背景（圓角矩形填充）
+            $this->pdf->SetFillColor(245, 245, 245); // 淺灰色
+            $this->pdf->SetDrawColor(245, 245, 245); // 填充顏色
+            $this->pdf->SetLineWidth(0);
+            $this->pdf->RoundedRect($leftBorderX, $leftBorderY, $borderWidth, $borderHeight, $borderRadius, '1111', 'F');
+            
+            // 繪製黑色邊框（圓角矩形邊框）
+            $this->pdf->SetDrawColor(0, 0, 0); // 黑色邊框
+            $this->pdf->SetLineWidth(0.3);
+            $this->pdf->RoundedRect($leftBorderX, $leftBorderY, $borderWidth, $borderHeight, $borderRadius, '1111', 'D');
+        }
+        
+        // 繪製右下角場地/時段邊框（淺灰色背景 + 黑色邊框）
+        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+            // 繪製淺灰色背景（圓角矩形填充）
+            $this->pdf->SetFillColor(245, 245, 245); // 淺灰色
+            $this->pdf->SetDrawColor(245, 245, 245); // 填充顏色
+            $this->pdf->SetLineWidth(0);
+            $this->pdf->RoundedRect($rightBorderX, $rightBorderY, $borderWidth, $borderHeight, $borderRadius, 'F');
+            
+            // 繪製黑色邊框（圓角矩形邊框）
+            $this->pdf->SetDrawColor(0, 0, 0); // 黑色邊框
+            $this->pdf->SetLineWidth(0.3);
+            $this->pdf->RoundedRect($rightBorderX, $rightBorderY, $borderWidth, $borderHeight, $borderRadius, 'D');
+        } else {
+            // 繪製淺灰色背景（圓角矩形填充）
+            $this->pdf->SetFillColor(245, 245, 245); // 淺灰色
+            $this->pdf->SetDrawColor(245, 245, 245); // 填充顏色
+            $this->pdf->SetLineWidth(0);
+            $this->pdf->RoundedRect($rightBorderX, $rightBorderY, $borderWidth, $borderHeight, $borderRadius, '1111', 'F');
+            
+            // 繪製黑色邊框（圓角矩形邊框）
+            $this->pdf->SetDrawColor(0, 0, 0); // 黑色邊框
+            $this->pdf->SetLineWidth(0.3);
+            $this->pdf->RoundedRect($rightBorderX, $rightBorderY, $borderWidth, $borderHeight, $borderRadius, '1111', 'D');
+        }
+        
+        // 添加日期內容（左下角）
+        $this->pdf->SetTextColor(0, 0, 0);
+        $this->pdf->setFont($titleFont, 'B', 10); // 使用較小的字體
+        $this->pdf->SetXY($leftBorderX + 1, $leftBorderY + 1);
+        // 這裡您可以從外部傳入日期參數，或者使用當前日期
+        $dateText = $ellipseData['date']; // 預設使用當前日期
+        $this->pdf->Cell($borderWidth - 2, $borderHeight - 2, $dateText, 0, 0, 'C');
+        
+        // 添加場地和時段內容（右下角）
+        $this->pdf->setFont($titleFont, 'B', 10); // 使用較小的字體
+        $this->pdf->SetXY($rightBorderX + 1, $rightBorderY + 1);
+        // 這裡您可以從外部傳入場地和時段參數
+        $venueTimeText = "場地:". $ellipseData['mat'] . "時段:" . $ellipseData['section']; // 預設文字
+        $this->pdf->Cell($borderWidth - 2, $borderHeight - 2, $venueTimeText, 0, 0, 'C');
+        
+        // 以下為原有的大header繪製程式碼保持不變
         // 先繪製圓角邊框作為 clipping path
         if (get_class($this->pdf) == 'Mpdf\Mpdf') {
             // 對於 Mpdf，使用 Save/Restore 來限制繪圖區域
@@ -107,48 +186,16 @@ class PdfHelper
         
         // 圖片放在左邊
         $leftMargin = 5;
-        $logoSpacing = 2; // 圖標之間的間距
 
         if ($logo_primary) {
-            $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 2, 14, 14, 'png');
-        }
-        if ($logo_secondary) {
-            $primaryWidth = $logo_primary ? 14 + $logoSpacing : 0;
-            $this->pdf->image($logo_secondary, $centeredX + $leftMargin + $primaryWidth, $y + 2, 14, 14, 'png');
+            $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 3, 18, 16, 'png');
         }
         
         // 先計算右側內容的寬度，以便確定分隔線位置
-        $rightContentWidth = 0;
-        if ($ellipseData !== null) {
-            $program = $ellipseData["program"];
-            $weight = $ellipseData["weight"];
-            $athletes_count = isset($ellipseData["athletes_count"]) ? $ellipseData["athletes_count"] : "";
-            $mat = $ellipseData['mat']??'';
-            
-            $programText = $program;
-            if (!empty($athletes_count)) {
-                $programText .= " (場地" . $mat . ")";
-            }
-            
-            $weightText = $weight;
-            if (!empty($athletes_count)) {
-                $weightText .= " (人數" . $athletes_count . ")";
-            }
-            
-            // 計算文字寬度
-            $this->pdf->setFont($titleFont, 'B', 14); // weight 字型
-            $weightWidth = $this->pdf->GetStringWidth($programText);
-            
-            $this->pdf->setFont($titleFont, 'B', 12); // program 字型
-            $programWidth = $this->pdf->GetStringWidth($weightText);
-            
-            $rightContentWidth = max($weightWidth, $programWidth) + 5; // 加上額外間距
-        }
-        
+        $rightContentWidth = 40;
         // 繪製分隔線 - 在標題和右側內容之間
-        $lineMargin = 5; // 分隔線距離右側內容的間距
-        $lineX = $centeredX + $w - $rightContentWidth - $lineMargin;
-        $lineTopMargin = 3; // 上下邊距
+        $lineX = $pageWidth - $rightContentWidth - $centeredX;
+        $lineTopMargin = 4; // 上下邊距
         $lineY1 = $y + $lineTopMargin;
         $lineY2 = $y + $h - $lineTopMargin;
         
@@ -163,53 +210,44 @@ class PdfHelper
         }
         
         // 標題放在中間（但限制寬度避免與右側內容重疊）
-        $titleWidth = $lineX - $centeredX - 10; // 標題寬度為分隔線左側減去間距
+        if ($logo_primary){
+            $titleWidth = $lineX + $leftMargin;
+        }else {
+            $titleWidth = $lineX - $centeredX; // 標題寬度為分隔線左側減去間距
+        }
         
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);
-            $this->pdf->setXY($centeredX + 5.8, $y - 0.7);
-            $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
+            $this->pdf->setXY($centeredX, $y);
+            $this->pdf->Cell($titleWidth, $h, $title, 0, 1, 'C', 0, '', 0);
         } else {
             $this->pdf->setFont($titleFont, 'B', 24);
-            $this->pdf->setXY($centeredX + 5.5 , $y);
+            $this->pdf->setXY($centeredX , $y);
             $this->pdf->Cell($titleWidth, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
             $this->pdf->setFont($titleFont, 'B', 13);
-            $this->pdf->setXY($centeredX + 5.5, $y + ($h / 1.6));
+            $this->pdf->setXY($centeredX, $y + ($h / 1.6));
             $this->pdf->Cell($titleWidth, $h - ($h / 1.6) -10, $title_sub, 0, 0, 'C', 0, '', 0);
         }
-        
-        // 其他內容（橢圓數據）放在右邊並垂直置中
+
         if ($ellipseData !== null) {
             $this->pdf->SetTextColor(0, 0, 0);
             
             $program = $ellipseData["program"];
             $weight = $ellipseData["weight"];
             $athletes_count = isset($ellipseData["athletes_count"]) ? $ellipseData["athletes_count"] : "";
-            $mat = $ellipseData['mat']??'';
             
             // 組合 program 和 athletes_count
             $programText = $program;
-            if (!empty($mat)) {
-                $programText .= " (場地" . $mat . ")";
-            }
 
             $weightText = $weight;
             if (!empty($athletes_count)) {
-                $weightText .= " (人數" . $athletes_count . ")";
+                $weightText .= "(" . $athletes_count . "人)";
             }
             
-            // 計算文字寬度
-            $this->pdf->setFont($titleFont, 'B', 14); // weight 字型
-            $weightWidth = $this->pdf->GetStringWidth($programText);
-            
-            $this->pdf->setFont($titleFont, 'B', 12); // program 字型
-            $programWidth = $this->pdf->GetStringWidth($weightText);
-            
-            $maxWidth = max($weightWidth, $programWidth);
+            $maxWidth = 40;
             
             // 右側起始位置
-            $rightStartX = $lineX + $lineMargin;
-            
+            $rightStartX = $lineX;
             // 計算垂直置中的 Y 位置
             $totalTextHeight = 16; // 兩行文字的總高度
             $startY = $y + ($h - $totalTextHeight) / 2;
@@ -694,25 +732,18 @@ class PdfHelper
         if ($logo_primary) {
             $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 2, 18, 16, 'png');
         }
-        if ($logo_secondary) {
-            $primaryWidth = $logo_primary ? 14 + $logoSpacing : 0;
-            $this->pdf->image($logo_secondary, $centeredX + $leftMargin + $primaryWidth, $y + 2, 14, 14, 'png');
-        }
         
         // 計算 logo 佔用的總寬度
         $logoTotalWidth = 0;
         if ($logo_primary) {
             $logoTotalWidth += 14;
         }
-        if ($logo_secondary) {
-            $logoTotalWidth += $logo_primary ? 14 + $logoSpacing : 14;
-        }
         
         // 計算標題區域的起始位置和寬度（更加置中）
         $titleStartX = $centeredX + $leftMargin + $logoTotalWidth; // logo 右邊加上間距
-        $titleWidth = $w - ($leftMargin * 2) - $logoTotalWidth - 15; // 減去左右邊距和 logo 寬度
+        $titleWidth = $w - ($leftMargin * 2) - $logoTotalWidth - ($logo_primary ? 15 : 0); // 減去左右邊距和 logo 寬度
         
-        if($title_sub == null){
+        if($title_sub == null){ 
             $this->pdf->setFont($titleFont, 'B', 24);
             $this->pdf->setXY($titleStartX, $y);
             $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);

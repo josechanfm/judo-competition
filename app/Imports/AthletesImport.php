@@ -80,7 +80,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
                     }
                 }],
                 'team_name' => 'required',
-                'team_abbreviation' => 'nullable|string',
+                'team_code' => 'nullable|string',
                 'name' => 'nullable|string',
                 'name_secondary' => 'nullable|string',
                 'seed' => 'nullable|integer|min:0|max:32',
@@ -119,7 +119,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         return Team::firstOrCreate([
             'competition_id' => $this->competition->id,
             'name' => $row['team_name'],
-            'abbreviation' => $row['team_name'],
+            'abbreviation' => $row['team_code'],
         ]);
     }
 

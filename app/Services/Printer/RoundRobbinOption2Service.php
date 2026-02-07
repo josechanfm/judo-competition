@@ -1,7 +1,7 @@
 <?php
 namespace App\Services\Printer;
 use App\Helpers\PdfHelper;
-
+use App\Services\CustomTCPDF;
 use TCPDF;
 
 class RoundRobbinOption2Service{
@@ -10,7 +10,7 @@ class RoundRobbinOption2Service{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $logo_primary='';
+    protected $logo_primary = '';
     protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
@@ -36,8 +36,8 @@ class RoundRobbinOption2Service{
     protected $generalFont='times';
     
     protected $arcColor=array(50, 50, 127);
-    protected $boxWhiteColor=array(240,240,255);
-    protected $boxBlueColor=array(255,255,255);
+    protected $boxWhiteColor=array(255,255,255);
+    protected $boxBlueColor=array(240,240,255);
     protected $circleColor=array(240,240,240);
     protected $styleWinnerLine=null;
     protected $styleArcLine=null;
@@ -83,7 +83,7 @@ class RoundRobbinOption2Service{
     }
 
     public function pdf($players = [], $winners = [],  $sequences = [], $winnerList = [], $ellipseData = [], $repechagePlayers = [], $repechage = true){
-        $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $this->pdf = new CustomTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         $this->playerCount=count($players);
         foreach($this->gameSetting[$this->playerCount] as $key=>$value){
             $this->$key=$value;
@@ -106,8 +106,33 @@ class RoundRobbinOption2Service{
         $this->pdf->Output('myfile.pdf', 'I');
     }
 
+    public function multiPdf($pdf,$players = [], $winners = [],  $sequences = [], $winnerList = [], $ellipseData = [], $repechagePlayers = [], $repechage = true){
+        $this->pdf = $pdf;
+        $this->playerCount=count($players);
+        foreach($this->gameSetting[$this->playerCount] as $key=>$value){
+            $this->$key=$value;
+        }
+        // set margins
+        //$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        //$this->pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+        $this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        //$this->pdf->SetFooterMargin(0);
+        $this->pdf->SetPrintHeader(false);
+        // $this->pdf->SetPrintFooter(false);
+        $this->pdf->SetMargins(15,10,15);
+        $this->pdf->SetAutoPageBreak(TRUE,0);
+        $this->pdf->AddPage();
+        $helper=new PdfHelper($this->pdf);
+        $helper->header1(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont, $ellipseData);
+        $this->gameTable($players);
+        $this->boxPlayers($players);
+        $this->resultBox($winnerList);
+
+        return $this->pdf ;
+    }
+
     public function gameTable($players){
-        $this->pdf->setXY($this->startX, $this->startY);
+        $this->pdf->setXY($this->startX -3 , $this->startY);
         $cnt=count($players);
         $tbl ='
         <table cellspacing="0" cellpadding="1" border="0">
@@ -121,13 +146,14 @@ class RoundRobbinOption2Service{
         <th class="num2">RANK</th></tr>';
 
         for($i=0;$i<$cnt;$i++){
-            $tbl.='<tr><td class="num">'.($i+1).'</td><td class="playerbox">'.
+            $tbl.='<tr><td class="num1">'.($i+1).'</td><td class="playerbox">'.
                 '<table border="0" cellpadding="0" cellspacing="0" width="100%">'.
                 '<tr>'.
                 '<td width="50%" style="vertical-align:top;border:none;">'.
                 $this->smartTruncate($players[$i]['name']).'<div>'. $this->smartTruncate($players[$i]['name_secondary']) .'</div>'.
                 '</td>'.
-                '<td width="50%" style="vertical-align:center;border:none;line-height:22px;text-align:right; font-size:9px;">'.
+                '<td width="50%" style="vertical-align:center;border:none;text-align:right; font-size:9px;">'.
+                '<div>'. $this->smartTruncate($players[$i]['team']['abbreviation']) .'</div>'.
                 ($players[$i]['team']['name'] ).
                 '</td>'.
                 '</tr>'.
@@ -158,22 +184,29 @@ class RoundRobbinOption2Service{
             }
             .player{
                 border: none;
-                width:200px;
+                width:220px;
             }
             .num{
                 background-color:rgb(254,206,50);
                 width:22px;
-                line-height:20px;
+                line-height:18px;
+                text-align:center;
+            }
+            .num1{
+                background-color:rgb(254,206,50);
+                width:22px;
+                line-height:22px;
                 text-align:center;
             }
             .num2{
                 background-color:rgb(245,158,51);
                 width:50px;
+                line-height:18px;
                 text-align:center;
             }
             .playerbox{
                 font-size:10px;
-                width:200px;
+                width:220px;
             }
         </style>
         ';
@@ -205,11 +238,11 @@ class RoundRobbinOption2Service{
             $this->pdf->setXY($x + 1, $y);
             $this->pdf->Cell($this->boxW , $h - 4, $players[$g[0]]['name'] . $players[$g[0]]['name_secondary'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + ($h/5));
-            $this->pdf->Cell($this->boxW, $h, $players[$g[0]]['team']['name'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h,($players[$g[0]]['team']['abbreviation'] ? $players[$g[0]]['team']['abbreviation'] . '-' : '') . $players[$g[0]]['team']['name'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + $h - 2);
-            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name'] . $players[$g[0]]['name_secondary'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name'] . $players[$g[1]]['name_secondary'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + $h + ($h/5));
-            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['team']['name'] , 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h,($players[$g[1]]['team']['abbreviation'] ? $players[$g[1]]['team']['abbreviation'] . '-' : '') . $players[$g[1]]['team']['name'] , 0, 1, 'L', 0, '', 0);
             $this->pdf->RoundedRect($x+$this->boxW, $y+($h/2), $gap, $h, $r, '0000', 'DF', $style, array(254,206,50));
             $this->pdf->circle($x+$this->boxW+$gap+2, $y+($h/2)+($h/2), 2, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
             $x1=$x+$this->boxW+$gap;
@@ -222,7 +255,7 @@ class RoundRobbinOption2Service{
     }
     private function resultBox($winnerList)
     {
-        $x = $this->resultXY[0] - 10;
+        $x = $this->resultXY[0];
         $y = $this->resultXY[1];
         $w = 60;
         $h = 35;
@@ -259,7 +292,7 @@ class RoundRobbinOption2Service{
         $this->pdf->SetFont($this->generalFont, 'B', 14);
         $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
     }
-    private function smartTruncate($name, $maxLength = 21)
+    private function smartTruncate($name, $maxLength = 15)
     {
         if (mb_strlen($name) <= $maxLength) {
             return $name;

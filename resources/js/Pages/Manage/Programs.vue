@@ -135,7 +135,7 @@
             </div>
             <template v-else>
               <div
-                v-if="competition.status === 1"
+                v-if="competition.status <= 4"
                 class="pr-4 py-2 flex justify-between bg-white shadow-md rounded-sm"
               >
                 <div class="flex justify-start">

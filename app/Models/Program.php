@@ -199,7 +199,80 @@ class Program extends Model
         // 其他情況返回原始值（去除前綴後的）
         return $cleanedWeight;
     }
+    public function maxWeight() {
+        $cleanedWeight = preg_replace('/^(MW|FW)/i', '', $this->weight_code);
+        
+        if (preg_match('/^(\d+)([+-])$/', $cleanedWeight, $matches)) {
+            $sign = $matches[2];
+            $value = (int)$matches[1];
+            
+            if (in_array($this->category->code, ['C', 'D', 'E'])) {
+                $value += 0.4;
+            } 
+            elseif (in_array($this->category->code, ['A', 'B', 'OPEN'])) {
+                $value += 0.2;
+            }
 
+            if ($sign === '+') {
+                if (in_array($this->category->code, ['C', 'D', 'E'])) {
+                    $value += 10;
+                } elseif ($this->category->code === 'B') {
+                    $value += 20;
+                }
+            }
+            
+            // 返回调整后的值
+            return $value;
+        }
+        
+        // 如果没有匹配到模式，返回原始值或默认值
+        return $this->weight_code;
+    }
+    public function minWeight() {
+        $gender = $this->converGender();
+        
+        $cleanedWeight = preg_replace('/^(MW|FW)/i', '', $this->weight_code);
+        
+        if (preg_match('/^(\d+)([+-])$/', $cleanedWeight, $matches)) {
+            $currentValue = (int)$matches[1];
+            
+            $programsInSameCategory = $this->category->programs ?? [];
+
+            if (empty($programsInSameCategory)) {
+                return max(0, $currentValue - 5);
+            }
+            
+            $weightValues = [];
+            foreach ($programsInSameCategory as $program) {
+                $programGender = $program->converGender();
+                if ($programGender !== $gender) {
+                    continue;
+                }
+                
+                $programCleanedWeight = preg_replace('/^(MW|FW)/i', '', $program->weight_code);
+                if (preg_match('/^(\d+)([+-])$/', $programCleanedWeight, $programMatches)) {
+                    $weightValues[] = (int)$programMatches[1];
+                }
+            }
+            
+            if (empty($weightValues)) {
+                return max(0, $currentValue - 5);
+            }
+
+            $weightValues = array_unique($weightValues);
+            sort($weightValues);
+
+            $currentIndex = array_search($currentValue, $weightValues);
+
+            if ($currentIndex === false || $currentIndex === 0) {
+                return max(0, $currentValue - 5);
+            }
+
+            return $weightValues[$currentIndex - 1];
+        }
+
+        return $this->weight_code;
+    }
     public function converGender()
     {
         $firstChar = strtoupper(substr($this->weight_code ?? '', 0, 1));

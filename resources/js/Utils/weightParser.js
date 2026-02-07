@@ -67,3 +67,51 @@ export const weightParser = (weight) => {
         }
     }
 }
+
+
+export function convertGender(weightCode) {
+  if (!weightCode) return '未知';
+  
+  const firstChar = weightCode.charAt(0).toUpperCase();
+  
+  switch(firstChar) {
+    case 'M': return '男子';
+    case 'F': return '女子';
+    default: return '未知';
+  }
+}
+
+export function convertWeight(weightCode) {
+  if (!weightCode) return '';
+  
+  const weight = weightCode.toString();
+  
+  // 如果是 MWULW 或 FWULW，轉換為 無限量級
+  if (['MWULW', 'FWULW', 'ULW'].includes(weight.toUpperCase())) {
+    return '無限量級';
+  }
+  
+  // 去除 MW 或 FW 前綴
+  let cleanedWeight = weight.replace(/^(MW|FW)/i, '');
+  
+  // 處理帶有 +/- 符號的體重級別
+  const plusMinusMatch = cleanedWeight.match(/^(\d+)([+-])$/);
+  if (plusMinusMatch) {
+    const sign = plusMinusMatch[2];
+    const value = plusMinusMatch[1];
+    
+    if (sign === '-') {
+      return `-${value}kg`;
+    } else if (sign === '+') {
+      return `+${value}kg`;
+    }
+  }
+  
+  // 如果是純數字，加上 kg
+  if (/^\d+$/.test(cleanedWeight)) {
+    return `${cleanedWeight}kg`;
+  }
+  
+  // 其他情況返回原始值（去除前綴後的）
+  return cleanedWeight;
+}

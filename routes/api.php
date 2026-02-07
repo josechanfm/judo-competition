@@ -33,3 +33,5 @@ Route::get('/competition/{token}',[App\Http\Controllers\Api\CompetitionControlle
 Route::get('/competition/{token}/bouts',[App\Http\Controllers\Api\CompetitionController::class, 'getCompetitionBouts']);
 Route::get('/competition/{token}/bout', [App\Http\Controllers\Api\BoutController::class, 'getCompetitionBout']);
 Route::post('/competition/{token}/bout/{bout}/result', [App\Http\Controllers\Api\BoutController::class, 'postBoutResult']);
+Route::get('/fetchCompetition',[App\Http\Controllers\Api\CompetitionController::class, 'fetchCompetitionData']);
+Route::post('/postCompetition',[App\Http\Controllers\Api\CompetitionController::class, 'postCompetitionData']);

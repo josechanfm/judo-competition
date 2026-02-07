@@ -54,7 +54,7 @@ class Bout extends Model
     public function getBluePlayerAttribute()
     {
         if ($this->blue == 0 || $this->blue == -1) {
-            return (object)["name_display" => ""];
+            return (object)["name_display" => null,'team' => null];
         } else {
             return  ProgramAthlete::find($this->blue)->athlete ?? (object)["name_display" => ""];
         };

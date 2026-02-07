@@ -58,6 +58,7 @@
                 >Import Athletes</a-button
               >
               <a :href="route('athletes.generateIdCards', competition.id)" target="_blank"><a-button type="text">download athletes id cards</a-button></a>
+              <a :href="route('manage.competition.teams-athletes-statistics-table', competition.id)" target="_blank"><a-button type="text">下載運動員統計表</a-button></a>
               <a :href="route('manage.competition.teams-athletes-table', competition.id)" target="_blank"><a-button type="text">download all teams athletes</a-button></a>
             </div>
           </div>

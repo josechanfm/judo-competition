@@ -15,6 +15,7 @@ use App\Services\Printer\TournamentQuarterService;
 use App\Models\Bout;
 use App\Models\Athlete;
 use App\Models\ProgramAthlete;
+use App\Services\CustomTCPDF;
 use App\Services\FontService;
 use App\Services\Printer\RoundRobbinOption1Service;
 use App\Services\Printer\RoundRobbinOption2Service;
@@ -511,9 +512,16 @@ class ProgramController extends Controller
             '*.section' => 'required',
             '*.sequence' => 'required',
         ]);
-        // dd($validated);
         collect($validated)->each(function (array $val) {
-            Program::where('id', $val['id'])->update($val);
+            $program = Program::find($val['id']);
+            
+            $program->update($val);
+
+            $program->bouts()->update([
+                'mat' => $val['mat'],
+                'date' => $val['date'],
+                'section' => $val['section']
+            ]);
         });
 
         return redirect()->back();
@@ -557,45 +565,19 @@ class ProgramController extends Controller
 
     public function programTimeExport(Competition $competition)
     {
-        $fileName = '項目時間表_' . now()->format('Y-m-d') . '.xlsx';
+        $fileName = $competition->name . '項目時間表.xlsx';
 
         return Excel::download(new ProgramTimeExport($competition), $fileName);
     }
 
     public function generateOnlineTable(Competition $competition, Program $program)
     {
-        $size = $program->chart_size;
-        // dd($program->competition_system);
-        $fontService = new FontService;
-
-        $file  = $fontService->addFont('resources/fonts/NotoSerifCJKtc-VF.ttf');
+        $settings = $this->tcpdfSetting($program);
+        // $fontService = new FontService;
+        // $file = $fontService->addFont('resources/fonts/NotoSerifCJKhk-Bold.ttf');
         // dd($file);
-        switch($program->competition_system){
-            case 'kos':
-                $settings = File::json(storage_path('setting/game_tournament_knockout.json'));
-                $service = new TournamentQuarterService($settings);
-                $players = $this->getPlayersFromProgram($program);
-                $repechagePlayers = null;
-                break;
-            case 'rrb':
-                $settings = File::json(storage_path('setting/game_round_robbin_option2.json'));
-                $service = new RoundRobbinOption2Service($settings);
-                $players = $program->athletes;
-                $repechagePlayers = null;
-                break;
-            case 'erm':
-                $settings = File::json(storage_path('setting/game_tournament_quarter.json'));
-                $service = new TournamentQuarterService($settings);
-                $players = $this->getPlayersFromProgram($program);
-                $repechagePlayers = $this->getRepechagePlayers($program);
-                break;
-        }
-        // dd($repechagePlayers);
-        $service->setFonts('notoserifcjktcvf', 'notoserifcjktcvf', 'notoserifcjktcvf');
-        $service->setTitles($program->competition->name, $program->competition->name_secondary);
-        // dd($this->generateSequencesArray($program));
-        $service->pdf(
-            $players,
+        $settings['service']->pdf(
+            $settings['players'],
             $this->generateWinnersArray($program),
             $this->generateSequencesArray($program),
             $this->generateWinnerList($competition,$program->athletes),
@@ -603,69 +585,43 @@ class ProgramController extends Controller
                 'program' => $program->converGender() . $program->competitionCategory->name ,
                 'athletes_count' => $program->athletes->count(),
                 'weight' => $program->convertWeight(),
-                // 'mat' => $program->mat,
+                'mat' => $program->mat,
+                'date' => $program->date,
+                'section' => $program->section,
             ],
-            $repechagePlayers,
+            $settings['repechagePlayers'],
         );
     }
 
     // CompetitionController.php
     public function generateAllProgramsOnlineTable(Competition $competition,$winnerLine = false)
     {
-        $programs = $competition->programs;
-        
-        if ($programs->isEmpty()) {
-            return response()->json(['error' => '沒有找到任何量級'], 404);
-        }
-        
-        $firstProgram = $programs->first();
-        $settings = $this->getSettingsBySystem($firstProgram->competition_system);
-        $service = $this->getServiceBySystem($firstProgram->competition_system, $settings);
-        
-        $service->setWinnerLine(true);
-        
-        $service->setFonts('NotoSerifTC', 'NotoSerifTC', 'NotoSerifTC');
-        $service->setTitles($competition->name,null);
-        
-        // 準備所有 program 的數據
-        $allProgramsData = [];
-   
-        foreach ($programs as $program) {
-            // dd($this->generateWinnersArray($program));
-            $players = $this->getPlayersFromProgram($program);
-            $allProgramsData[] = [
-                'players' => $players->toArray(),
-                'winners' => $this->generateWinnersArray($program),
-                'sequences' => $this->generateSequencesArray($program),
-                'winnerList' => $this->generateWinnerList($program),
-                'ellipseData' => [ 
-                    'program' => $program->converGender() . $program->competitionCategory->name,
-                    'mat' => $program->mat,
+        $pdf = new CustomTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+        $pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+        $pdf->SetPrintHeader(false);
+        $pdf->SetMargins(15, 10, 15);
+        $pdf->SetAutoPageBreak(TRUE, 0);
+        foreach($competition->programs as $program){
+            $settings = $this->tcpdfSetting($program);
+            $pdf = $settings['service']->multiPdf(
+                $pdf,
+                $settings['players'],
+                $this->generateWinnersArray($program),
+                $this->generateSequencesArray($program),
+                $this->generateWinnerList($competition,$program->athletes),
+                [ 
+                    'program' => $program->converGender() . $program->competitionCategory->name ,
                     'athletes_count' => $program->athletes->count(),
-                    'weight' => $program->convertWeight()
+                    'weight' => $program->convertWeight(),
+                    'mat' => $program->mat,
+                    'date' => $program->date,
+                    'section' => $program->section,
                 ],
-                'repechagePlayers' => [],
-                'repechage' => false
-            ];
-            // dd($allProgramsData);
-        }
-        // dd($allProgramsData);
-        // 如果 service 有 multiplePrograms 方法就使用，否則使用第一個
-        if (method_exists($service, 'pdfForMultiplePrograms')) {
-            $service->pdfForMultiplePrograms($allProgramsData);
-        } else {
-            // 回退方案：只生成第一個 program
-            $firstProgramData = $allProgramsData[0];
-            $service->pdf(
-                $firstProgramData['players'],
-                $firstProgramData['winners'],
-                $firstProgramData['sequences'],
-                $firstProgramData['winnerList'],
-                $firstProgramData['ellipseData'],
-                $firstProgramData['repechagePlayers'],
-                $firstProgramData['repechage']
+                $settings['repechagePlayers'],
             );
         }
+        $pdf->Output($competition->name . '所有上線表.pdf', 'I');
     }
     /**
      * 生成序列號
@@ -709,33 +665,6 @@ class ProgramController extends Controller
         return $winner_list;
     }
 
-    private function getSettingsBySystem($system)
-    {
-        switch($system) {
-            case 'kos':
-                return File::json(storage_path('setting/game_tournament_knockout.json'));
-            case 'rrb':
-                return File::json(storage_path('setting/game_round_robbin_option1.json'));
-            default:
-                return File::json(storage_path('setting/game_tournament_knockout.json'));
-        }
-    }
-
-    /**
-     * 根據競賽系統取得服務
-     */
-    private function getServiceBySystem($system, $settings)
-    {
-        switch($system) {
-            case 'kos':
-                return new TournamentQuarterService($settings);
-            case 'rrb':
-                return new RoundRobbinOption1Service($settings);
-            default:
-                return new TournamentQuarterService($settings);
-        }
-    }
-
     /**
      * 從 program 取得選手資料
      */
@@ -746,8 +675,8 @@ class ProgramController extends Controller
                 return;
             } else {
                 return [
-                    'white' => ['name' => $bout->white_player->name ?? '' , 'name_secondary' => $bout->white_player->name_secondary ?? '', 'team' => $bout->white_player->team->name ?? '' , 'is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? ''],
-                    'blue' => ['name' => $bout->blue_player->name ?? '', 'name_secondary' => $bout->blue_player->name_secondary ?? '', 'team' => $bout->blue_player->team->name ?? '' , 'is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '']
+                    'white' => ['name' => $bout->white_player->name ?? '' , 'name_secondary' => $bout->white_player->name_secondary ?? '', 'team' => ($bout->white_player->team->abbreviation ? $bout->white_player->team->abbreviation . '-' : '') . $bout->white_player->team->name ?? '' , 'is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? ''],
+                    'blue' => ['name' => $bout->blue_player->name ?? '', 'name_secondary' => $bout->blue_player->name_secondary ?? '', 'team' =>  $bout->blue_player->team ? (($bout->blue_player->team->abbreviation ? $bout->blue_player->team->abbreviation . '-' : '') . $bout->blue_player->team->name ?? '') : '' , 'is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '']
                 ];
             }
         })->reject(function ($bout) {
@@ -848,7 +777,7 @@ class ProgramController extends Controller
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
         $pdf->SetAutoPageBreak(false);
-        $pdf->SetFont('NotoSerifTC', '', 30);
+        $pdf->SetFont('notoserifcjkhk', '', 30);
         
         $pageWidth = 595; // A4 纵向宽度 (pt)
         
@@ -887,13 +816,13 @@ class ProgramController extends Controller
 
             $pdf->SetXY($followX + 90, 440);
             if(strlen($athleteName) > 16){
-                $pdf->SetFont('NotoSerifTC', '', 16);
+                $pdf->SetFont('notoserifcjkhk', '', 16);
                 $pdf->Cell($pdf->GetStringWidth($athleteName), 40, $athleteName , 0, 0, 'L');
             }else {
                 $pdf->Cell($pdf->GetStringWidth($athleteName), 40, $athleteName , 0, 0, 'L');
             }
 
-            $pdf->SetFont('NotoSerifTC', '', 30);
+            $pdf->SetFont('notoserifcjkhk', '', 30);
             // 第四行：名次
             $fourthLineText = '名次：第' . $rank . '名';
             $pdf->SetXY($followX, 520);
@@ -963,6 +892,38 @@ class ProgramController extends Controller
                     'blue' => ['name_display' => $bout->blue_player->name_display ?? '', 'from' => ''],
                 ];
             })->values()->all()
+        ];
+    }
+
+    public function tcpdfSetting($program){
+        switch($program->competition_system){
+            case 'kos':
+                $settings = File::json(storage_path('setting/game_tournament_knockout.json'));
+                $service = new TournamentQuarterService($settings);
+                $players = $this->getPlayersFromProgram($program);
+                $repechagePlayers = null;
+                break;
+            case 'rrb':
+                $settings = File::json(storage_path('setting/game_round_robbin_option2.json'));
+                $service = new RoundRobbinOption2Service($settings);
+                $players = $program->athletes;
+                $repechagePlayers = null;
+                break;
+            case 'erm':
+                $settings = File::json(storage_path('setting/game_tournament_quarter.json'));
+                $service = new TournamentQuarterService($settings);
+                $players = $this->getPlayersFromProgram($program);
+                $repechagePlayers = $this->getRepechagePlayers($program);
+                break;
+        }
+        $service->setFonts('notoserifcjkhk', 'notoserifcjkhk', 'notoserifcjkhk');
+        $service->setTitles($program->competition->name, $program->competition->name_secondary);
+
+        return [
+            'settings' => $settings,
+            'service' => $service,
+            'players' => $players,
+            'repechagePlayers' => $repechagePlayers,
         ];
     }
 }

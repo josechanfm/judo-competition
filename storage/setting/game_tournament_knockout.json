@@ -1,7 +1,7 @@
 {
     "2": {
         "startX": 25,
-        "startY": 35,
+        "startY": 40,
         "boxW": 95,
         "boxH": 22,
         "boxGap": 6,
@@ -14,6 +14,7 @@
         "circleSize": 3,
         "circleFontSize": 10,
         "playerFontSize": 11,
+        "teamFontSize": 10,
         "winners": [ 
             [0]
         ],
@@ -21,13 +22,13 @@
             [1]
         ],
         "resultXY": [
-            120,
-            120
+            140,
+            240
         ]
     },
     "4": {
         "startX": 25,
-        "startY": 35,
+        "startY": 40,
         "boxW": 95,
         "boxH": 22,
         "boxGap": 6,
@@ -40,6 +41,7 @@
         "circleSize": 3,
         "circleFontSize": 10,
         "playerFontSize": 11,
+        "teamFontSize": 10,
         "winners": [ 
             [0, 0],
             [1]
@@ -49,13 +51,13 @@
             [3]
         ],
         "resultXY": [
-            120,
-            120
+            140,
+            240
         ]
     },
     "8": {
         "startX": 25,
-        "startY": 35,
+        "startY": 40,
         "boxW": 80,
         "boxH": 22,
         "boxGap": 6,
@@ -69,6 +71,7 @@
         "circleSize": 3,
         "circleFontSize": 10,
         "playerFontSize": 11,
+        "teamFontSize": 10,
         "winners": [ 
             [2, 2, 2, 2],
             [0, 0],
@@ -81,12 +84,12 @@
         ],
         "resultXY": [
             140,
-            130
+            240
         ]
     },
     "16": {
         "startX": 25,
-        "startY": 35,
+        "startY": 40,
         "boxW": 60,
         "boxH": 15,
         "boxGap": 6,
@@ -100,6 +103,7 @@
         "circleSize": 3,
         "circleFontSize": 9,
         "playerFontSize": 9,
+        "teamFontSize": 9,
         "winners": [ 
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0],
@@ -114,12 +118,12 @@
         ],
         "resultXY": [
             140,
-            175
+            240
         ]
     },
     "32": {
         "startX": 25,
-        "startY": 30,
+        "startY": 40,
         "boxW": 60,
         "boxH": 12,
         "boxGap": 2,
@@ -133,8 +137,9 @@
         "circleSize": 2.5,
         "circleFontSize": 8,
         "playerFontSize": 8,
+        "teamFontSize": 8,
         "resultXY": [
-            135,
+            140,
             240
         ]
     },
@@ -151,11 +156,12 @@
         "repechageBoxGap": 1,
         "repechageSectionGap": 1,
         "circleSize": 2,
-        "circleFontSize": 10,
+        "circleFontSize": 8,
         "playerFontSize": 8,
+        "teamFontSize": 8,
         "resultXY": [
-            150,
-            233
+            140,
+            240
         ]
     }
 }

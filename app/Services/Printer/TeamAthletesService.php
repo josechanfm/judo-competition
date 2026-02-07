@@ -10,7 +10,7 @@ class TeamAthletesService
 {
     private $pdf;
     private $title = "隊伍運動員名單";
-    private $logo_primary = 'images/mja_logo.png';
+    private $logo_primary = '';
     private $title_sub = null;
     private $logo_secondary;
     private $titleFont = 'NotoSerifTC';
@@ -59,7 +59,145 @@ class TeamAthletesService
 
         return $this->pdf;
     }
+    public function generateAllTeamsAthletesStatistics($competition, $teams)
+    {
+        // 添加页面
+        $this->pdf->AddPage();
+        
+        // 设置字体        
+        $helper = new PdfHelper($this->pdf);
+        $helper->header4(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont);
+        
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 14); // 减小全局字体
 
+        $this->pdf->SetY($this->pdf->GetY() + 13);
+        $this->pdf->Cell(0, 5, '運動員統計表', 0, 1, 'C');
+        $this->pdf->Ln(5); // 减小间距
+        
+        // 生成表格HTML
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 8);
+        $this->pdf->setX(12);
+        $html = $this->generateTableHTML($teams);
+        
+        // 输出HTML内容
+        $this->pdf->writeHTML($html, true, false, true, false, '');
+        
+        return $this->pdf;
+    }
+
+    private function generateTableHTML($teams)
+    {
+        
+        $html = '<table border="0.5" cellpadding="2" cellspacing="0" style=" line-height:1.2; width:99%;">';
+        
+        // 表头
+        $html .= '<thead><tr>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:5%;">序</th>'; // 较小的宽度
+        $html .= '<th colspan="2" style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:30%;">學校</th>'; // 较大的宽度
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">男子A組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">男子BC組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">男子D組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">男子E組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">女子A組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">女子BC組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">女子D組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:8%;">女子E組</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; background-color:#f2f2f2; padding:3px 1px; width:5%;">總計</th>'; // 较小的宽度
+        $html .= '</tr></thead>';
+        
+        // 表格内容
+        $html .= '<tbody>';
+        
+        $index = 1;
+        foreach ($teams as $team) {
+            // 获取各分组人数统计
+            $maleA = $this->getCategoryCount($team, 'M', 'A');
+            $maleBC = $this->getCategoryCount($team, 'M', 'BC');
+            $maleD = $this->getCategoryCount($team, 'M', 'D');
+            $maleE = $this->getCategoryCount($team, 'M', 'E');
+            
+            $femaleA = $this->getCategoryCount($team, 'F', 'A');
+            $femaleBC = $this->getCategoryCount($team, 'F', 'BC');
+            $femaleD = $this->getCategoryCount($team, 'F', 'D');
+            $femaleE = $this->getCategoryCount($team, 'F', 'E');
+            
+            // 计算总计
+            $total = $maleA + $maleBC + $maleD + $maleE + $femaleA + $femaleBC + $femaleD + $femaleE;
+            
+            $html .= '<tr>';
+            $html .= '<td style="width:5%; text-align:center; padding:2px 1px;">' . $index . '</td>';
+            $html .= '<td style="width:10%; padding:2px 1px;">' . htmlspecialchars($team->abbreviation ?? $team->name) . '</td>';
+            $html .= '<td style="width:20%; padding:2px 1px; border-left: none;">' . htmlspecialchars($team->name ?? '') . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $maleA . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $maleBC . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $maleD . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $maleE . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $femaleA . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $femaleBC . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $femaleD . '</td>';
+            $html .= '<td style="width:8%; text-align:center; padding:2px 1px;">' . $femaleE . '</td>';
+            $html .= '<td style="width:5%; text-align:center; font-weight:bold; padding:2px 1px;">' . $total . '</td>';
+            $html .= '</tr>';
+            
+            $index++;
+        }
+        
+        // 合计行
+        $html .= '<tr style=" font-weight:bold; background-color:#f9f9f9;">';
+        $html .= '<td colspan="2" style=" text-align:right; padding:2px 1px;">合計</td>';
+        
+        $maleATotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'M', 'A');
+        });
+        $maleBCTotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'M', 'BC');
+        });
+        $maleDTotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'M', 'D');
+        });
+        $maleETotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'M', 'E');
+        });
+        
+        $femaleATotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'F', 'A');
+        });
+        $femaleBCTotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'F', 'BC');
+        });
+        $femaleDTotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'F', 'D');
+        });
+        $femaleETotal = $teams->sum(function($team) {
+            return $this->getCategoryCount($team, 'F', 'E');
+        });
+        
+        $grandTotal = $maleATotal + $maleBCTotal + $maleDTotal + $maleETotal + 
+                    $femaleATotal + $femaleBCTotal + $femaleDTotal + $femaleETotal;
+        $html .= '<td> </td>';  
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $maleATotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $maleBCTotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $maleDTotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $maleETotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $femaleATotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $femaleBCTotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $femaleDTotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $femaleETotal . '</td>';
+        $html .= '<td style=" text-align:center; padding:2px 1px;">' . $grandTotal . '</td>';
+        $html .= '</tr>';
+        
+        $html .= '</tbody></table>';
+        
+        return $html;
+    }
+
+    private function getCategoryCount($team, $gender, $categoryCode)
+    {
+        if (!isset($team->athletesCategoryCount[$categoryCode][$gender])) {
+            return 0;
+        }
+        return $team->athletesCategoryCount[$categoryCode][$gender];
+    }
     private function calculateTotalPages($athletes)
     {
         $totalRows = $athletes->count();

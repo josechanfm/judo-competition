@@ -1,7 +1,7 @@
 {
     "2": {
         "startX": 20,
-        "startY": 35,
+        "startY": 40,
         "boxW": 60,
         "boxH": 20,
         "boxGap": 6,
@@ -13,11 +13,14 @@
         "repechageSectionGap": 10,
         "circleSize": 3,
         "playerFontSize": 14,
-        "resultXY":[120,120]
+        "resultXY": [
+            140,
+            240
+        ]
     },
     "3": {
         "startX": 20,
-        "startY": 35,
+        "startY": 40,
         "boxW": 60,
         "boxH": 20,
         "boxGap": 6,
@@ -29,11 +32,14 @@
         "repechageSectionGap": 5,
         "circleSize": 3,
         "playerFontSize": 14,
-        "resultXY":[140,130]
+        "resultXY": [
+            140,
+            240
+        ]
     },
     "4": {
         "startX": 20,
-        "startY": 35,
+        "startY": 40,
         "boxW": 60,
         "boxH": 15,
         "boxGap": 6,
@@ -45,11 +51,14 @@
         "repechageSectionGap": 5,
         "circleSize": 3,
         "playerFontSize": 12,
-        "resultXY":[145,170]
+        "resultXY": [
+            140,
+            240
+        ]
     },
     "5": {
         "startX": 20,
-        "startY": 35,
+        "startY": 40,
         "boxW": 60,
         "boxH": 15,
         "boxGap": 2,
@@ -61,7 +70,10 @@
         "repechageSectionGap": 5,
         "circleSize": 3,
         "playerFontSize": 12,
-        "resultXY":[145,210]
+        "resultXY": [
+            140,
+            240
+        ]
     },
     "6": {
         "startX": 25,
@@ -77,6 +89,9 @@
         "repechageSectionGap": 1,
         "circleSize": 2,
         "playerFontSize": 8,
-        "resultXY":[150,233]
+        "resultXY": [
+            140,
+            240
+        ]
     }
 }

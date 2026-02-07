@@ -409,5 +409,45 @@ class AthleteController extends Controller
         return response($pdf->Output("{$competition->name}運動員名單.pdf", 'I'))
             ->header('Content-Type', 'application/pdf');
     }
+
+    public function generateAllTeamsAthletesStatistics(Competition $competition)
+    {
+        $teams = $competition->teams()
+            ->with(['athletes', 'athletes.programs.category'])
+            ->orderBy('abbreviation')
+            ->get()->map(function ($team) {
+                $data = [];
+                foreach ($team->athletes as $athlete) {
+                    // 确保 athlete 有 programs 且不为空
+                    if ($athlete->programs && isset($athlete->programs[0])) {
+                        $program = $athlete->programs[0];
+                        if ($program->category) {
+                            $code = $program->category->code;
+                            $gender = $athlete->gender;
+                            
+                            if (!isset($data[$code][$gender])) {
+                                $data[$code][$gender] = 1;
+                            } else {
+                                $data[$code][$gender]++;
+                            }
+                        }
+                    }
+                }
+                $team->athletesCategoryCount = $data;
+                $team->athletesCount = $team->athletes->count();
+                return $team;
+            });
+        $TeamAthletesService = new TeamAthletesService();
+
+        $TeamAthletesService->setTitle(
+            $competition->name,
+            $competition->name_secondary
+        );
+        
+        $pdf = $TeamAthletesService->generateAllTeamsAthletesStatistics($competition,$teams);
+
+        return response($pdf->Output("{$competition->name}運動員統計表.pdf", 'I'))
+        ->header('Content-Type', 'application/pdf');
+    }
 }
 

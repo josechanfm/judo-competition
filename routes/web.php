@@ -87,6 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
     Route::get('manage/competition/{competition}/result-table/{blankMedals}', [App\Http\Controllers\Manage\CompetitionController::class, 'resultTable'])->name('manage.competition.result-table');
     // Route::get('/pdf/simple', [PdfController::class, 'generatePdfWithRoundedHeader'])->name('simplepdf');
+    Route::get('manage/competition/{competition}/teams-athletes-statistics-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllTeamsAthletesStatistics'])->name('manage.competition.teams-athletes-statistics-table');
     Route::get('manage/competition/{competition}/teams-athletes-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllTeamsAthletes'])->name('manage.competition.teams-athletes-table');
     Route::get('importname',[App\Http\Controllers\Manage\AthleteController::class , 'importExcel']);
     Route::get('manage/competition/{competition}/export/medal_quantity', [App\Http\Controllers\Manage\ProgramController::class, 'medalQuantityExport'])->name('manage.competition.program.export.medal-quantity');    

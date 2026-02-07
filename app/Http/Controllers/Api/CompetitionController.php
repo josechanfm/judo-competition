@@ -77,7 +77,7 @@ class CompetitionController extends Controller
                     'category_id' => $program->competition_category_id,
                     'name' => $program->converGender() . $program->convertWeight(),
                     'max' => $program->maxWeight(),
-                    'min' => 0,
+                    'min' => $program->minWeight(),
                 ];
             });
         });

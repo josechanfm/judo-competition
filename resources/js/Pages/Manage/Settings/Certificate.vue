@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import useXSRFHeader from "::admin/Utils/useXSRFHeader";
+
 
 export default {
   name: "Certificate",
@@ -39,7 +39,7 @@ export default {
     };
   },
   setup() {
-    const headers = useXSRFHeader();
+    const headers = '';
 
     return { headers };
   },

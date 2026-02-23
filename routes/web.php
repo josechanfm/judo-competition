@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function () {
     Route::get('importname',[App\Http\Controllers\Manage\AthleteController::class , 'importExcel']);
     Route::get('manage/competition/{competition}/export/medal_quantity', [App\Http\Controllers\Manage\ProgramController::class, 'medalQuantityExport'])->name('manage.competition.program.export.medal-quantity');    
     Route::get('manage/competition/{competition}/export/program_time', [App\Http\Controllers\Manage\ProgramController::class, 'programTimeExport'])->name('manage.competition.program.export.program-time');    
+    Route::get('manage/competition/{competition}/export_athletes_id_card',[App\Http\Controllers\Manage\AthleteController::class, 'exportAthletesIDCard'])->name('manage.competition.athletes.export.id-card');
     Route::get('manage/print/demo', [App\Http\Controllers\Manage\Printer\PrinterController::class, 'demo'])->name('manage.print.demo');
     Route::get('manage/print/{competition}/programs', [App\Http\Controllers\Manage\Printer\PrinterController::class, 'programs'])->name('manage.print.programs');
     Route::get('manage/print/tournament_quarter', [App\Http\Controllers\Manage\Printer\TournamentQuarterController::class, 'printPdf'])->name('manage.print.tournament_quarter');

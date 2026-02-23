@@ -386,7 +386,7 @@ class TeamAthletesService
         $groups = [];
         foreach ($athlete['programs'] as $p) {
             $program = Program::where('id',$p['id'])->first();
-            $groups[] = $program->converGender() . $program->category->name . $program->convertWeight();
+            $groups[] = $program->convertGender() . $program->category->name . $program->convertWeight();
         }
         
         $groups = array_unique($groups);

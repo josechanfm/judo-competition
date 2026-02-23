@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Manage;
 
+use App\Exports\AthleteIDCardExport;
 use App\Imports\NameSecondaryImport;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
@@ -327,7 +328,7 @@ class AthleteController extends Controller
                     
                     // 添加項目特定信息
                     $athlete->program_name = $program->name;
-                    $athlete->programCategoryWeight = $program->converGender() . $program->competitionCategory->name . $program->convertWeight();
+                    $athlete->programCategoryWeight = $program->convertGender() . $program->competitionCategory->name . $program->convertWeight();
                     $athlete->team = $athlete->team;
                     $athlete->original_program_id = $program->id; // 標記原始項目
                     
@@ -337,7 +338,7 @@ class AthleteController extends Controller
         });
         // dd($programAthletes[0]);
         if ($programAthletes->isEmpty()) {
-            return back()->with('error', '该比赛没有参赛运动员');
+            return back()->with('error', '該項目沒有運動員');
         }
 
         $pdfService = new AthletePdfService();
@@ -448,6 +449,29 @@ class AthleteController extends Controller
 
         return response($pdf->Output("{$competition->name}運動員統計表.pdf", 'I'))
         ->header('Content-Type', 'application/pdf');
+    }
+
+    public function exportAthletesIDCard(Competition $competition){
+        $programAthletes = $competition->categories->flatMap(function ($category) {
+            return $category->programs->flatMap(function ($program) use ($category) {
+                return $program->programAthletes->map(function ($programAthlete) use ($program, $category) {
+                    // 複製運動員對象
+                    $athlete = clone $programAthlete->athlete;
+                    
+                    // 添加項目特定信息
+                    $athlete->program_name = $program->name;
+                    $athlete->programCategoryWeight = $program->convertGender() . $program->competitionCategory->name . $program->convertWeight();
+                    $athlete->team = $athlete->team;
+                    $athlete->original_program_id = $program->id; // 標記原始項目
+                    
+                    return $athlete;
+                });
+            });
+        });
+
+        $fileName = $competition->name . '運動員ID_Card表.xlsx';
+
+        return Excel::download(new AthleteIDCardExport($programAthletes), $fileName);
     }
 }
 

@@ -274,7 +274,7 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
         $groupType = $this->getGroupType($program);
 
         return [
-            $program->converGender() . $program->competitionCategory->name . $program->convertWeight(),
+            $program->convertGender() . $program->competitionCategory->name . $program->convertWeight(),
             $this->getContestSystemName($contestSystem),
             $athletesCount,
             $matchTimeFormatted,

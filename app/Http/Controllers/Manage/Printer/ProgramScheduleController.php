@@ -44,48 +44,52 @@ class ProgramScheduleController extends Controller
     {
         $matNumbers = range(1, $competition->mat_number);
         $sectionNumbers = range(1, $competition->section_number);
+        // dd($competition->days);
         
         $allBouts = [];
         
         // 遍歷所有場地和賽區
-        foreach ($matNumbers as $mat) {
-            foreach ($sectionNumbers as $section) {
-                // 獲取該場地和賽區的所有比賽
-                $bouts = $competition->bouts()
-                    ->where('mat', $mat)
-                    ->where('section', $section)
-                    ->where('queue', '!=', 0)
-                    ->orderBy('queue')
-                    ->get();
-                
-                if ($bouts->isNotEmpty()) {
-                    $formattedBouts = $bouts->map(function ($bout) use ($mat, $section) {
-                        return [
-                            'sequence' => $bout['queue'],
-                            'category' => $bout->program->converGender() . $bout['program']->competitionCategory->name,
-                            'weight' => $bout->program->convertWeight(),
-                            'round' => $bout->bout_name,
-                            'event_date' => $bout->date,
-                            'status' => $bout->status,
-                            'winner' => $bout->winner == $bout->white ? 'white' : ($bout->winner == $bout->blue ? 'blue' : '') ,
-                            'white_player' => ($this->smartTruncate($bout->white_player?->name ?? $bout->whiteRiseFromQueue($bout))) . $this->smartTruncate($bout->white_player?->name_secondary ?? ''),
-                            'white_is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? '',
-                            'white_team' => $bout->white_player->team->name ?? '',
-                            'blue_player' => ($this->smartTruncate($bout->blue_player?->name ?? $bout->blueRiseFromQueue($bout)))  . $this->smartTruncate($bout->blue_player?->name_secondary ?? ''),
-                            'blue_is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '',
-                            'blue_team' => $bout?->blue_player->team->name ?? '',
-                            'time' => $bout->duration_formatted,
+        foreach ($competition->days as $day){
+            foreach ($matNumbers as $mat) {
+                foreach ($sectionNumbers as $section) {
+                    // 獲取該場地和賽區的所有比賽
+                    $bouts = $competition->bouts()
+                        ->where('date', $day)
+                        ->where('mat', $mat)
+                        ->where('section', $section)
+                        ->where('queue', '!=', 0)
+                        ->orderBy('queue')
+                        ->get();
+                    
+                    if ($bouts->isNotEmpty()) {
+                        $formattedBouts = $bouts->map(function ($bout) use ($mat, $section) {
+                            return [
+                                'sequence' => $bout['queue'],
+                                'category' => $bout->program->convertGender() . $bout['program']->competitionCategory->name,
+                                'weight' => $bout->program->convertWeight(),
+                                'round' => $bout->bout_name,
+                                'event_date' => $bout->date,
+                                'status' => $bout->status,
+                                'winner' => $bout->winner == $bout->white ? 'white' : ($bout->winner == $bout->blue ? 'blue' : '') ,
+                                'white_player' => ($this->smartTruncate($bout->white_player?->name ?? $bout->whiteRiseFromQueue($bout))) . $this->smartTruncate($bout->white_player?->name_secondary ?? ''),
+                                'white_is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? '',
+                                'white_team' => $bout->white_player->team->name ?? '',
+                                'blue_player' => ($this->smartTruncate($bout->blue_player?->name ?? $bout->blueRiseFromQueue($bout)))  . $this->smartTruncate($bout->blue_player?->name_secondary ?? ''),
+                                'blue_is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '',
+                                'blue_team' => $bout?->blue_player->team->name ?? '',
+                                'time' => $bout->duration_formatted,
+                                'mat' => $mat,
+                                'section' => $section,
+                            ];
+                        });
+                        
+                        $allBouts[] = [
                             'mat' => $mat,
                             'section' => $section,
+                            'bouts' => $formattedBouts,
+                            'date' => $bouts[0]->date ?? null
                         ];
-                    });
-                    
-                    $allBouts[] = [
-                        'mat' => $mat,
-                        'section' => $section,
-                        'bouts' => $formattedBouts,
-                        'date' => $bouts[0]->date ?? null
-                    ];
+                    }
                 }
             }
         }

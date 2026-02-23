@@ -75,7 +75,7 @@ class CompetitionController extends Controller
                 return [
                     'id' => $program->id,
                     'category_id' => $program->competition_category_id,
-                    'name' => $program->converGender() . $program->convertWeight(),
+                    'name' => $program->convertGender() . $program->convertWeight(),
                     'max' => $program->maxWeight(),
                     'min' => $program->minWeight(),
                 ];
@@ -100,16 +100,12 @@ class CompetitionController extends Controller
     }
     public function postCompetitionData(Request $request)
     {
-        // 验证请求数据
         $validated = $request->validate([
-            'competition_token' => 'required|string|exists:competitions,token',
             'version' => 'required|integer',
             'athletes' => 'required|array',
-            'athletes.*.id' => 'required|integer|exists:program_athletes,id',
-            'athletes.*.actual' => 'nullable|numeric',
-            'athletes.*.signature' => 'nullable|string',
+            'categories' => 'sometimes|array',
+            'weights' => 'sometimes|array',
         ]);
-
         // 查找比賽
         $competition = Competition::where('token', $validated['competition_token'])->firstOrFail();
 
@@ -137,7 +133,7 @@ class CompetitionController extends Controller
                 $updateData = [];
                 
                 if (isset($athleteData['actual'])) {
-                    $updateData['actual_weight'] = $athleteData['actual'];
+                    $updateData['actual_weight'] = $athleteData['weight'];
                 }
                 
                 if (isset($athleteData['signature'])) {
@@ -164,5 +160,4 @@ class CompetitionController extends Controller
         return response()->json($response);
 
     }
-    public function sendCompetition(Competition $competition) {}
 }

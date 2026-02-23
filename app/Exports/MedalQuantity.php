@@ -63,7 +63,7 @@ class MedalQuantity implements FromCollection, WithHeadings, WithMapping, Should
         return [
             $this->rowNumber++, // 按顺序编号，从1开始
             $program->competition_date ?? $program->date ?? '', // 比赛日期
-            $program->converGender() . $program->competitionCategory->name ?? '', // 参赛组别
+            $program->convertGender() . $program->competitionCategory->name ?? '', // 参赛组别
             $participantCount,
             $program->convertWeight() , // 参赛级别
             $gold,

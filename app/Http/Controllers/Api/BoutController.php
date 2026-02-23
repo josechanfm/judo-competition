@@ -79,7 +79,7 @@ class BoutController extends Controller
                 'mat' => $bout->mat,
                 'weight' => $bout->program ? $bout->program->convertWeight() : null,
                 'category' => $bout->program->competitionCategory->name ?? null,
-                'gender' => $bout->program->converGender(),
+                'gender' => $bout->program->convertGender(),
                 'bout_name' => $bout->bout_name
             ],
             'time' => $bout->duration / 60 ,

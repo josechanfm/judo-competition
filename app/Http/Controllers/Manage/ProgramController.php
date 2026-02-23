@@ -122,7 +122,7 @@ class ProgramController extends Controller
     }
     public function progress(Competition $competition)
     {
-        $competition->programAthletes;
+        $competition->programAthletes = $competition->programAthletes()->get();
         $competition->programsBouts;
 
         $competition->bouts = $competition->bouts()->where('queue', '!=', 0)->orderBy('queue')->get();
@@ -503,7 +503,7 @@ class ProgramController extends Controller
         return response()->json($program);
     }
 
-    public function updateSequence(Request $request)
+    public function updateSequence(Competition $competition,Request $request)
     {
         $validated = $request->validate([
             '*.id' => 'required',
@@ -523,6 +523,9 @@ class ProgramController extends Controller
                 'section' => $val['section']
             ]);
         });
+        $service = new BoutGenerationService($competition);
+
+        $service->resetSequenceAndQueue();
 
         return redirect()->back();
     }
@@ -582,7 +585,7 @@ class ProgramController extends Controller
             $this->generateSequencesArray($program),
             $this->generateWinnerList($competition,$program->athletes),
             [ 
-                'program' => $program->converGender() . $program->competitionCategory->name ,
+                'program' => $program->convertGender() . $program->competitionCategory->name ,
                 'athletes_count' => $program->athletes->count(),
                 'weight' => $program->convertWeight(),
                 'mat' => $program->mat,
@@ -611,7 +614,7 @@ class ProgramController extends Controller
                 $this->generateSequencesArray($program),
                 $this->generateWinnerList($competition,$program->athletes),
                 [ 
-                    'program' => $program->converGender() . $program->competitionCategory->name ,
+                    'program' => $program->convertGender() . $program->competitionCategory->name ,
                     'athletes_count' => $program->athletes->count(),
                     'weight' => $program->convertWeight(),
                     'mat' => $program->mat,

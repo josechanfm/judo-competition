@@ -229,7 +229,7 @@ class Program extends Model
         return $this->weight_code;
     }
     public function minWeight() {
-        $gender = $this->converGender();
+        $gender = $this->convertGender();
         
         $cleanedWeight = preg_replace('/^(MW|FW)/i', '', $this->weight_code);
         
@@ -244,7 +244,7 @@ class Program extends Model
             
             $weightValues = [];
             foreach ($programsInSameCategory as $program) {
-                $programGender = $program->converGender();
+                $programGender = $program->convertGender();
                 if ($programGender !== $gender) {
                     continue;
                 }
@@ -273,7 +273,7 @@ class Program extends Model
 
         return $this->weight_code;
     }
-    public function converGender()
+    public function convertGender()
     {
         $firstChar = strtoupper(substr($this->weight_code ?? '', 0, 1));
         

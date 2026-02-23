@@ -31,8 +31,8 @@ class AthletePdfService
     {
         // 每頁只顯示兩個運動員（左側兩個位置）
         $positions = [
-            ['x' => 0, 'y' => 0],    // 左上
-            ['x' => 0, 'y' => 148],  // 左下
+            ['x' => 28, 'y' => 0],    // 左上
+            ['x' => 28, 'y' => 148],  // 左下
         ];
 
         $currentPosition = 0;
@@ -103,54 +103,68 @@ class AthletePdfService
         // 檢查是否有 name_secondary
         $hasSecondaryName = !empty($athlete->name_secondary);
 
-        // 計算名稱區域的垂直居中位置
-        $nameAreaCenterY = $hasSecondaryName ? 
-            ($startY + 76 + $startY + 84) / 2 : // 有次名稱時，在兩行中間
-            $startY + 80; // 只有主名稱時，在原來次名稱的位置
-
         // 定義字段位置和寬度 - 調整x坐標以適應左側位置
         $fields = [
             'name' => [
-                'x' => $startX + 30, 
-                'y' => $hasSecondaryName ? $startY + 60 : $nameAreaCenterY,
-                'width' => 48
+                'x' => $startX, 
+                'y' => $startY + 77,
+                'width' => 50
             ],
             'name_secondary' => [
-                'x' => $startX + 30, 
-                'y' => $startY + 75,
-                'width' => 48
+                'x' => $startX, 
+                'y' => $startY + 88,
+                'width' => 50
             ],
             'programCategoryWeight' => [
-                'x' => $startX + 28, 
-                'y' => $startY + 90,
+                'x' => $startX, 
+                'y' => $startY + 100,
                 'width' => 50
             ],
             'team' => [
-                'x' => $startX + 28, 
-                'y' => $startY + 105,
+                'x' => $startX, 
+                'y' => $startY + 55,
+                'width' => 50
+            ],
+            'abbreviation' => [
+                'x' => $startX,
+                'y' => $startY + 66,
                 'width' => 50
             ]
         ];
 
                 // 設置字體
-        $this->pdf->SetFont('notoserifcjkhk', 'B', 18);
+        $this->pdf->SetFont('notoserifcjkhk', 'BU', 18);
         // 添加運動員數據
-        $this->addField($fields['name'], ($this->smartTruncate($athlete->name) ?? ''));
+        $this->addField($fields['name'], $athlete->name);
         
         // 只有在有 name_secondary 時才顯示
         if ($hasSecondaryName) {
-            $this->addField($fields['name_secondary'], ($this->smartTruncate($athlete->name_secondary) ?? ''));
+            if(mb_strlen($athlete->name_secondary) > 40){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 7);
+            }else if(mb_strlen($athlete->name_secondary) > 35){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 8);
+            }else if(mb_strlen($athlete->name_secondary) > 30){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 9);
+            }else if(mb_strlen($athlete->name_secondary) > 25){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 10);
+            }else if(mb_strlen($athlete->name_secondary) > 20){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 13);
+            }else {
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 16);
+            }
+            $this->addField($fields['name_secondary'], $athlete->name_secondary);
         }
         if ($athlete->gender == 'M') {
             $this->pdf->SetTextColor(0, 0, 255);
         } else {
             $this->pdf->SetTextColor(255, 0, 0);
         }
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 24);
         $this->addField($fields['programCategoryWeight'], ($athlete->programCategoryWeight ?? ''));
         $this->pdf->setTextColor(0,0,0);
-        $this->pdf->SetFont('notoserifcjkhk', 'B', 14);
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 18);
         $this->addField($fields['team'], ($athlete->team->name ?? ''));
-
+        $this->addField($fields['abbreviation'], ($athlete->team->abbreviation ?? ''));
         // 添加照片和QR碼...
         if (!empty($athlete->photo) && is_string($athlete->photo)) {
             $this->addPhoto($athlete->photo, $startX + 65, $startY + 25, 30, 40);
@@ -165,13 +179,8 @@ class AthletePdfService
     {
         if (is_array($position) && isset($position['x']) && isset($position['y'])) {
             $this->pdf->SetXY($position['x'], $position['y']);
-            
-            // 如果有指定寬度，則使用置中對齊，否則使用左對齊
-            if (isset($position['width'])) {
-                $this->pdf->Cell($position['width'], 0, $this->truncateText($text, 14), 0, 1, 'C');
-            } else {
-                $this->pdf->Cell(0, 0, $this->truncateText($text, 13), 0, 1, 'L');
-            }
+
+            $this->pdf->Cell($position['width'], 0, $text, 0, 1, 'C');
         }
     }
 

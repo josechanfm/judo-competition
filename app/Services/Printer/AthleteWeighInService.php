@@ -55,7 +55,7 @@ class AthleteWeighInService
 
             $programData = [
                 'ellipseData' => [
-                    'program' => $program->converGender() . $program->competitionCategory->name,
+                    'program' => $program->convertGender() . $program->competitionCategory->name,
                     'athletes_count' => $program->athletes->count(),
                     'weight' => $program->convertWeight(),
                     'upper_limit' => $upper_limit

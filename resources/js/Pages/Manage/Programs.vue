@@ -411,6 +411,7 @@
                 <a class="text-blue-500" target="_blank" :href="route('manage.competition.generateAllProgramsOnlineTable', competition.id)">所有上線表</a>
                 <a class="text-blue-500" target="_blank" :href="route('manage.competition.allSchedule', competition.id)">所有賽程表</a>
                 <a class="text-blue-500" target="_blank" :href="route('manage.competition.result-table', {'competition':competition.id,'blankMedals':false})">賽果表(未完成)</a>
+                <a class="text-blue-500" target="_blank" :href="route('manage.competition.athletes.export.id-card', {'competition':competition.id,'blankMedals':false})">運動員IDCard表</a>
                 <!-- <a>比賽秩序表</a> -->
                 <!-- <a>各場地安排</a>
                 

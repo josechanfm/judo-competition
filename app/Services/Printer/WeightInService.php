@@ -55,7 +55,7 @@ class WeightInService
         //$this->header();
         $helper = new PdfHelper($this->pdf);
         $extra = ["title" => $this->weight, "title_sub" => $this->category];
-        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $extra);
+        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, 'notoserifcjkhk' ,$extra);
         $this->schedule($records);
         $this->pdf->Output('myfile.pdf', 'I');
     }
@@ -63,7 +63,7 @@ class WeightInService
     public function schedule($records)
     {
         $this->pdf->setXY($this->startX, $this->startY);
-        $this->pdf->setFont('times', 'B', 11);
+        $this->pdf->setFont('notoserifcjkhk', 'B', 11);
         $data = '
         <!DOCTYPE html>
             <html lang="en">

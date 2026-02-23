@@ -357,10 +357,10 @@ class AthleteController extends Controller
         }
 
         $weighInService = new AthleteWeighInService();
-        
         // 可以自定義標題和logo
         $weighInService->setTitle(
-            $competition->name
+            $competition->name,
+            $competition->name_secondary
         );
         
         $pdf = $weighInService->generateAllWeighInTable($programs);

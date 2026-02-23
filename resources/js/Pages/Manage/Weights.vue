@@ -5,6 +5,7 @@
       <div class="mx-6 flex flex-col gap-3">
         <div class="bg-white p-2 rounded-md shadow-md">
           <div class="text-xl font-bold mb-4">Weight Choose</div>
+          <div><a :href="route('generate.all.weighIn.table',competition)" target="_blank">download weightIn table</a></div>
           <a-form>
             <a-form-item label="Category" name="category">
               <a-radio-group

@@ -201,23 +201,29 @@ class Program extends Model
     }
     public function maxWeight() {
         $cleanedWeight = preg_replace('/^(MW|FW)/i', '', $this->weight_code);
-        
+    
+        if($cleanedWeight == 'ULW'){
+            return 999;
+        }
+
         if (preg_match('/^(\d+)([+-])$/', $cleanedWeight, $matches)) {
             $sign = $matches[2];
             $value = (int)$matches[1];
             
-            if (in_array($this->category->code, ['C', 'D', 'E'])) {
+            if (in_array($this->category->code, ['A', 'B', 'BC', 'OPEN'])) {
                 $value += 0.4;
             } 
-            elseif (in_array($this->category->code, ['A', 'B', 'OPEN'])) {
+            elseif (in_array($this->category->code, ['C', 'D', 'E'])) {
                 $value += 0.2;
             }
 
             if ($sign === '+') {
-                if (in_array($this->category->code, ['C', 'D', 'E'])) {
+                if (in_array($this->category->code, ['E', 'D', 'C'])) {
                     $value += 10;
-                } elseif ($this->category->code === 'B') {
+                } elseif (in_array($this->category->code, ['B'])) {
                     $value += 20;
+                } elseif (in_array($this->category->code, ['A'])) {
+                    $value = 999;
                 }
             }
             
@@ -232,16 +238,25 @@ class Program extends Model
         $gender = $this->convertGender();
         
         $cleanedWeight = preg_replace('/^(MW|FW)/i', '', $this->weight_code);
+
+        if($cleanedWeight == 'ULW'){
+            return 0;
+        }
         
         if (preg_match('/^(\d+)([+-])$/', $cleanedWeight, $matches)) {
-            $currentValue = (int)$matches[1];
-            
+            $sign = $matches[2];
+            $currentValue = (int)$matches[1] + 0.1;
+
+            if ($sign === '+') {
+                return $currentValue;
+            }
+               
             $programsInSameCategory = $this->category->programs ?? [];
 
             if (empty($programsInSameCategory)) {
                 return max(0, $currentValue - 5);
             }
-            
+
             $weightValues = [];
             foreach ($programsInSameCategory as $program) {
                 $programGender = $program->convertGender();
@@ -251,10 +266,10 @@ class Program extends Model
                 
                 $programCleanedWeight = preg_replace('/^(MW|FW)/i', '', $program->weight_code);
                 if (preg_match('/^(\d+)([+-])$/', $programCleanedWeight, $programMatches)) {
-                    $weightValues[] = (int)$programMatches[1];
+                    $weightValues[] = $programMatches[1] + 0.1;
                 }
             }
-            
+
             if (empty($weightValues)) {
                 return max(0, $currentValue - 5);
             }

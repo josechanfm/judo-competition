@@ -10,10 +10,10 @@ class AthleteWeighInService
 {
     private $pdf;
     private $title = null;
-    private $logo_primary = 'images/mja_logo.png';
+    private $logo_primary = '';
     private $title_sub = null;
     private $logo_secondary;
-    private $titleFont = 'NotoSerifTC';
+    private $titleFont = 'notoserifcjkhk';
 
     private $maxWeightMap = [
         'MW33+' => '10',
@@ -57,6 +57,7 @@ class AthleteWeighInService
                 'ellipseData' => [
                     'program' => $program->convertGender() . $program->competitionCategory->name,
                     'athletes_count' => $program->athletes->count(),
+                    'range' => '(' . $program->minWeight() . 'kg-' . $program->maxWeight() . 'kg)',
                     'weight' => $program->convertWeight(),
                     'upper_limit' => $upper_limit
                 ]
@@ -75,12 +76,12 @@ class AthleteWeighInService
     {
         $columnWidths = [
             15,  // 序號
-            57,  // 姓名
-            57,  // 外文姓名
+            55,  // 姓名
+            59,  // 外文姓名
             45,  // 隊伍
             25,  // 過磅體重
             45,  // 簽名
-            25   // 備註
+            24   // 備註
         ];
 
         $headers = [
@@ -95,12 +96,13 @@ class AthleteWeighInService
 
         // 修改：直接設置表格起始位置
         $startY = 30; // 向下移動30
-        $signatureAreaHeight = 45;
+        $signatureAreaHeight = 20;
         $availableHeight = 190 - $startY - $signatureAreaHeight;
+        // dd($availableHeight);
         $rowHeight = 10;
         $headerHeight = 8;
         $maxRowsPerPage = floor(($availableHeight - $headerHeight) / $rowHeight);
-
+        // dd($maxRowsPerPage);
         $athletesArray = $athletes->toArray();
         $totalRows = count($athletesArray);
         $currentPage = 1;
@@ -145,7 +147,7 @@ class AthleteWeighInService
         
         $this->pdf->SetFillColor(200, 200, 200);
         $this->pdf->SetTextColor(0, 0, 0);
-        $this->pdf->SetFont('NotoSerifTC', 'B', 10);
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 10);
 
         foreach ($headers as $key => $header) {
             $this->pdf->Cell($columnWidths[$key], $headerHeight, $header, 1, 0, 'C', true);
@@ -160,7 +162,7 @@ class AthleteWeighInService
     {
         $this->pdf->SetFillColor(255, 255, 255);
         $this->pdf->SetTextColor(0, 0, 0);
-        $this->pdf->SetFont('NotoSerifTC', '', 12);
+        $this->pdf->SetFont('notoserifcjkhk', '', 12);
 
         for ($i = 0; $i < $rowsCount; $i++) {
             $athlete = $athletesArray[$startIndex + $i];
@@ -201,7 +203,7 @@ class AthleteWeighInService
         // 設置左邊界
         $this->pdf->SetX(15);
         
-        $this->pdf->SetFont('NotoSerifTC', 'B', 10);
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 10);
         $this->pdf->Cell($signatureWidth, $lineHeight, '監磅員簽名', 0, 0, 'L');
         
         $this->pdf->SetX(105);

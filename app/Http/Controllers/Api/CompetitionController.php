@@ -103,12 +103,13 @@ class CompetitionController extends Controller
         $validated = $request->validate([
             'version' => 'required|integer',
             'athletes' => 'required|array',
-            'categories' => 'sometimes|array',
-            'weights' => 'sometimes|array',
+            'categories' => 'required|array',
+            'weights' => 'required|array',
+            'competition_token' => 'required',
         ]);
         // 查找比賽
         $competition = Competition::where('token', $validated['competition_token'])->firstOrFail();
-
+        
         $updatedCount = 0;
         $errors = [];
         

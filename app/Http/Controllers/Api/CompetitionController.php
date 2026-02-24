@@ -60,7 +60,7 @@ class CompetitionController extends Controller
     }
     public function fetchCompetitionData()
     {   
-        $competition = Competition::where('token','uhZSsOupW5zK')->first();
+        $competition = Competition::where('token','FI5DymF3I4OK')->first();
         $version = time();
         
         $categories = $competition->categories->map(function($category) {
@@ -98,67 +98,87 @@ class CompetitionController extends Controller
             'athletes' => $athletes, 
         ]);
     }
-    public function postCompetitionData(Request $request)
-    {
-        $validated = $request->validate([
-            'version' => 'required|integer',
-            'athletes' => 'required|array',
-            'categories' => 'required|array',
-            'weights' => 'required|array',
-            'competition_token' => 'required',
-        ]);
-        // 查找比賽
-        $competition = Competition::where('token', $validated['competition_token'])->firstOrFail();
-        
-        $updatedCount = 0;
-        $errors = [];
-        
-        // 處理每個運動員的數據
-        foreach ($validated['athletes'] as $athleteData) {
-            try {
-                // 查找運動員
-                $programAthlete = ProgramAthlete::find($athleteData['id']);
-                
-                if (!$programAthlete) {
-                    $errors[] = "運動員 ID {$athleteData['id']} 不存在";
-                    continue;
-                }
-                
-                // 驗證運動員是否屬於該比賽
-                if ($programAthlete->program->category->competition_id !== $competition->id) {
-                    $errors[] = "運動員 ID {$athleteData['id']} 不屬於此比賽";
-                    continue;
-                }
-                
-                // 更新數據
-                $updateData = [];
-                
-                if (isset($athleteData['actual'])) {
-                    $updateData['actual_weight'] = $athleteData['weight'];
-                }
-                
-                if (isset($athleteData['signature'])) {
-                    $updateData['signature'] = $athleteData['signature'];
-                }
-                
-                if (!empty($updateData)) {
-                    $programAthlete->update($updateData);
-                    $updatedCount++;
-                }
-                
-            } catch (\Exception $e) {
-                $errors[] = "處理運動員 ID {$athleteData['id']} 時出錯: " . $e->getMessage();
-            }
-        }
-
-        // 返回響應
-        $response = [
-            'success' => true,
-            'message' => "成功更新 {$updatedCount} 條記錄",
-            'version' => time(), // 返回新的版本號
-        ];
-        
-        return response()->json($response);
-
+public function postCompetitionData(Request $request)
+{
+    $validated = $request->validate([
+        'version' => 'required|integer',
+        'athletes' => 'required|array',
+        'categories' => 'required|array',
+        'weights' => 'required|array',
+        'competition_token' => 'required|string',
+    ]);
+    
+    // 查找比賽 - 使用 first() 而不是 firstOrFail()
+    $competition = Competition::where('token', $validated['competition_token'])->first();
+    
+    // 檢查比賽是否存在
+    if (!$competition) {
+        return response()->json([
+            'success' => false,
+            'message' => '比賽token錯誤',
+            'error_code' => 'COMPETITION_NOT_FOUND'
+        ], 404); // 使用 404 Not Found 狀態碼
     }
+    
+    $updatedCount = 0;
+    $errors = [];
+       
+    // 處理每個運動員的數據
+    foreach ($validated['athletes'] as $athleteData) {
+        try {
+            // 查找運動員
+            $programAthlete = ProgramAthlete::find($athleteData['id']);
+            
+            if (!$programAthlete) {
+                $errors[] = "運動員 ID {$athleteData['id']} 不存在";
+                continue;
+            }
+            
+            // 驗證運動員是否屬於該比賽
+            if ($programAthlete->program->category->competition_id !== $competition->id) {
+                $errors[] = "運動員 ID {$athleteData['id']} 不屬於此比賽";
+                continue;
+            }
+            
+            // 更新數據
+            $updateData = [];
+            
+            if (isset($athleteData['actual'])) {
+                $updateData['weight'] = $athleteData['actual'];
+                if(!isset($athleteData['signature'])){
+                    $updateData['is_weight_passed'] = 1;
+                }
+            }
+            
+            if (isset($athleteData['signature'])) {
+                $updateData['signature'] = $athleteData['signature'];
+                $updateData['is_weight_passed'] = 0;
+            }
+
+            if (!empty($updateData)) {
+                $programAthlete->update($updateData);
+                $updatedCount++;
+            }
+            
+        } catch (\Exception $e) {
+            $errors[] = "處理運動員 ID {$athleteData['id']} 時出錯: " . $e->getMessage();
+        }
+    }
+
+    // 返回響應
+    $response = [
+        'success' => true,
+        'message' => "成功更新 {$updatedCount} 條記錄",
+        'version' => time(), // 返回新的版本號
+    ];
+    
+    // 如果有錯誤，添加到響應中
+    if (!empty($errors)) {
+        $response['errors'] = $errors;
+        $response['success'] = false; // 如果有錯誤，標記為失敗
+        $response['message'] = "部分記錄更新失敗";
+    }
+    
+    return response()->json($response);
+}
 }

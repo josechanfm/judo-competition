@@ -13,6 +13,7 @@ class ProgramAthlete extends Model
         'seed',
         'seat',
         'weight',
+        'signature',
         'is_weight_passed',
         'rank',
         'score',

@@ -10,7 +10,7 @@ class RoundRobbinOption2Service{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $logo_primary = '';
+    protected $logo_primary = 'images/mja_logo.png';
     protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
@@ -51,8 +51,8 @@ class RoundRobbinOption2Service{
 
     protected $gameRound=[
         3=>[[0,1],[0,2],[1,2]],
-        4=>[[0,1],[2,3],[0,2],[1,3],[0,0],[1,2]],
-        5=>[[0,1],[2,3],[0,4],[1,2],[3,4],[0,2],[1,3],[2,4],[0,3],[1,4]]
+        4=>[[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]],
+        5=>[[1,4],[2,3],[0,4],[1,2],[0,1],[3,4],[0,2],[1,3],[0,3],[2,4]]
     ];
 
     public function __construct($settings){
@@ -103,6 +103,10 @@ class RoundRobbinOption2Service{
         $this->gameTable($players);
         $this->boxPlayers($players);
         $this->resultBox($winnerList);
+        if($this->playerCount == 4 || $this->playerCount == 5){
+            $this->pdf->setXY(200, 0);
+            $this->pdf->Cell(12, 0, '改' , 0, 1, 'L', 0, '', 0);
+        }
         $this->pdf->Output('myfile.pdf', 'I');
     }
 
@@ -127,6 +131,10 @@ class RoundRobbinOption2Service{
         $this->gameTable($players);
         $this->boxPlayers($players);
         $this->resultBox($winnerList);
+        if($this->playerCount == 4 || $this->playerCount == 5){
+            $this->pdf->setXY(200, 0);
+            $this->pdf->Cell(12, 0, '改' , 0, 1, 'L', 0, '', 0);
+        }
 
         return $this->pdf ;
     }

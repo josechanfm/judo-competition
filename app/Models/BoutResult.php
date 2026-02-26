@@ -35,6 +35,7 @@ class BoutResult extends Model
     // 藍方勝利
     public const STATUS_BLUE_WIN = 11;
 
+    public const STATUS_BOTH_LOSE = 12;
     // 白方退賽，藍方勝利
     public const STATUS_WHITE_ABSTAIN = 20;
     public const STATUS_WHITE_MEDICAL = 30;

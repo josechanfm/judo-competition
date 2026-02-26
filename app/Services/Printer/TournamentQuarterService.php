@@ -12,7 +12,7 @@ class TournamentQuarterService
     protected $pdf = null;
     protected $title = 'Judo Competition of Asia Pacific';
     protected $title_sub = 'Judo Union of Asia';
-    protected $logo_primary = '';
+    protected $logo_primary = 'images/mja_logo.png';
     protected $logo_secondary = null;
 
     protected $startX = 25; //面頁基點X軸
@@ -275,7 +275,7 @@ class TournamentQuarterService
             $name = $poolLabel[$i]['name'];
             
             // 使用精確的文字寬度計算
-            $fontSize = $this->calculateOptimalFontSize($name, $this->playerFont, $w, $this->playerFontSize);
+            $fontSize = 14;
             $this->pdf->setFont($this->playerFont, '', $fontSize);
             $this->pdf->Cell($w, 0, $name, 0, 0, 'C', 0, '');
         }

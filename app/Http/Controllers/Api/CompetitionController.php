@@ -60,7 +60,7 @@ class CompetitionController extends Controller
     }
     public function fetchCompetitionData()
     {   
-        $competition = Competition::where('token','FI5DymF3I4OK')->first();
+        $competition = Competition::where('token','uhZSsOupW5zK')->first();
         $version = time();
         
         $categories = $competition->categories->map(function($category) {

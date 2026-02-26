@@ -125,8 +125,20 @@ class ProgramController extends Controller
         $competition->programAthletes = $competition->programAthletes()->get();
         $competition->programsBouts;
 
-        $competition->bouts = $competition->bouts()->where('queue', '!=', 0)->orderBy('queue')->get();
-        // dd($competition->bouts);
+        $competition->bouts = $competition->bouts()
+            ->where('queue', '!=', 0)
+            ->orderBy('queue')
+            ->with(['result'])
+            ->get()
+            ->map(function ($bout) {
+                // 將 convertWeight 函數加入每個 bout 物件
+                $bout->convertWeight = function () use ($bout) {
+                    return $bout->program->convertWeight();
+                };
+                
+                return $bout;
+            });
+        // dd($competition->bouts[0]->convertWeight);
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
         ]);

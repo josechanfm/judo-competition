@@ -86,6 +86,8 @@ Route::middleware('auth')->group(function () {
     Route::post('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'joinAthlete'])->name('manage.program.joinAthlete');
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
     Route::get('manage/competition/{competition}/result-table/{blankMedals}', [App\Http\Controllers\Manage\CompetitionController::class, 'resultTable'])->name('manage.competition.result-table');
+    Route::post('manage/competition/{competition}/bouts/update-queue', [App\Http\Controllers\Manage\BoutController::class, 'updateQueue'])->name('manage.competition.bouts.update.queue');
+    Route::post('manage/competition/{competition}/bout/{bout}/update/result',[App\Http\Controllers\Manage\BoutController::class , 'createOrUpdateResult'])->name('manage.competition.bout.update.result');
     // Route::get('/pdf/simple', [PdfController::class, 'generatePdfWithRoundedHeader'])->name('simplepdf');
     Route::get('manage/competition/{competition}/teams-athletes-statistics-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllTeamsAthletesStatistics'])->name('manage.competition.teams-athletes-statistics-table');
     Route::get('manage/competition/{competition}/teams-athletes-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllTeamsAthletes'])->name('manage.competition.teams-athletes-table');

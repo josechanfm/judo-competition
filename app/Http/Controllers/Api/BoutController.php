@@ -157,7 +157,6 @@ class BoutController extends Controller
                 'b_score' => $b_score, // 使用計算後的分數
                 'winner' => $winner, // 儲存勝者資訊
                 'time' => $request['time'],
-                'device_uuid' => $request['device_uuid'] ?? null,
                 'actions' => $request['actions'] ?? null,
             ]
         );

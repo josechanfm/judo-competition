@@ -10,7 +10,7 @@ class RoundRobbinOption2Service{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $logo_primary = 'images/mja_logo.png';
+    protected $logo_primary = '';
     protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
@@ -149,9 +149,9 @@ class RoundRobbinOption2Service{
             $tbl.='<th class="num">'.($i+1).'</th>';
 
         }
-        $tbl.='<th class="num2">WON</th>
-        <th class="num2">SCORE</th>
-        <th class="num2">RANK</th></tr>';
+        $tbl.='<th class="num2">Won</th>
+        <th class="num2">Score</th>
+        <th class="num2">Rank</th></tr>';
 
         for($i=0;$i<$cnt;$i++){
             $tbl.='<tr><td class="num1">'.($i+1).'</td><td class="playerbox">'.
@@ -160,7 +160,7 @@ class RoundRobbinOption2Service{
                 '<td width="50%" style="vertical-align:top;border:none;">'.
                 $this->smartTruncate($players[$i]['name']).'<div>'. $this->smartTruncate($players[$i]['name_secondary']) .'</div>'.
                 '</td>'.
-                '<td width="50%" style="vertical-align:center;border:none;text-align:right; font-size:9px;">'.
+                '<td width="50%" style="vertical-align:center;border:none;text-align:right; font-size:8px;">'.
                 '<div>'. $this->smartTruncate($players[$i]['team']['abbreviation']) .'</div>'.
                 ($players[$i]['team']['name'] ).
                 '</td>'.
@@ -192,17 +192,17 @@ class RoundRobbinOption2Service{
             }
             .player{
                 border: none;
-                width:220px;
+                width:188px;
             }
             .num{
                 background-color:rgb(254,206,50);
-                width:22px;
+                width:30x;
                 line-height:18px;
                 text-align:center;
             }
             .num1{
                 background-color:rgb(254,206,50);
-                width:22px;
+                width:30px;
                 line-height:22px;
                 text-align:center;
             }
@@ -213,8 +213,8 @@ class RoundRobbinOption2Service{
                 text-align:center;
             }
             .playerbox{
-                font-size:10px;
-                width:220px;
+                font-size:8px;
+                width:180px;
             }
         </style>
         ';
@@ -275,15 +275,14 @@ class RoundRobbinOption2Service{
         $x1 = $x;
         $y1 = $y;
         $h1 = 7;
-        
         for ($i = 0; $i < count($winnerList); $i++) {
             // 排名部分
-            $this->pdf->setXY($x1, $y1 + 6);
+            $this->pdf->setXY($x1, $y1 + 8);
             $this->pdf->SetFont($this->generalFont, 'B', 10);
             $this->pdf->Cell(0, 0, $winnerList[$i]['award'] . ':', 0, 1, 'L', 0, '', 0);
             
             // 運動員名字部分（置左對齊）
-            $this->pdf->setXY($x1 + 5, $y1 + 5);
+            $this->pdf->setXY($x1 + 5, $y1 + 8);
             $this->pdf->SetFont($this->playerFont, 'B', 10);
             $this->pdf->Cell($w - 15, 0, $winnerList[$i]['name'], 0, 1, 'L', 0, '', 0);
             
@@ -294,11 +293,17 @@ class RoundRobbinOption2Service{
         $x = $x + 5;
         $y = $y - 5;
         $w = $w - 10;
-        $h = 10;
+        $h = 12;
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
-        $this->pdf->setXY($x, $y);
+        $this->pdf->setXY($x, $y - 2);
         $this->pdf->SetFont($this->generalFont, 'B', 14);
         $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
+        $this->pdf->setXY($x, $y + 3);
+        $this->pdf->SetFont($this->generalFont, 'B', 14);
+        $this->pdf->Cell($w, 10, 'Resultados', 0, 1, 'C', 0, '', 0);
+        $this->pdf->setXY($x, $y + 3);
+        $this->pdf->SetFont($this->generalFont, 'B', 14);
+        $this->pdf->Cell($w, 10, 'Resultados', 0, 1, 'C', 0, '', 0);
     }
     private function smartTruncate($name, $maxLength = 15)
     {

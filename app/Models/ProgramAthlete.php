@@ -46,7 +46,21 @@ class ProgramAthlete extends Model
             'competition_category_id' 
         );
     }
-    
+    public function collectScore()
+    {
+        $this->score = 0;
+
+        // $this->program->bouts()->where('white', $this->id)
+        //                        ->orWhere('blue', $this->id)
+        //                        ->get()
+        //                        ->each(function (Bout $bout) {
+        //     $this->score += $bout->isWinner($this) ? 1 : 0;
+        // });
+
+        $this->score = $this->program->bouts()->where('winner', $this->id)->count();
+
+        $this->save();
+    }
     public function competition()
     {
         return $this->hasOneThrough(

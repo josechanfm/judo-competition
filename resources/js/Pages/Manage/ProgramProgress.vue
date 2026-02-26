@@ -809,17 +809,34 @@ export default {
       
       this.isLoading = true;
       
+      // 保存當前選擇的日期和時段
+      const currentDate = this.selectedDate;
+      const currentSectionId = this.currentSection.id;
+      
       this.$inertia.reload({
         only: ['competition'],
         preserveState: true,
         preserveScroll: true,
+        // 添加這兩個選項來保持日期和時段不變
+        data: {
+          // 可以將當前選擇的日期和時段作為參數發送給後端
+          // 這樣後端可以根據這些參數返回相應的數據
+          date: currentDate,
+          section: currentSectionId
+        },
         onSuccess: () => {
           this.isLoading = false;
           this.lastUpdateTime = Date.now();
-          this.clearCache();
           
-          // 重新計算當前場次
+          // 清除快取但保持選擇狀態
+          this.cachedBouts = {};
+          
+          // 重新計算當前場次，但不要重置選擇
           this.onMatChange();
+          this.selectedDate = currentDate,
+          this.currentSection.id = currentSectionId,
+          // 可選：更新後保持選擇的場次（如果需要）
+          // 如果需要保持選擇的場次，可以在這裡重新驗證選擇的場次是否仍然有效
           
           message.success('數據已更新');
         },
@@ -1348,18 +1365,25 @@ export default {
     }
   },
   watch: {
-    "currentSection.id"() {
+  "currentSection.id"() {
+    // 只有當用戶手動切換時段時才清除選擇
+    // 如果是數據刷新導致的變化，不應該清除選擇
+    if (!this.isLoading) {
       this.clearCache();
       this.selectedBouts = [];
       this.selectedBout = null;
       this.onSectionChange();
-    },
-    selectedDate() {
+    }
+  },
+  selectedDate() {
+    // 只有當用戶手動切換日期時才清除選擇
+    if (!this.isLoading) {
       this.clearCache();
       this.selectedBouts = [];
       this.selectedBout = null;
       this.onMatChange();
-    },
+    }
+  },
     competition: {
       handler(newVal) {
         if (newVal) {

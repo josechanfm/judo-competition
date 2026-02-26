@@ -120,11 +120,13 @@ class ProgramController extends Controller
 
         return redirect()->back();
     }
-    public function progress(Competition $competition)
+    public function progress(Competition $competition, Request $request)
     {
         $competition->programAthletes = $competition->programAthletes()->get();
         $competition->programsBouts;
 
+        $date = $request->input('date');
+        $section = $request->input('section');
         $competition->bouts = $competition->bouts()
             ->where('queue', '!=', 0)
             ->orderBy('queue')
@@ -141,6 +143,8 @@ class ProgramController extends Controller
         // dd($competition->bouts[0]->convertWeight);
         return Inertia::render('Manage/ProgramProgress', [
             'competition' => $competition,
+            'date' => $date,
+            'section' => $section
         ]);
     }
 
@@ -595,7 +599,7 @@ class ProgramController extends Controller
             $settings['players'],
             $this->generateWinnersArray($program),
             $this->generateSequencesArray($program),
-            $this->generateWinnerList($competition,$program->athletes),
+            $this->generateWinnerList($program,$program->athletes),
             [ 
                 'program' => $program->convertGender() . $program->competitionCategory->name ,
                 'athletes_count' => $program->athletes->count(),
@@ -624,7 +628,7 @@ class ProgramController extends Controller
                 $settings['players'],
                 $this->generateWinnersArray($program),
                 $this->generateSequencesArray($program),
-                $this->generateWinnerList($competition,$program->athletes),
+                $this->generateWinnerList($program,$program->athletes),
                 [ 
                     'program' => $program->convertGender() . $program->competitionCategory->name ,
                     'athletes_count' => $program->athletes->count(),
@@ -641,44 +645,87 @@ class ProgramController extends Controller
     /**
      * 生成序列號
      */
-    public function generateWinnerList($program)
-    {
-        $winner_list = [];
-        
-        // 使用 Collection 的 filter 方法過濾已確定排名的運動員
-        if($program->status == 0){
+        public function generateWinnerList($program)
+        {
+            $winner_list = [];
+            $display_count = 0;
+            $programAthletes = collect(); // 初始化為空集合
 
-        }
-        $programAthletes = $program->programAthletes()->whereIn('rank',[1,2,3])->where('is_weight_passed',1)->orderBy('rank')->get();
-        // 生成獲獎者列表
-        for ($i = 0; $i < count($programAthletes); $i++) {
-            $award = $i + 1;
-            
-            // 如果是第4個且award_count為4，則獎項設為3（並列第三）
-            if ($i == 3 && count($programAthletes) == 4) {
-                $award = 3;
-            }
-            
-            $athlete_name = '';
-            $is_determined = false;
-            
-            if ($programAthletes[$i]) {
-                $athlete_name = $this->smartTruncate($programAthletes[$i]->athlete->name) . $this->smartTruncate($programAthletes[$i]->athlete->name_secondary);
-                $is_determined = true;
+
+            if ($program->competition->awarding_method == 1) {
+                // 顯示 4 個人：1,2,3,3 (並列第三)
+                $display_count = 4;
+                $programAthletes = $program->programAthletes()
+                    ->whereIn('rank',[1,2,3])
+                    ->where('is_weight_passed',1)
+                    ->orderBy('rank')
+                    ->take(4)
+                    ->get();
             } else {
-                // 如果該名次尚未確定，顯示待定或空白
-                $athlete_name = '待定';
+                // awarding_method == 0，顯示總人數-1，最多4個
+                $totalAthletes = $program->programAthletes()->count();
+                $display_count = min(max($totalAthletes - 1, 0), 4);
+                
+                if ($display_count > 0) {
+                    $programAthletes = $program->programAthletes()
+                        ->whereIn('rank',[1,2,3])
+                        ->where('is_weight_passed',1)
+                        ->orderBy('rank')
+                        ->take($display_count)
+                        ->get();
+                }
+            }
+            // dd($programAthletes);
+            // 生成獲獎者列表
+            for ($i = 0; $i < $display_count; $i++) {
+                // 直接使用 rank 作為獎項（如果有的話），否則使用預設順序
+                if (isset($programAthletes[$i]) && $programAthletes[$i]) {
+                    $award = $programAthletes[$i]->rank;
+                    
+                    $athlete_name = $this->smartTruncate($programAthletes[$i]->athlete->name) . 
+                                $this->smartTruncate($programAthletes[$i]->athlete->name_secondary);
+                    $is_determined = true;
+                } else {
+                    // 如果該名次尚未確定，根據 awarding_method 決定預設獎項
+                    if ($i == 3) {
+                        $award = 3; // 第四個位置是並列第三
+                    } else {
+                        $award = $i + 1;
+                    }
+                    
+                    $athlete_name = '待定';
+                    $is_determined = false;
+                }
+                
+                $winner_list[] = [
+                    'award' => $award,
+                    'name' => $athlete_name,
+                    'is_determined' => $is_determined
+                ];
             }
             
-            $winner_list[] = [
-                'award' => $award,
-                'name' => $athlete_name,
-                'is_determined' => $is_determined
-            ];
+            // 如果完全沒有資料，但需要顯示預設排名（例如 awarding_method == 1 時）
+            if ($display_count > 0 && $programAthletes->isEmpty()) {
+                $winner_list = []; // 清空列表
+                
+                for ($i = 0; $i < $display_count; $i++) {
+                    if ($i == 3) {
+                        $award = 3; // 第四個位置是並列第三
+                    } else {
+                        $award = $i + 1;
+                    }
+                    
+                    $winner_list[] = [
+                        'award' => $award,
+                        'name' => '待定',
+                        'is_determined' => false
+                    ];
+                }
+            }
+            // dd($winner_list);
+            
+            return $winner_list;
         }
-        
-        return $winner_list;
-    }
 
     /**
      * 從 program 取得選手資料

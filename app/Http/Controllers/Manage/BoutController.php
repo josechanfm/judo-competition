@@ -20,19 +20,18 @@ class BoutController extends Controller
                 'message' => '無效的賽事 token'
             ], 404);
         }
-        
         // 獲取各項得分數量
-        $w_ippon = (int)$request['resultData']['scores']['white']['ippon'];
-        $b_ippon = (int)$request['resultData']['scores']['blue']['ippon'];
-        $w_wazari = (int)$request['resultData']['scores']['white']['wazari'];
-        $b_wazari = (int)$request['resultData']['scores']['blue']['wazari'];
-        $w_yuko = (int)$request['resultData']['scores']['white']['yuko'];
-        $b_yuko = (int)$request['resultData']['scores']['blue']['yuko'];
-        $w_shido = (int)$request['resultData']['scores']['white']['shido'];
-        $b_shido = (int)$request['resultData']['scores']['blue']['shido'];
+        $w_ippon = (int)$request['w_ippon'];
+        $b_ippon = (int)$request['b_ippon'];
+        $w_wazari = (int)$request['w_wazari'];
+        $b_wazari = (int)$request['b_wazari'];
+        $w_yuko = (int)$request['w_yuko'];
+        $b_yuko = (int)$request['b_yuko'];
+        $w_shido = (int)$request['w_shido'];
+        $b_shido = (int)$request['b_shido'];
         
         // 根據 status 判斷勝者顏色
-        $status = (int)$request['resultData']['status'];
+        $status = (int)$request['status'];
         $winnerColor = null;
         $winnerId = null;
         
@@ -144,7 +143,7 @@ class BoutController extends Controller
                 'b_shido' => $b_shido,
                 'w_score' => $w_score,
                 'b_score' => $b_score,
-                'time' => $request['resultData']['usage_time'],
+                'time' => $request['time'],
             ]
         );
         
@@ -152,7 +151,6 @@ class BoutController extends Controller
         if ($bout->winner_rise_to != 0 && $winnerId) {
             $this->updateNextBoutFighter($bout, $winnerId);
         }
-        
         // KOS 賽制排名處理
         if ($bout->competition_system === 'kos' && in_array($bout->turn, [1, 2])) {
             
@@ -212,6 +210,8 @@ class BoutController extends Controller
                     'loser_rank' => 2
                 ]);
             }
+        }else if($bout->competition_system == 'rrb'){
+            $this->setRankForRRB($bout->program);
         }
         
         return redirect()->back();
@@ -229,5 +229,103 @@ class BoutController extends Controller
         });
         
         return back()->with('success', '場次順序已更新');
+    }
+    public function setRankForRRB($program)
+    {
+        // 獲取所有選手並計算分數
+        $athletes = $program->programAthletes;
+        $athletes->each(function (ProgramAthlete $athlete) {
+            $athlete->collectScore();
+        });
+        // 按分數降序排序
+        $sortedAthletes = $athletes->sortByDesc('score')->values();
+        $totalCount = $sortedAthletes->count();
+        
+        // 為每個選手計算排名
+        foreach ($sortedAthletes as $index => $currentAthlete) {
+            $rank = $totalCount; // 初始排名為最後一名
+            
+            // 與其他所有選手比較
+            for ($i = 0; $i < $totalCount; $i++) {
+                if ($i === $index) continue; // 跳過自己
+                
+                $otherAthlete = $sortedAthletes[$i];
+                
+                // 判斷是否應該提高排名（是否贏過對方）
+                $shouldIncreaseRank = false;
+                
+                if ($currentAthlete->score > $otherAthlete->score) {
+                    $shouldIncreaseRank = true;
+                } 
+                else if ($currentAthlete->score == $otherAthlete->score) {
+                    $bout = Bout::where(function($query) use ($currentAthlete, $otherAthlete) {
+                    $query->where('white', $currentAthlete->id)
+                        ->where('blue', $otherAthlete->id);
+                    })->orWhere(function($query) use ($currentAthlete, $otherAthlete) {
+                        $query->where('white', $otherAthlete->id)
+                            ->where('blue', $currentAthlete->id);
+                    })->first();
+                    if ($bout) {
+                        $shouldIncreaseRank = ($bout->winner == $currentAthlete->id);
+                    }
+                }
+                
+                if ($shouldIncreaseRank) {
+                    $rank--; // 排名提前
+                }
+            }
+            
+            // 5名選手的特殊排名處理
+            if ($totalCount == 5) {
+                $specialRankMap = [4 => 3]; // 第4名變成第3名
+                $rank = $specialRankMap[$rank] ?? $rank;
+            }
+            
+            // 設定排名
+            $currentAthlete->setRank($rank);
+        }
+    }
+    public function updateNextBoutFighter(Bout $currentBout, string $winner)
+    {
+        // 獲取當前比賽的勝者對應的選手ID
+        $winnerFighterId = $winner;
+
+        if (!$winnerFighterId) {
+            return; // 如果沒有選手ID，則不處理
+        }
+        
+        // 查找下一場比賽（相同 program_id，且 in_program_sequence 等於 winner_rise_to）
+        $nextBout = Bout::where('program_id', $currentBout->program_id)
+            ->where('in_program_sequence', $currentBout->winner_rise_to)
+            ->first();
+        
+        if (!$nextBout) {
+            return; // 如果找不到下一場比賽，則不處理
+        }
+        
+        // 檢查下一場比賽的 white_rise_from 或 blue_rise_from 是否匹配當前比賽的 in_program_sequence
+        $updateData = [];
+        
+        if ($nextBout->white_rise_from == $currentBout->in_program_sequence) {
+            $updateData['white'] = $winnerFighterId;
+        } elseif ($nextBout->blue_rise_from == $currentBout->in_program_sequence) {
+            $updateData['blue'] = $winnerFighterId;
+        }
+
+        // 如果有需要更新的資料，則更新下一場比賽
+        if (!empty($updateData)) {
+            $nextBout->update($updateData);
+            
+            // 可選：記錄日誌以便調試
+            \Log::info('勝者晉級更新', [
+                'current_bout_id' => $currentBout->id,
+                'current_sequence' => $currentBout->in_program_sequence,
+                'winner' => $winner,
+                'winner_fighter_id' => $winnerFighterId,
+                'next_bout_id' => $nextBout->id,
+                'next_sequence' => $nextBout->in_program_sequence,
+                'updated_fields' => array_keys($updateData)
+            ]);
+        }
     }
 }

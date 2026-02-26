@@ -31,6 +31,7 @@ class CompetitionController extends Controller
         $bouts = $competition->bouts()
             ->where('mat', $request->mat)
             ->where('section', $request->section)
+            ->where('date', $request->date)
             ->where('queue', '!=', 0)
             ->where('status', 0)
             ->orderBy('queue')
@@ -51,6 +52,7 @@ class CompetitionController extends Controller
                 'category' => $bout->program->competitionCategory->name ?? null,
                 'weight' => $bout->program ? $bout->program->convertWeight() : null,
                 'program_id' => $bout->program_id,
+                'time' => $bout->duration,
             ];
         });
 

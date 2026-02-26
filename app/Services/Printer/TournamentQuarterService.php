@@ -12,7 +12,7 @@ class TournamentQuarterService
     protected $pdf = null;
     protected $title = 'Judo Competition of Asia Pacific';
     protected $title_sub = 'Judo Union of Asia';
-    protected $logo_primary = 'images/mja_logo.png';
+    protected $logo_primary = '';
     protected $logo_secondary = null;
 
     protected $startX = 25; //面頁基點X軸
@@ -368,9 +368,11 @@ class TournamentQuarterService
 
         $this->pdf->Line($x, $y, $x + 160, $y, $this->styleResult1); //Repechage horizontal sperate line
         $this->pdf->RoundedRect($x + $boxW + $this->arcWFirst + 7, $y - 2, 25, 6, 2, '1111', 'F', $this->styleBoxLine, array(255, 255, 255));
-        $this->pdf->setXY($x + $boxW + $this->arcWFirst + 5, $y - 2);
+        $this->pdf->setXY($x + $boxW + $this->arcWFirst + 5, $y - 5);
         $this->pdf->setFont($this->titleFont, '', $this->playerFontSize);
         $this->pdf->Cell(30, 4, '復活賽', 0, 1, 'C', 0, '', 0);
+        $this->pdf->setXY($x + $boxW + $this->arcWFirst + 5, $y);
+        $this->pdf->Cell(30, 4, 'Repechage', 0, 1, 'C', 0, '', 0);
 
         $y += $this->repechageDistance;
         $x1 = $this->startX;
@@ -635,15 +637,15 @@ private function boxPlayers($x, $y, $w, $h, $players = ['white' => ['name' => 'w
         $x1 = $x;
         $y1 = $y;
         $h1 = 7;
-        
+
         for ($i = 0; $i < count($winnerList); $i++) {
             // 排名部分
-            $this->pdf->setXY($x1, $y1 + 6);
+            $this->pdf->setXY($x1, $y1 + 8);
             $this->pdf->SetFont($this->generalFont, 'B', 10);
             $this->pdf->Cell(0, 0, $winnerList[$i]['award'] . ':', 0, 1, 'L', 0, '', 0);
             
             // 運動員名字部分（置左對齊）
-            $this->pdf->setXY($x1 + 5, $y1 + 5);
+            $this->pdf->setXY($x1 + 5, $y1 + 8);
             $this->pdf->SetFont($this->playerFont, 'B', 10);
             $this->pdf->Cell($w - 15, 0, $winnerList[$i]['name'], 0, 1, 'L', 0, '', 0);
             
@@ -654,11 +656,14 @@ private function boxPlayers($x, $y, $w, $h, $players = ['white' => ['name' => 'w
         $x = $x + 5;
         $y = $y - 5;
         $w = $w - 10;
-        $h = 10;
+        $h = 12;
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
-        $this->pdf->setXY($x, $y);
+        $this->pdf->setXY($x, $y - 2);
         $this->pdf->SetFont($this->generalFont, 'B', 14);
         $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
+        $this->pdf->setXY($x, $y + 3);
+        $this->pdf->SetFont($this->generalFont, 'B', 14);
+        $this->pdf->Cell($w, 10, 'Resultados', 0, 1, 'C', 0, '', 0);
     }
 
     private function smartTruncate($name, $maxLength = 15)

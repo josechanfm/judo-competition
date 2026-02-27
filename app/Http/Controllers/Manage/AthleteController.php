@@ -482,9 +482,7 @@ class AthleteController extends Controller
         // 獲取所有符合條件的 programAthletes
         $programAthletes = $competition->programAthletes()
             ->with(['athlete', 'program'])
-            ->whereHas('athlete', function($query) {
-                $query->where('email', 'abc95175346@hotmail.com');
-            })
+            ->where('is_weight_passed', 1)
             ->get()
             ->map(function ($programAthlete) {
                 $athlete = clone $programAthlete->athlete;

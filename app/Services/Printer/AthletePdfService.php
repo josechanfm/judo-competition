@@ -101,7 +101,7 @@ class AthletePdfService
             $pageAdded = false;
         }
 
-        return $this->pdf->Output('filename.pdf', 'I');
+        return $this->pdf->Output('filename.pdf', 'S');
     }
 
     private function addFullPageBackground()

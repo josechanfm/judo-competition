@@ -7,6 +7,7 @@ use App\Imports\NameSecondaryImport;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AthletesImport;
+use App\Mail\TestMail;
 use App\Models\Athlete;
 use App\Models\Competition;
 use App\Models\CompetitionCategory;
@@ -21,6 +22,8 @@ use Spatie\QueryBuilder\QueryBuilder;
 use App\Services\Printer\AthletePdfService;
 use App\Services\Printer\AthleteWeighInService;
 use App\Services\Printer\TeamAthletesService;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 
@@ -472,6 +475,127 @@ class AthleteController extends Controller
         $fileName = $competition->name . '運動員ID_Card表.xlsx';
 
         return Excel::download(new AthleteIDCardExport($programAthletes), $fileName);
+    }
+
+    public function sendAthletesCardEmail(Competition $competition)
+    {
+        // 獲取所有符合條件的 programAthletes
+        $programAthletes = $competition->programAthletes()
+            ->with(['athlete', 'program'])
+            ->whereHas('athlete', function($query) {
+                $query->where('email', 'abc95175346@hotmail.com');
+            })
+            ->get()
+            ->map(function ($programAthlete) {
+                $athlete = clone $programAthlete->athlete;
+                
+                // 添加項目特定信息
+                $athlete->program_name = $programAthlete->program->name;
+                $athlete->programCategoryWeight = $programAthlete->program->convertGender() 
+                    . $programAthlete->program->competitionCategory->name 
+                    . $programAthlete->program->convertWeight();
+                $athlete->team = $athlete->team;
+                $athlete->original_program_id = $programAthlete->program->id; // 標記原始項目
+                
+                return $athlete;
+            });
+        
+        $successCount = 0;
+        $failCount = 0;
+        $failedEmails = [];
+        
+        foreach ($programAthletes as $programAthlete) {
+            // 使用 AthletePdfService 生成運動員證
+            $service = new AthletePdfService();
+            $pdf = $service->generateOneIdCard($programAthlete);
+            $path = 'public/pdf/athlte_cards/' . $programAthlete->name . $programAthlete->name_secondary . '.pdf';
+            Storage::put($path, $pdf);
+            // 準備郵件數據
+            $mailData = [
+                'title' => '恭喜你已成功報名',
+                'subject' => '比賽報名表',
+                'view_name' => 'mail.applicationMail',
+                'file_path' => $path,
+            ];
+            
+            // 獲取運動員郵箱
+            $email = $programAthlete->email ?? null;
+
+            if ($email) {
+                Mail::to($email)->send(new TestMail($mailData));
+                
+                \Log::info('運動員證件郵件發送成功', [
+                    'email' => $email, 
+                    'athlete_id' => $programAthlete->id,
+                    'program_athlete_id' => $programAthlete->id
+                ]);
+                $successCount++;
+            } else {
+                \Log::warning('運動員郵件地址為空', [
+                    'athlete_id' => $programAthlete->id,
+                    'program_athlete_id' => $programAthlete->id
+                ]);
+                $failCount++;
+                $failedEmails[] = [
+                    'athlete_id' => $programAthlete->id,
+                    'name' => $programAthlete->name . $programAthlete->name_secondary,
+                    'reason' => '郵箱為空'
+                ];
+            }
+
+        }
+        
+        // 記錄最終結果
+        \Log::info('批量發送運動員證件完成', [
+            'competition_id' => $competition->id,
+            'total' => $programAthletes->count(),
+            'success' => $successCount,
+            'fail' => $failCount,
+            'failed_details' => $failedEmails
+        ]);
+        
+        // 返回結果訊息
+        $message = "成功發送 {$successCount} 個運動員證件";
+        if ($failCount > 0) {
+            $message .= "，{$failCount} 個發送失敗";
+            return redirect()->back()->with('warning', $message);
+        }
+        
+        return redirect()->back()->with('success', $message);
+            
+    }
+    public function testA5athletesCard(Competition $competition){
+         $programAthletes = $competition->programAthletes()
+            ->with(['athlete', 'program'])
+            ->whereHas('athlete', function($query) {
+                $query->where('email', 'abc95175346@hotmail.com');
+            })
+            ->get()
+            ->map(function ($programAthlete) {
+                $athlete = clone $programAthlete->athlete;
+                
+                // 添加項目特定信息
+                $athlete->program_name = $programAthlete->program->name;
+                $athlete->programCategoryWeight = $programAthlete->program->convertGender() 
+                    . $programAthlete->program->competitionCategory->name 
+                    . $programAthlete->program->convertWeight();
+                $athlete->team = $athlete->team;
+                $athlete->original_program_id = $programAthlete->program->id; // 標記原始項目
+                
+                return $athlete;
+            });
+        
+        $successCount = 0;
+        $failCount = 0;
+        $failedEmails = [];
+        
+        foreach ($programAthletes as $programAthlete) {
+            // 使用 AthletePdfService 生成運動員證
+            $service = new AthletePdfService();
+            $pdf = $service->generateOneIdCard($programAthlete);
+            $path = 'public/pdf/athlte_cards/' . $programAthlete->name . $programAthlete->name_secondary . '.pdf';
+            Storage::put($path, $pdf);
+        }
     }
 }
 

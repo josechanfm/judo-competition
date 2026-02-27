@@ -57,6 +57,27 @@
                 @click="visible = true"
                 >Import Athletes</a-button
               >
+             <div>
+                <!-- 按鈕 -->
+                <button 
+                  @click="sendAthleteCards" 
+                  class="btn" 
+                  :class="{
+                    'btn-primary': !isLoading,
+                    'btn-disabled': isLoading
+                  }"
+                  :disabled="isLoading"
+                >
+                  <span v-if="isLoading" class="loading-spinner"></span>
+                  <i v-else class="fas fa-envelope"></i>
+                  {{ isLoading ? '發送中...' : '發送運動員證件' }}
+                </button>
+
+                <!-- 結果提示 -->
+                <div v-if="showResult" class="mt-3" :class="resultClass">
+                  {{ resultMessage }}
+                </div>
+              </div>
               <a :href="route('athletes.generateIdCards', competition.id)" target="_blank"><a-button type="text">download athletes id cards</a-button></a>
               <a :href="route('manage.competition.teams-athletes-statistics-table', competition.id)" target="_blank"><a-button type="text">下載運動員統計表</a-button></a>
               <a :href="route('manage.competition.teams-athletes-table', competition.id)" target="_blank"><a-button type="text">download all teams athletes</a-button></a>
@@ -311,6 +332,10 @@ export default {
         title: "Record Modal",
         data: {},
       },
+      isLoading:false,
+      showResult:false,
+      resultMessage:'',
+      resultClass:'',
       // 添加筛选状态
       filters: {
         team: null,
@@ -592,6 +617,45 @@ export default {
       this.imported = false;
       this.errors = [];
     },
+    async sendAthleteCards() {
+      // 確認對話框
+      if (!confirm('確定要發送運動員證件給所有已通過體重的運動員嗎？')) {
+        return;
+      }
+      
+      this.isLoading = true;
+      this.showResult = false;
+      
+      try {
+        const response = await axios.post(`/manage/competition/${this.competition.id}/send/athletes_card`);
+        
+        // 處理成功回應
+        this.resultMessage = response.data.message || '發送成功！';
+        this.resultClass = 'alert alert-success';
+        this.showResult = true;
+        
+        // 3秒後自動隱藏提示
+        setTimeout(() => {
+          this.showResult = false;
+        }, 3000);
+        
+      } catch (error) {
+        // 處理錯誤
+        console.error('發送失敗:', error);
+        
+        if (error.response && error.response.data) {
+          this.resultMessage = error.response.data.message || '發送失敗，請稍後再試';
+        } else {
+          this.resultMessage = '網絡錯誤，請檢查連接';
+        }
+        
+        this.resultClass = 'alert alert-danger';
+        this.showResult = true;
+        
+      } finally {
+        this.isLoading = false;
+      }
+    }
   },
 };
 </script>

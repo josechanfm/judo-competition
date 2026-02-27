@@ -24,7 +24,7 @@ class AthletePdfService
         $this->pdf->setPrintHeader(false);
         $this->pdf->setPrintFooter(false);
 
-        $this->bgImagePath = public_path('images/id-card-bg2.jpeg');
+        $this->bgImagePath = public_path('images/id-card-bg3.jpg');
     }
 
     public function generateIdCard($athletes)
@@ -51,7 +51,7 @@ class AthletePdfService
             // 獲取當前位置
             if (isset($positions[$currentPosition])) {
                 $pos = $positions[$currentPosition];
-                $this->generateSingleCard($athlete, $pos['x'], $pos['y']);
+                $this->generateOtherSingleCard($athlete, $pos['x'], $pos['y']);
             }
 
             // 更新位置計數器
@@ -67,6 +67,43 @@ class AthletePdfService
         return $this->pdf;
     }
 
+    public function generateOneIdCard($athlete)
+    {
+        // 每頁只顯示兩個運動員（左側兩個位置）
+        $positions = [
+            ['x' => 28, 'y' => 0],    // 左上
+            ['x' => 28, 'y' => 148],  // 左下
+        ];
+
+        $currentPosition = 0;
+        $pageAdded = false;
+
+        if ($currentPosition === 0 && !$pageAdded) {
+            $this->pdf->AddPage('L', [210, 148]);
+            $pageAdded = true;
+            
+            // 添加整頁背景圖片
+            $this->addA5Background();
+        }
+
+        // 獲取當前位置
+        if (isset($positions[$currentPosition])) {
+            $pos = $positions[$currentPosition];
+            $this->generateOtherSingleCard($athlete, $pos['x'], $pos['y']);
+        }
+
+        // 更新位置計數器
+        $currentPosition++;
+
+        // 如果當前位置達到2，重置計數器並標記需要新頁面
+        if ($currentPosition >= 2) {
+            $currentPosition = 0;
+            $pageAdded = false;
+        }
+
+        return $this->pdf->Output('filename.pdf', 'I');
+    }
+
     private function addFullPageBackground()
     {
         // 添加整頁背景圖片
@@ -76,7 +113,50 @@ class AthletePdfService
                 0, // x
                 0, // y
                 210, // 寬度 - A4寬度
-                297, // 高度 - A4高度
+                148, // 高度 - A4高度
+                'JPG',
+                '',
+                '',
+                false,
+                300,
+                '',
+                false,
+                false,
+                0,
+                false,
+                false,
+                false
+            );
+            $this->pdf->Image(
+                $this->bgImagePath,
+                0, // x
+                148, // y
+                210, // 寬度 - A4寬度
+                148, // 高度 - A4高度
+                'JPG',
+                '',
+                '',
+                false,
+                300,
+                '',
+                false,
+                false,
+                0,
+                false,
+                false,
+                false
+            );
+        }
+    }
+    private function addA5Background()
+    {
+        if (file_exists($this->bgImagePath)) {
+            $this->pdf->Image(
+                $this->bgImagePath,
+                0, // x
+                0, // y
+                210, // 寬度 - A5寬度 (148mm)
+                148, // 高度 - A5高度 (210mm)
                 'JPG',
                 '',
                 '',
@@ -165,6 +245,88 @@ class AthletePdfService
         $this->pdf->SetFont('notoserifcjkhk', 'B', 18);
         $this->addField($fields['team'], ($athlete->team->name ?? ''));
         $this->addField($fields['abbreviation'], ($athlete->team->abbreviation ?? ''));
+        // 添加照片和QR碼...
+        if (!empty($athlete->photo) && is_string($athlete->photo)) {
+            $this->addPhoto($athlete->photo, $startX + 65, $startY + 25, 30, 40);
+        }
+
+        if (!empty($athlete->id_number)) {
+            $this->addQrCode($athlete->id_number, $startX + 70, $startY + 110, 25);
+        }
+    }
+
+    private function generateOtherSingleCard($athlete, $startX, $startY)
+    {
+        // 設置卡片區域
+        $this->pdf->setPageMark();
+
+        // 注意：這裡不再添加單獨的背景圖片，因為已經有整頁背景
+
+        // 檢查是否有 name_secondary
+        $hasSecondaryName = !empty($athlete->name_secondary);
+
+        // 定義字段位置和寬度 - 調整x坐標以適應左側位置
+        $fields = [
+            'name' => [
+                'x' => $startX + 10, 
+                'y' => $startY + 70,
+                'width' => 50
+            ],
+            'name_secondary' => [
+                'x' => $startX + 10, 
+                'y' => $startY + 80,
+                'width' => 50
+            ],
+            'programCategoryWeight' => [
+                'x' => $startX + 7, 
+                'y' => $startY + 94,
+                'width' => 50
+            ],
+            'team' => [
+                'x' => $startX + 6,
+                'y' => $startY + 115,
+                'width' => 50
+            ],
+            // 'abbreviation' => [
+            //     'x' => $startX,
+            //     'y' => $startY + 103,
+            //     'width' => 50
+            // ]
+        ];
+
+                // 設置字體
+        $this->pdf->SetFont('notoserifcjkhk', 'BU', 18);
+        // 添加運動員數據
+        $this->addField($fields['name'], $athlete->name);
+        
+        // 只有在有 name_secondary 時才顯示
+        if ($hasSecondaryName) {
+            if(mb_strlen($athlete->name_secondary) > 40){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 7);
+            }else if(mb_strlen($athlete->name_secondary) > 35){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 8);
+            }else if(mb_strlen($athlete->name_secondary) > 30){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 9);
+            }else if(mb_strlen($athlete->name_secondary) > 25){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 10);
+            }else if(mb_strlen($athlete->name_secondary) > 20){
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 13);
+            }else {
+                $this->pdf->SetFont('notoserifcjkhk', 'U', 16);
+            }
+            $this->addField($fields['name_secondary'], $athlete->name_secondary);
+        }
+        if ($athlete->gender == 'M') {
+            $this->pdf->SetTextColor(0, 0, 255);
+        } else {
+            $this->pdf->SetTextColor(255, 0, 0);
+        }
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 22);
+        $this->addField($fields['programCategoryWeight'], ($athlete->programCategoryWeight ?? ''));
+        $this->pdf->setTextColor(0,0,0);
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 18);
+        $this->addField($fields['team'], ($athlete->team->name ?? ''));
+        // $this->addField($fields['abbreviation'], ($athlete->team->abbreviation ?? ''));
         // 添加照片和QR碼...
         if (!empty($athlete->photo) && is_string($athlete->photo)) {
             $this->addPhoto($athlete->photo, $startX + 65, $startY + 25, 30, 40);

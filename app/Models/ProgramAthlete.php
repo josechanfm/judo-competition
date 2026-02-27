@@ -78,4 +78,27 @@ class ProgramAthlete extends Model
         $this->rank = $rank;
         $this->save();
     }
+    public function collectMark()
+    {
+        $mark = 0;
+
+        $bouts = $this->program->bouts()->where('winner', $this->id)->get();
+        foreach ($bouts as $b) {
+            $result = $b->result()->first();
+            $mark = $mark + max($result->w_score ?? 0 , $result->b_score ?? 0);
+        }
+        return $mark;
+    }
+    public function RankWinner($otherAthlete)
+    {
+        $bout = $this->program->bouts()->where(function ($bout) {
+            $bout->where('white', '=', $this->id)
+                ->orWhere('blue', '=', $this->id);
+        })->where(function ($bout) use ($otherAthlete) {
+            $bout->where('white', '=', $otherAthlete)
+                ->orWhere('blue', '=', $otherAthlete);
+        })->where('winner', $this->id)->first();
+
+        return $bout;
+    }
 }

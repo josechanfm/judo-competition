@@ -101,6 +101,9 @@ class ProgramScheduleController extends Controller
         
         // 生成PDF（使用分頁功能）
         $service = new ProgramScheduleService();
+        $service->setTitles(
+            $competition->name
+        );
         return $service->allSchedulesPdf($allBouts);
     }
 

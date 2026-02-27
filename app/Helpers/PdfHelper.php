@@ -342,7 +342,7 @@ class PdfHelper
         $logoSpacing = 2;
 
         if ($logo_primary) {
-            $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 2, 14, 14, 'png');
+            $this->pdf->image($logo_primary, $centeredX + $leftMargin, $y + 3, 18, 16, 'png');
         }
         if ($logo_secondary) {
             $primaryWidth = $logo_primary ? 14 + $logoSpacing : 0;
@@ -382,7 +382,7 @@ class PdfHelper
         }
         
         // 標題放在中間（但限制寬度避免與右側內容重疊）
-        $titleWidth = $lineX - $centeredX - 10;
+        $titleWidth = $lineX - $centeredX + 10;
 
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);

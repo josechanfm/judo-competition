@@ -10,7 +10,7 @@ class ProgramScheduleService
 
     protected $pdf = null;
     protected $gameSetting = null;
-    protected $title = '2025全澳柔道錦標賽';
+    protected $title = '';
     protected $title_sub = '';
     protected $logo_primary = 'images/mja_logo.png';
     protected $logo_secondary = null;

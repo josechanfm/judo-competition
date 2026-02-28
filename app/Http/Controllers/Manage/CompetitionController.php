@@ -190,9 +190,10 @@ class CompetitionController extends Controller
     public function resultTable(Competition $competition, $blankMedals = false)
     {    
         $programsByCategory = $competition->programs()
-        ->with(['athletes.team', 'competitionCategory'])
-        ->get()
-        ->groupBy('competition_category_id');
+            ->where('date', '2026-02-28')
+            ->with(['athletes.team', 'competitionCategory'])
+            ->get()
+            ->groupBy('competition_category_id');
     
         if ($programsByCategory->isEmpty()) {
             return response()->json(['error' => '沒有找到任何賽程'], 404);

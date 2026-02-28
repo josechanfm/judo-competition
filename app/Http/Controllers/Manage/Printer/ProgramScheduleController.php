@@ -49,12 +49,12 @@ class ProgramScheduleController extends Controller
         $allBouts = [];
         
         // 遍歷所有場地和賽區
-        foreach ($competition->days as $day){
+
             foreach ($matNumbers as $mat) {
                 foreach ($sectionNumbers as $section) {
                     // 獲取該場地和賽區的所有比賽
                     $bouts = $competition->bouts()
-                        ->where('date', $day)
+                        ->where('date', '2026-02-28')
                         ->where('mat', $mat)
                         ->where('section', $section)
                         ->where('queue', '!=', 0)
@@ -92,7 +92,7 @@ class ProgramScheduleController extends Controller
                     }
                 }
             }
-        }
+       
         
         // 如果沒有找到任何比賽，返回空結果
         if (empty($allBouts)) {
@@ -170,7 +170,7 @@ class ProgramScheduleController extends Controller
         $this->gameSheet->pdf($records, 'MAT' . $mat, '2024.12.31');
     }
 
-    private function smartTruncate($name, $maxLength = 14)
+    private function smartTruncate($name, $maxLength = 13)
     {
         if (mb_strlen($name) <= $maxLength) {
             return $name;

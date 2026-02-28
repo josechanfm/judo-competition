@@ -10,7 +10,7 @@ class RoundRobbinOption2Service{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $logo_primary = '';
+    protected $logo_primary = 'images/mja_logo.png';
     protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
@@ -103,10 +103,6 @@ class RoundRobbinOption2Service{
         $this->gameTable($players);
         $this->boxPlayers($players);
         $this->resultBox($winnerList);
-        if($this->playerCount == 4 || $this->playerCount == 5){
-            $this->pdf->setXY(200, 0);
-            $this->pdf->Cell(12, 0, '改' , 0, 1, 'L', 0, '', 0);
-        }
         $this->pdf->Output('myfile.pdf', 'I');
     }
 
@@ -131,10 +127,6 @@ class RoundRobbinOption2Service{
         $this->gameTable($players);
         $this->boxPlayers($players);
         $this->resultBox($winnerList);
-        if($this->playerCount == 4 || $this->playerCount == 5){
-            $this->pdf->setXY(200, 0);
-            $this->pdf->Cell(12, 0, '改' , 0, 1, 'L', 0, '', 0);
-        }
 
         return $this->pdf ;
     }
@@ -154,10 +146,14 @@ class RoundRobbinOption2Service{
         <th class="num2">Rank</th></tr>';
 
         for($i=0;$i<$cnt;$i++){
+            $nameStyle = '';
+            if(isset($players[$i]['pivot']['is_weight_passed']) && $players[$i]['pivot']['is_weight_passed'] == 0){
+                $nameStyle = ' text-decoration: line-through;';
+            }
             $tbl.='<tr><td class="num1">'.($i+1).'</td><td class="playerbox">'.
                 '<table border="0" cellpadding="0" cellspacing="0" width="100%">'.
                 '<tr>'.
-                '<td width="50%" style="vertical-align:top;border:none;">'.
+                '<td width="50%" style="vertical-align:top;border:none;' . $nameStyle .'">'.
                 $this->smartTruncate($players[$i]['name']).'<div>'. $this->smartTruncate($players[$i]['name_secondary']) .'</div>'.
                 '</td>'.
                 '<td width="50%" style="vertical-align:center;border:none;text-align:right; font-size:8px;">'.
@@ -244,11 +240,19 @@ class RoundRobbinOption2Service{
             $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
             $this->pdf->RoundedRect($x, $y+$h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
             $this->pdf->setXY($x + 1, $y);
+            if(isset($players[$g[0]]['pivot']['is_weight_passed']) && $players[$g[0]]['pivot']['is_weight_passed'] == 0){
+                $this->pdf->setFont($this->generalFont, 'BD', 8);
+            }
             $this->pdf->Cell($this->boxW , $h - 4, $players[$g[0]]['name'] . $players[$g[0]]['name_secondary'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + ($h/5));
+            $this->pdf->setFont($this->generalFont, 'B', 8);
             $this->pdf->Cell($this->boxW, $h,($players[$g[0]]['team']['abbreviation'] ? $players[$g[0]]['team']['abbreviation'] . '-' : '') . $players[$g[0]]['team']['name'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + $h - 2);
+            if(isset($players[$g[1]]['pivot']['is_weight_passed']) && $players[$g[1]]['pivot']['is_weight_passed'] == 0){
+                $this->pdf->setFont($this->generalFont, 'BD', 8);
+            }
             $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name'] . $players[$g[1]]['name_secondary'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->setFont($this->generalFont, 'B', 8);
             $this->pdf->setXY($x + 1, $y + $h + ($h/5));
             $this->pdf->Cell($this->boxW, $h,($players[$g[1]]['team']['abbreviation'] ? $players[$g[1]]['team']['abbreviation'] . '-' : '') . $players[$g[1]]['team']['name'] , 0, 1, 'L', 0, '', 0);
             $this->pdf->RoundedRect($x+$this->boxW, $y+($h/2), $gap, $h, $r, '0000', 'DF', $style, array(254,206,50));

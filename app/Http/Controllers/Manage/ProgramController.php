@@ -621,7 +621,7 @@ class ProgramController extends Controller
         $pdf->SetPrintHeader(false);
         $pdf->SetMargins(15, 10, 15);
         $pdf->SetAutoPageBreak(TRUE, 0);
-        foreach($competition->programs as $program){
+        foreach($competition->programs->where('date','2026-02-28') as $program){
             $settings = $this->tcpdfSetting($program);
             $pdf = $settings['service']->multiPdf(
                 $pdf,
@@ -651,10 +651,10 @@ class ProgramController extends Controller
             $display_count = 0;
             $programAthletes = collect(); // 初始化為空集合
 
-
-            if ($program->competition->awarding_method == 1) {
+            if ($program->competition->competition_type->awarding_methods == 1) {
                 // 顯示 4 個人：1,2,3,3 (並列第三)
-                $display_count = 4;
+                $totalAthletes = $program->programAthletes()->count();
+                $display_count = min(max($totalAthletes , 0), 4);
                 $programAthletes = $program->programAthletes()
                     ->whereIn('rank',[1,2,3])
                     ->where('is_weight_passed',1)
@@ -677,6 +677,7 @@ class ProgramController extends Controller
             }
             // dd($programAthletes);
             // 生成獲獎者列表
+            if($program->status == 4){
             for ($i = 0; $i < $display_count; $i++) {
                 // 直接使用 rank 作為獎項（如果有的話），否則使用預設順序
                 if (isset($programAthletes[$i]) && $programAthletes[$i]) {
@@ -693,7 +694,7 @@ class ProgramController extends Controller
                         $award = $i + 1;
                     }
                     
-                    $athlete_name = '待定';
+                    $athlete_name = '';
                     $is_determined = false;
                 }
                 
@@ -703,9 +704,9 @@ class ProgramController extends Controller
                     'is_determined' => $is_determined
                 ];
             }
-            
+            }
             // 如果完全沒有資料，但需要顯示預設排名（例如 awarding_method == 1 時）
-            if ($display_count > 0 && $programAthletes->isEmpty()) {
+           else  {
                 $winner_list = []; // 清空列表
                 
                 for ($i = 0; $i < $display_count; $i++) {
@@ -717,7 +718,7 @@ class ProgramController extends Controller
                     
                     $winner_list[] = [
                         'award' => $award,
-                        'name' => '待定',
+                        'name' => '',
                         'is_determined' => false
                     ];
                 }

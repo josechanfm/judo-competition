@@ -12,7 +12,7 @@ class TournamentQuarterService
     protected $pdf = null;
     protected $title = 'Judo Competition of Asia Pacific';
     protected $title_sub = 'Judo Union of Asia';
-    protected $logo_primary = '';
+    protected $logo_primary = 'images/mja_logo.png';
     protected $logo_secondary = null;
 
     protected $startX = 25; //面頁基點X軸

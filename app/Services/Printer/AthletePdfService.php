@@ -325,7 +325,7 @@ class AthletePdfService
         $this->addField($fields['programCategoryWeight'], ($athlete->programCategoryWeight ?? ''));
         $this->pdf->setTextColor(0,0,0);
         $this->pdf->SetFont('notoserifcjkhk', 'B', 18);
-        $this->addField($fields['team'], ($athlete->team->name ?? ''));
+        $this->addField($fields['team'], ($athlete->team->name ?? $athlete->team['name']));
         // $this->addField($fields['abbreviation'], ($athlete->team->abbreviation ?? ''));
         // 添加照片和QR碼...
         if (!empty($athlete->photo) && is_string($athlete->photo)) {

@@ -283,9 +283,9 @@ protected function generateScheduleHtml($records)
         $data .= '</tr>';
         $data .= '<tr>';
         if($record['blue_is_weight_passed'] == 0){
-            $data .= '<td rowspan="2" style="background:lightblue; font-size:14px;"><del>' . mb_substr($record['blue_player'] ?? '', 0, 18). '</del></td>'; // 增加藍方選手字體
+            $data .= '<td rowspan="2" style="background:lightblue; font-size:15px;"><del>' . mb_substr($record['blue_player'] ?? '', 0, 18). '</del></td>'; // 增加藍方選手字體
         }else {
-            $data .= '<td rowspan="2" style="background:lightblue; font-size:14px;">' . mb_substr($record['blue_player'] ?? '', 0, 18). '</td>';
+            $data .= '<td rowspan="2" style="background:lightblue; font-size:15px;">' . mb_substr($record['blue_player'] ?? '', 0, 18). '</td>';
         }
         $data .= '<td rowspan="2" style="background:lightblue; font-size:14px;">' . ($record['blue_team'] ?? '') . '</td>'; // 增加藍方隊伍字體
         $data .= '</tr>';

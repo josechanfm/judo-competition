@@ -23,6 +23,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 use App\Services\Printer\AthletePdfService;
 use App\Services\Printer\AthleteWeighInService;
 use App\Services\Printer\TeamAthletesService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -480,49 +481,40 @@ class AthleteController extends Controller
 
     public function sendAthletesCardEmail(Competition $competition)
     {
-        try {
-            // 獲取所有符合條件的 programAthletes
-            $programAthletes = $competition->programAthletes()
-                ->with(['athlete', 'program'])
-                ->where('is_weight_passed', 1)
-                ->get()
-                ->map(function ($programAthlete) {
-                    $athlete = clone $programAthlete->athlete;
-                    
-                    // 添加項目特定信息
-                    $athlete->program_name = $programAthlete->program->name;
-                    $athlete->programCategoryWeight = $programAthlete->program->convertGender() 
-                        . $programAthlete->program->competitionCategory->name 
-                        . $programAthlete->program->convertWeight();
-                    $athlete->team = $athlete->team;
-                    $athlete->original_program_id = $programAthlete->program->id;
-                    $athlete->program_athlete_id = $programAthlete->id; // 保留原始 ID
-                    
-                    return $athlete;
-                });
-            
-            $totalCount = $programAthletes->count();
-            
-            if ($totalCount === 0) {
-                return redirect()->back()->with('warning', '沒有符合條件的運動員');
-            }
-            
-            // 分發任務到佇列
-            foreach ($programAthletes as $athlete) {
-                SendAthleteCardJob::dispatch($athlete, $competition);
-            }
-            
-            // 立即返回，不用等待
-            return redirect()->back()->with('success', "已將 {$totalCount} 個發送任務加入佇列，將在背景處理");
-            
-        } catch (\Exception $e) {
-            Log::error('批量發送運動員證件失敗', [
-                'error' => $e->getMessage(),
-                'competition_id' => $competition->id
-            ]);
-            
-            return redirect()->back()->with('error', '系統錯誤：' . $e->getMessage());
+
+        $programAthletes = $competition->programAthletes()
+            ->with(['athlete', 'program'])
+            ->where('is_weight_passed', 1)
+            ->get()
+            ->map(function ($programAthlete) {
+                $athlete = (object) $programAthlete->athlete->toArray();
+                
+                // 添加項目特定信息
+                $athlete->program_name = $programAthlete->program->name;
+                $athlete->programCategoryWeight = $programAthlete->program->convertGender() 
+                    . $programAthlete->program->competitionCategory->name 
+                    . $programAthlete->program->convertWeight();
+                $athlete->team = $athlete->team;
+                $athlete->original_program_id = $programAthlete->program->id;
+                $athlete->program_athlete_id = $programAthlete->id; // 保留原始 ID
+                
+                return $athlete;
+            });
+        // dd($programAthletes[0]);
+        $totalCount = $programAthletes->count();
+        
+        if ($totalCount === 0) {
+            return redirect()->back()->with('warning', '沒有符合條件的運動員');
         }
+        
+        // 分發任務到佇列
+        foreach ($programAthletes as $athlete) {
+            SendAthleteCardJob::dispatch($athlete, $competition);
+        }
+        
+        // 立即返回，不用等待
+        return redirect()->back()->with('success', "已將 {$totalCount} 個發送任務加入佇列，將在背景處理");
+
     }
     public function testA5athletesCard(Competition $competition){
          $programAthletes = $competition->programAthletes()

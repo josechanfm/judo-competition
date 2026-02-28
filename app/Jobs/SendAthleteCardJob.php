@@ -19,12 +19,12 @@ class SendAthleteCardJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $programAthlete;
+    protected $athlete;
     protected $competition;
 
-    public function __construct($programAthlete, Competition $competition)
+    public function __construct($athlete, Competition $competition)
     {
-        $this->programAthlete = $programAthlete;
+        $this->athlete = $athlete;
         $this->competition = $competition;
     }
 
@@ -33,14 +33,14 @@ class SendAthleteCardJob implements ShouldQueue
         try {
             // 使用 AthletePdfService 生成運動員證
             $service = new AthletePdfService();
-            $pdf = $service->generateOneIdCard($this->programAthlete);
-            
+
+            $pdf = $service->generateOneIdCard($this->athlete);
             // 生成安全的檔案名稱
             $fileName = sprintf(
                 '%s_%s_%s_%s.pdf',
-                $this->programAthlete->id,
-                preg_replace('/[^A-Za-z0-9]/', '', $this->programAthlete->name ?? 'athlete'),
-                preg_replace('/[^A-Za-z0-9]/', '', $this->programAthlete->name_secondary ?? ''),
+                $this->athlete->id,
+                preg_replace('/[^A-Za-z0-9]/', '', $this->athlete->name ?? 'athlete'),
+                preg_replace('/[^A-Za-z0-9]/', '', $this->athlete->name_secondary ?? ''),
                 time()
             );
             
@@ -56,24 +56,24 @@ class SendAthleteCardJob implements ShouldQueue
             ];
             
             // 獲取運動員郵箱
-            $email = $this->programAthlete->email ?? null;
+            $email = $this->athlete->email ?? null;
 
             if ($email) {
                 Mail::to($email)->send(new TestMail($mailData));
                 
                 Log::info('運動員證件郵件發送成功', [
                     'email' => $email, 
-                    'athlete_id' => $this->programAthlete->id,
+                    'athlete_id' => $this->athlete->id,
                 ]);
             } else {
                 Log::warning('運動員郵件地址為空', [
-                    'athlete_id' => $this->programAthlete->id,
+                    'athlete_id' => $this->athlete->id,
                 ]);
             }
             
         } catch (\Exception $e) {
             Log::error('運動員證件發送失敗', [
-                'athlete_id' => $this->programAthlete->id,
+                'athlete_id' => $this->athlete->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);

@@ -354,14 +354,18 @@ class PdfHelper
         if ($ellipseData !== null) {
             $ellipseTitle = $ellipseData["title"];
             $ellipseTitleSub = $ellipseData["title_sub"];
+            $ellipseCount = $ellipseData["count"];
 
             $this->pdf->setFont($titleFont, 'B', 14);
             $ellipseTitleWidth = $this->pdf->GetStringWidth($ellipseTitle);
             
             $this->pdf->setFont($titleFont, 'B', 14);
             $ellipseTitleSubWidth = $this->pdf->GetStringWidth($ellipseTitleSub);
+
+            $this->pdf->setFont($titleFont, 'B', 14);
+            $ellipseCountWidth = $this->pdf->GetStringWidth($ellipseCount);
             
-            $rightContentWidth = max($ellipseTitleWidth, $ellipseTitleSubWidth) + 5;
+            $rightContentWidth = max($ellipseTitleWidth, $ellipseTitleSubWidth, $ellipseCountWidth) + 5;
         }
         
         // 繪製分隔線 - 在標題和右側內容之間
@@ -404,7 +408,8 @@ class PdfHelper
             
             $ellipseTitle = $ellipseData["title"];
             $ellipseTitleSub = $ellipseData["title_sub"];
-        
+            $ellipseCount = $ellipseData["count"];
+
             // 計算文字寬度
             $this->pdf->setFont($titleFont, 'B', 11);
             $weightWidth = $this->pdf->GetStringWidth($ellipseTitle);
@@ -422,13 +427,17 @@ class PdfHelper
             $startY = $y + ($h - $totalTextHeight) / 2;
             
             // 繪製右側內容
-            $this->pdf->setFont($titleFont, 'B', 14);
-            $this->pdf->SetXY($rightStartX, $startY);
+            $this->pdf->setFont($titleFont, 'B', 16);
+            $this->pdf->SetXY($rightStartX, $startY - 2);
             $this->pdf->Cell($maxWidth, 8, $ellipseTitle, 0, 1, 'C');
             
-            $this->pdf->setFont($titleFont, 'B', 14);
-            $this->pdf->SetXY($rightStartX, $startY + 8);
+            $this->pdf->setFont($titleFont, 'B', 15);
+            $this->pdf->SetXY($rightStartX, $startY + 5.5);
             $this->pdf->Cell($maxWidth, 8, $ellipseTitleSub, 0, 0, 'C');
+
+            $this->pdf->setFont($titleFont, 'B', 10);
+            $this->pdf->SetXY($rightStartX, $startY + 12);
+            $this->pdf->Cell($maxWidth, 8, $ellipseCount, 0, 0, 'C');
         }
     }
     public function header3($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)

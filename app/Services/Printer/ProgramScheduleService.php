@@ -109,7 +109,6 @@ class ProgramScheduleService
             $section = $schedule['section'];
             $date = $schedule['date'];
             $bouts = $schedule['bouts'];
-            
             // 將比賽數據分頁
             $chunks = array_chunk($bouts->toArray(), $this->recordsPerPage);
             $pageCount = count($chunks);
@@ -121,6 +120,7 @@ class ProgramScheduleService
                 $ellipseData = [
                     "title" => "場地{$mat}-時段{$section}", 
                     "title_sub" => $date ? $date : "",
+                    "count" => '共' . $bouts->count() . '場',
                 ];
                 
                 $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, 'mingliu', $ellipseData);

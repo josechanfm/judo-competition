@@ -621,7 +621,7 @@ class ProgramController extends Controller
         $pdf->SetPrintHeader(false);
         $pdf->SetMargins(15, 10, 15);
         $pdf->SetAutoPageBreak(TRUE, 0);
-        foreach($competition->programs->where('date','2026-02-28') as $program){
+        foreach($competition->programs->where('date','2026-03-07') as $program){
             $settings = $this->tcpdfSetting($program);
             $pdf = $settings['service']->multiPdf(
                 $pdf,
@@ -969,7 +969,7 @@ class ProgramController extends Controller
             case 'rrb':
                 $settings = File::json(storage_path('setting/game_round_robbin_option2.json'));
                 $service = new RoundRobbinOption2Service($settings);
-                $players = $program->athletes;
+                $players = $program->athletes()->orderBy('seat')->get();
                 $repechagePlayers = null;
                 break;
             case 'erm':

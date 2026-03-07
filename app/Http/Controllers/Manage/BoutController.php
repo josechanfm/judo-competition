@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Bout;
 use App\Models\BoutResult;
 use App\Models\Competition;
+use App\Models\Program;
 use App\Models\ProgramAthlete;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -214,6 +215,8 @@ class BoutController extends Controller
             $this->setRankForRRB($bout->program);
         }
         
+        $this->checkProgramCompletion($bout->program);
+
         return redirect()->back();
     }
 
@@ -325,6 +328,26 @@ class BoutController extends Controller
                 'next_bout_id' => $nextBout->id,
                 'next_sequence' => $nextBout->in_program_sequence,
                 'updated_fields' => array_keys($updateData)
+            ]);
+        }
+    }
+    private function checkProgramCompletion($program)
+    {
+        // 獲取該 program 下的所有比賽
+        $bouts = Bout::where('program', $program->id)->get();
+        
+        // 檢查是否所有比賽的 status 都等於 1（已完成）
+        $allCompleted = $bouts->every(function ($bout) {
+            return $bout->status == 1;
+        });
+        
+        // 如果所有比賽都已完成，將 program 的 status 設為 4
+        if ($allCompleted && $bouts->count() > 0) {
+            Program::where('id', $program->id)->update(['status' => 4]);
+            
+            \Log::info('Program 所有比賽已完成，狀態更新為 4', [
+                'program_id' => $program->id,
+                'bouts_count' => $bouts->count()
             ]);
         }
     }

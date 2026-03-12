@@ -540,7 +540,7 @@ class BoutController extends Controller
     private function checkProgramCompletion($program)
     {
         // 獲取該 program 下的所有比賽
-        $bouts = Bout::where('program', $program->id)->get();
+        $bouts = Bout::where('program_id', $program->id)->get();
         
         // 檢查是否所有比賽的 status 都等於 1（已完成）
         $allCompleted = $bouts->every(function ($bout) {

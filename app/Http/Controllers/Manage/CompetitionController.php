@@ -190,7 +190,6 @@ class CompetitionController extends Controller
     public function resultTable(Competition $competition, $blankMedals = false)
     {    
         $programsByCategory = $competition->programs()
-            ->where('date', '2026-03-07')
             ->with(['athletes.team', 'competitionCategory'])
             ->get()
             ->groupBy('competition_category_id');

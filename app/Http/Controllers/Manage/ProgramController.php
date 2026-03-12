@@ -843,7 +843,7 @@ class ProgramController extends Controller
         $pdf->SetFont('notoserifcjkhk', '', 30);
         
         $pageWidth = 595; // A4 纵向宽度 (pt)
-        
+        // dd($athletes[2]->athlete);
         foreach ($athletes as $athlete) {
             $pdf->AddPage();
             
@@ -855,6 +855,9 @@ class ProgramController extends Controller
             $gender = $athlete->athlete?->gender == 'M' ? '男子' : '女子';
             $categoryName = $program->competitionCategory->name ?? '';
             $athleteName = $athlete->athlete?->name ?? '';
+            if($athleteName == '-'){
+                $athleteName = $athlete->athlete?->name_secondary ??'';
+            }
             
             // 第一行：組別（置中）
             $firstLineText = '組別：' . $gender . $categoryName;

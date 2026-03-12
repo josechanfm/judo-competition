@@ -43,7 +43,7 @@
               type="primary"
               :disabled="!selectedBouts?.length"
               @click="confirmPrint(competition)"
-              class="bg-blue-500"
+              class="bg-black"
             >
               <template #icon><printer-outlined /></template>
               顯示賽程
@@ -147,12 +147,12 @@
                     <a-row :gutter="4" align="middle">
                       <a-col :span="10" class="text-right">
                         <div class="text-sm font-medium truncate" :title="currentSection.mats[mat].bout.white_player?.name_display">
-                          <span class="text-blue-600">
+                          <span class="">
                             {{ currentSection.mats[mat].bout.white_player?.name + currentSection.mats[mat].bout.white_player?.name_secondary || '---' }}
                           </span>
                         </div>
                         <div class="text-sm font-medium truncate">
-                          <span class="text-blue-600">
+                          <span class="">
                             {{ currentSection.mats[mat].bout.white_player?.team?.name || '---' }}
                           </span>
                         </div>
@@ -204,7 +204,7 @@
                     size="small"
                     :rowClassName="(record) => {
                       const classes = [];
-                      if (isBoutSelected(record?.id)) classes.push('bg-blue-100');
+                      if (isBoutSelected(record?.id)) classes.push('bg-black');
                       if (dragState.draggedBout?.id === record?.id) classes.push('dragging');
                       return classes.join(' ');
                     }"
@@ -245,7 +245,7 @@
                       
                       <template v-else-if="column.key === 'players'">
                         <div class="text-md leading-tight">
-                          <div class="text-blue-600 truncate max-w-[250px]" :title="record?.white_player?.name_display">
+                          <div class=" truncate max-w-[250px]" :title="record?.white_player?.name_display">
                             {{ formatPlayerName(record?.white_player) }}
                           </div>
                           <div class="text-red-600 truncate max-w-[250px]" :title="record?.blue_player?.name_display">
@@ -344,7 +344,7 @@
           >
             <template #extra>
               <inertia-link :href="route('manage.competition.programs.index', competition?.id)">
-                <a-button type="primary" class="bg-blue-500">
+                <a-button type="primary" class="bg-black">
                   前往設置賽程
                 </a-button>
               </inertia-link>
@@ -384,7 +384,7 @@
         <!-- 計分區域 -->
         <div class="bg-gray-50 p-3 rounded-lg mb-3">
           <div class="flex justify-between items-center mb-2">
-            <span class="text-blue-600 font-medium">白方</span>
+            <span class=" font-medium">白方</span>
             <span class="text-gray-400">VS</span>
             <span class="text-red-600 font-medium">藍方</span>
           </div>
@@ -490,24 +490,24 @@
             <a-select-option :value="null">請選擇結果</a-select-option>
             
             <!-- 白方勝利 -->
-            <a-select-option :value="10" class="text-blue-600">
+            <a-select-option :value="10" class="">
               🏆 白方勝利 (10)
             </a-select-option>
             
-            <!-- 藍方勝利 -->
+            <!-- 紅方勝利 -->
             <a-select-option :value="11" class="text-red-600">
-              🏆 藍方勝利 (11)
+              🏆 紅方勝利 (11)
             </a-select-option>
             
-            <!-- 白方退賽/棄權等，藍方勝利 -->
+            <!-- 白方退賽/棄權等，紅方勝利 -->
             <a-select-option :value="20">
-              ⚠️ 白方退賽 - 藍方勝利 (20)
+              ⚠️ 白方退賽 - 紅方勝利 (20)
             </a-select-option>
             <a-select-option :value="30">
-              🏥 白方傷病 - 藍方勝利 (30)
+              🏥 白方傷病 - 紅方勝利 (30)
             </a-select-option>
             <a-select-option :value="40">
-              🚫 白方犯規輸 - 藍方勝利 (40)
+              🚫 白方犯規輸 - 紅方勝利 (40)
             </a-select-option>
             
             <!-- 藍方退賽/棄權等，白方勝利 -->
@@ -529,9 +529,9 @@
         </a-form-item>
         
         <!-- 分數摘要 -->
-        <div class="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+        <div class="text-xs text-gray-500 bg-black p-2 rounded">
           <div class="flex justify-between">
-            <span class="text-blue-600">白方: {{ whiteIppon }}/{{ whiteWazari }}/{{ whiteYuko }}/{{ whiteShido }}</span>
+            <span class="">白方: {{ whiteIppon }}/{{ whiteWazari }}/{{ whiteYuko }}/{{ whiteShido }}</span>
             <span>-</span>
             <span class="text-red-600">藍方: {{ blueIppon }}/{{ blueWazari }}/{{ blueYuko }}/{{ blueShido }}</span>
           </div>
@@ -1214,7 +1214,7 @@ export default {
       const statusMap = {
         '-1': '取消',
         '10': '白方勝',
-        '11': '藍方勝',
+        '11': '紅方勝',
         '20': '白退賽',
         '30': '白傷病',
         '40': '白犯規',
@@ -1488,7 +1488,7 @@ export default {
 }
 
 /* 背景色 */
-:deep(.bg-blue-100) {
+:deep(.bg-black) {
   background-color: #e6f7ff;
 }
 
@@ -1555,7 +1555,7 @@ export default {
   width: 100%;
 }
 
-:deep(.text-blue-600) {
+:deep(.) {
   color: #2563eb;
 }
 
@@ -1563,7 +1563,7 @@ export default {
   color: #dc2626;
 }
 
-:deep(.bg-blue-50) {
+:deep(.bg-black) {
   background-color: #eff6ff;
 }
 </style>

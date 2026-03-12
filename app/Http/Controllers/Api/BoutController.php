@@ -450,6 +450,14 @@ class BoutController extends Controller
             return 12; // 雙方犯規輸？
         }
         
+        // 檢查 SHIDO 優勢（3次 vs 對方較少）
+        if ($w_shido >= 3 && $b_shido < 3) {
+            return 11; // 白方因對方3次犯規而勝利
+        }
+        if ($b_shido >= 3 && $w_shido < 3) {
+            return 10; // 藍方因對方3次犯規而勝利
+        }
+
         // 計算 WAZARI 分數（2個 WAZARI = IPPON 效果）
         $w_wazari_score = $w_wazari;
         $b_wazari_score = $b_wazari;
@@ -460,22 +468,6 @@ class BoutController extends Controller
         }
         if ($b_wazari_score > $w_wazari_score) {
             return 11; // 藍方 WAZARI 優勢勝利
-        }
-        
-        // 檢查 SHIDO 犯規次數（4次直接犯規輸）
-        if ($w_shido >= 4) {
-            return 40; // 白方累積4次犯規，犯規輸
-        }
-        if ($b_shido >= 4) {
-            return 41; // 藍方累積4次犯規，犯規輸
-        }
-        
-        // 檢查 SHIDO 優勢（3次 vs 對方較少）
-        if ($w_shido >= 3 && $b_shido < 3) {
-            return 10; // 白方因對方3次犯規而勝利
-        }
-        if ($b_shido >= 3 && $w_shido < 3) {
-            return 11; // 藍方因對方3次犯規而勝利
         }
         
         // 如果雙方條件相同，可以比較 YUKO 或其他分數
@@ -536,7 +528,7 @@ class BoutController extends Controller
             }
             
             // 5名選手的特殊排名處理
-            if ($totalCount == 5) {
+            if ($totalCount == 5 || $totalCount == 4) {
                 $specialRankMap = [4 => 3]; // 第4名變成第3名
                 $rank = $specialRankMap[$rank] ?? $rank;
             }
@@ -552,7 +544,7 @@ class BoutController extends Controller
         
         // 檢查是否所有比賽的 status 都等於 1（已完成）
         $allCompleted = $bouts->every(function ($bout) {
-            return $bout->status == 1;
+            return $bout->status != 0;
         });
         
         // 如果所有比賽都已完成，將 program 的 status 設為 4

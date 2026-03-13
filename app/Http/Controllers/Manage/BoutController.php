@@ -246,12 +246,14 @@ class BoutController extends Controller
         // 為每個選手計算排名
         foreach ($sortedAthletes as $index => $currentAthlete) {
             $rank = $totalCount; // 初始排名為最後一名
+            $currentMark = $currentAthlete->collectMark();
             
             // 與其他所有選手比較
             for ($i = 0; $i < $totalCount; $i++) {
                 if ($i === $index) continue; // 跳過自己
                 
                 $otherAthlete = $sortedAthletes[$i];
+                $otherMark = $otherAthlete->collectMark();
                 
                 // 判斷是否應該提高排名（是否贏過對方）
                 $shouldIncreaseRank = false;
@@ -260,15 +262,23 @@ class BoutController extends Controller
                     $shouldIncreaseRank = true;
                 } 
                 else if ($currentAthlete->score == $otherAthlete->score) {
-                    $bout = Bout::where(function($query) use ($currentAthlete, $otherAthlete) {
-                    $query->where('white', $currentAthlete->id)
-                        ->where('blue', $otherAthlete->id);
-                    })->orWhere(function($query) use ($currentAthlete, $otherAthlete) {
-                        $query->where('white', $otherAthlete->id)
-                            ->where('blue', $currentAthlete->id);
-                    })->first();
-                    if ($bout) {
-                        $shouldIncreaseRank = ($bout->winner == $currentAthlete->id);
+                    // 分數相同時，比較 mark
+                        if ($currentMark > $otherMark) {
+                            $shouldIncreaseRank = true;
+                        }
+                    // 如果 mark 也相同，再比較對戰記錄
+                    else if ($currentMark == $otherMark) {
+                        $bout = Bout::where(function($query) use ($currentAthlete, $otherAthlete) {
+                            $query->where('white', $currentAthlete->id)
+                                ->where('blue', $otherAthlete->id);
+                        })->orWhere(function($query) use ($currentAthlete, $otherAthlete) {
+                            $query->where('white', $otherAthlete->id)
+                                ->where('blue', $currentAthlete->id);
+                        })->first();
+                        
+                        if ($bout) {
+                            $shouldIncreaseRank = ($bout->winner == $currentAthlete->id);
+                        }
                     }
                 }
                 
@@ -278,7 +288,7 @@ class BoutController extends Controller
             }
             
             // 5名選手的特殊排名處理
-            if ($totalCount == 5) {
+            if ($totalCount == 5 || $totalCount == 4) {
                 $specialRankMap = [4 => 3]; // 第4名變成第3名
                 $rank = $specialRankMap[$rank] ?? $rank;
             }

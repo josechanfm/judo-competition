@@ -43,7 +43,7 @@
               type="primary"
               :disabled="!selectedBouts?.length"
               @click="confirmPrint(competition)"
-              class="bg-black"
+              class="bg-blue-500"
             >
               <template #icon><printer-outlined /></template>
               顯示賽程
@@ -1190,7 +1190,7 @@ export default {
       try {
         const result = resultJson;
         const status = result.status;
-        if (status === 10 || status === 21 || status === 31 || status === 41) return 'blue';
+        if (status === 10 || status === 21 || status === 31 || status === 41) return 'default';
         if (status === 11 || status === 20 || status === 30 || status === 40) return 'red';
         if (status === -1) return 'default';
         return 'default';

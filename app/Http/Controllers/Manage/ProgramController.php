@@ -549,7 +549,7 @@ class ProgramController extends Controller
     public function lockSeat(Competition $competition)
     {
         $service = (new BoutGenerationService($competition));
-
+        // dd('aa');
         $service->invalidateByeBouts();
         // dd('aaaa');
         $service->resequence();

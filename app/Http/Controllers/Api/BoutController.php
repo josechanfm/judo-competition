@@ -122,6 +122,7 @@ class BoutController extends Controller
         $status = $this->determineMatchStatus($request);
         $winnerColor = null;
         $winnerId = null;
+        $loserId = null;
         
         // 判斷勝者顏色
         if (in_array($status, [
@@ -131,7 +132,8 @@ class BoutController extends Controller
             BoutResult::STATUS_BLUE_HANSOKUMAKE
         ])) {
             $winnerColor = 'white';
-            $winnerId = $bout->white; // 白方選手的 ID
+            $winnerId = $bout->white;
+            $loserId = $bout->blue;
         } elseif (in_array($status, [
             BoutResult::STATUS_BLUE_WIN,
             BoutResult::STATUS_WHITE_ABSTAIN,
@@ -139,7 +141,8 @@ class BoutController extends Controller
             BoutResult::STATUS_WHITE_HANSOKUMAKE
         ])) {
             $winnerColor = 'blue';
-            $winnerId = $bout->blue; // 藍方選手的 ID
+            $winnerId = $bout->blue;
+            $loserId = $bout->blue; 
         }
         // 初始化分數
         $w_score = 0;
@@ -237,9 +240,13 @@ class BoutController extends Controller
         
         // 更新下一輪比賽的選手（這裡需要傳入選手ID）
         if ($bout->winner_rise_to != 0 && $winnerId) {
-            $this->updateNextBoutFighter($bout, $winnerId);
+            $this->updateWinnerToNextBoutFighter($bout, $winnerId);
         }
         
+        if ($bout->loser_rise_to != 0 && $loserId){
+            $this->updateLoserToNextBoutFighter($bout,$loserId);
+        }
+
         // KOS 賽制排名處理
         if ($bout->competition_system === 'kos' && in_array($bout->turn, [1, 2])) {
             
@@ -314,7 +321,7 @@ class BoutController extends Controller
             ]
         ]);
     }
-    public function updateNextBoutFighter(Bout $currentBout, string $winner)
+    public function updateWinnerToNextBoutFighter(Bout $currentBout, string $winner)
     {
         // 獲取當前比賽的勝者對應的選手ID
         $winnerFighterId = $winner;
@@ -345,6 +352,7 @@ class BoutController extends Controller
         if (!empty($updateData)) {
             $nextBout->update($updateData);
             
+            $this->checkNextBout($nextBout);
             // 可選：記錄日誌以便調試
             \Log::info('勝者晉級更新', [
                 'current_bout_id' => $currentBout->id,
@@ -354,6 +362,147 @@ class BoutController extends Controller
                 'next_bout_id' => $nextBout->id,
                 'next_sequence' => $nextBout->in_program_sequence,
                 'updated_fields' => array_keys($updateData)
+            ]);
+        }
+    }
+    public function checkNextBout(Bout $nextBout)
+    {
+        // 檢查下一場比賽的白方和藍方是否有 -1（代表該位置需要補入）
+        $updateData = [];
+        $hasEmptyPosition = false;
+        
+        // 檢查白方是否為 -1（需要補入）
+        if ($nextBout->white == -1) {
+            $hasEmptyPosition = true;
+            // 如果藍方不是 -1，表示藍方是勝者，應該晉級到白方
+            if ($nextBout->blue != -1 && !empty($nextBout->blue)) {
+                $updateData['winner'] = $nextBout->blue;
+                \Log::info('藍方勝者晉級到白方位置', [
+                    'next_bout_id' => $nextBout->id,
+                    'winner' => $nextBout->blue,
+                    'action' => 'blue_to_white'
+                ]);
+            }
+        }
+        
+        // 檢查藍方是否為 -1（需要補入）
+        if ($nextBout->blue == -1) {
+            $hasEmptyPosition = true;
+            // 如果白方不是 -1，表示白方是勝者，應該晉級到藍方
+            if ($nextBout->white != -1 && !empty($nextBout->white)) {
+                $updateData['winner'] = $nextBout->white;
+                \Log::info('白方勝者晉級到藍方位置', [
+                    'next_bout_id' => $nextBout->id,
+                    'winner' => $nextBout->white,
+                    'action' => 'white_to_blue'
+                ]);
+            }
+        }
+        
+        // 如果有需要更新的資料
+        if (!empty($updateData)) {
+            $nextBout->update($updateData);
+            $this->updateWinnerToNextBoutFighter($nextBout, $updateData['winner']);
+            \Log::info('下一場比賽自動補位完成', [
+                'next_bout_id' => $nextBout->id,
+                'in_program_sequence' => $nextBout->in_program_sequence,
+                'updates' => $updateData,
+                'original_white' => $nextBout->getOriginal('white'),
+                'original_blue' => $nextBout->getOriginal('blue')
+            ]);
+        }
+        
+        // 如果兩個位置都是 -1，表示兩邊都需要補人，但沒有勝者可以晉級
+        if ($nextBout->white == -1 && $nextBout->blue == -1) {
+            \Log::warning('下一場比賽兩邊都是 -1，無法自動補位', [
+                'next_bout_id' => $nextBout->id,
+                'white' => $nextBout->white,
+                'blue' => $nextBout->blue
+            ]);
+        }
+        
+        // 如果沒有 -1 的位置，返回 false
+        if (!$hasEmptyPosition) {
+            \Log::info('下一場比賽沒有需要補位的位置', [
+                'next_bout_id' => $nextBout->id,
+                'white' => $nextBout->white,
+                'blue' => $nextBout->blue
+            ]);
+        }
+    }
+    public function updateLoserToNextBoutFighter(Bout $currentBout, string $loser)
+    {
+        // 獲取當前比賽的敗者對應的選手ID
+        $loserFighterId = $loser;
+
+        if (!$loserFighterId) {
+            return; // 如果沒有選手ID，則不處理
+        }
+        
+        // 查找下一場比賽（敗部復活賽）
+        // 使用 loser_rise_to 欄位儲存敗者要去的下一場比賽序號
+        $nextBout = Bout::where('program_id', $currentBout->program_id)
+            ->where('in_program_sequence', $currentBout->loser_rise_to)
+            ->first();
+        
+        if (!$nextBout) {
+            \Log::info('沒有找到敗部復活賽', [
+                'current_bout_id' => $currentBout->id,
+                'loser_rise_to' => $currentBout->loser_rise_to ?? '未設定'
+            ]);
+            return;
+        }
+        
+        // 檢查下一場比賽的 rise_from 欄位（負數代表敗部復活）
+        // 例如: white_rise_from = -1 表示從第1場比賽的敗者晉級而來
+        $updateData = [];
+        
+        // 檢查 white_rise_from 是否為負數，且絕對值等於當前比賽的序號
+        if (isset($nextBout->white_rise_from) && 
+            $nextBout->white_rise_from < 0 && 
+            abs($nextBout->white_rise_from) == $currentBout->in_program_sequence) {
+            $updateData['white'] = $loserFighterId;
+            $riseFromValue = $nextBout->white_rise_from;
+        } 
+        // 檢查 blue_rise_from 是否為負數，且絕對值等於當前比賽的序號
+        elseif (isset($nextBout->blue_rise_from) && 
+                $nextBout->blue_rise_from < 0 && 
+                abs($nextBout->blue_rise_from) == $currentBout->in_program_sequence) {
+            $updateData['blue'] = $loserFighterId;
+            $riseFromValue = $nextBout->blue_rise_from;
+        }
+
+        // 如果有需要更新的資料，則更新下一場比賽
+        if (!empty($updateData)) {
+            $nextBout->update($updateData);
+            $this->checkNextBout($nextBout);
+            \Log::info('敗者復活更新成功', [
+                'current_bout' => [
+                    'id' => $currentBout->id,
+                    'sequence' => $currentBout->in_program_sequence,
+                    'loser_rise_to' => $currentBout->loser_rise_to
+                ],
+                'loser_fighter_id' => $loserFighterId,
+                'next_bout' => [
+                    'id' => $nextBout->id,
+                    'sequence' => $nextBout->in_program_sequence,
+                    'white_rise_from' => $nextBout->white_rise_from ?? null,
+                    'blue_rise_from' => $nextBout->blue_rise_from ?? null,
+                    'matched_rise_from' => $riseFromValue ?? null,
+                    'updated_field' => array_keys($updateData)[0],
+                    'updated_value' => $loserFighterId
+                ],
+                'note' => '敗者晉級到敗部復活賽（rise_from為負數）'
+            ]);
+        } else {
+            \Log::warning('敗者復活賽位置不符（沒有匹配的負數rise_from）', [
+                'current_bout_id' => $currentBout->id,
+                'current_sequence' => $currentBout->in_program_sequence,
+                'next_bout_id' => $nextBout->id,
+                'next_bout_sequence' => $nextBout->in_program_sequence,
+                'white_rise_from' => $nextBout->white_rise_from ?? null,
+                'blue_rise_from' => $nextBout->blue_rise_from ?? null,
+                'note' => '敗部復活應該使用負數的rise_from值'
             ]);
         }
     }

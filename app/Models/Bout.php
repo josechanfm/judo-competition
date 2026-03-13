@@ -537,6 +537,7 @@ class Bout extends Model
         if ($this->winner_rise_to !== 0) {
             $winnerTo = $this->winnerRiseTo();
 
+
             $toColor = ($winnerTo->white_rise_from == $this->in_program_sequence) ? 'white' : 'blue';
             $winnerTo->{$toColor} = $this->getWinnerId();
             if ($winnerTo->white == -1 || $winnerTo->blue == -1) {
@@ -548,13 +549,12 @@ class Bout extends Model
         // 如果有下一場
         if ($this->loser_rise_to !== 0) {
             $loserTo = $this->loserRiseTo();
-
             $toColor = $loserTo->white_rise_from == (0 - $this->in_program_sequence) ? 'white' : 'blue';
 
             // 如果 Loser 過磅失敗
             $loserTo->{$toColor} = $this->getLoser()?->is_weight_passed === 1 ? $this->getLoserId() : -1;
             if ($loserTo->white == -1 || $loserTo->blue == -1) {
-                $loserTo->cancel();
+                $loserTo->cancel(0);
             }
             $loserTo->save();
         }

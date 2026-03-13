@@ -167,7 +167,6 @@ class BoutGenerationService
      */
     public function invalidateByeBouts($date = null, $status = 0): void
     {
-
         $this->getSections()->each(function (array $section) use ($status, $date) {
             if ($date == null || $section['date'] == $date) {
                 $bouts = $this->getBoutsUnderSection(...$section);
@@ -690,7 +689,10 @@ class BoutGenerationService
         $programSequence = $programs->sortBy('sequence')->pluck('sequence', 'id')->toArray();
         $bouts = $this->getBoutsUnderSection($date, $section, $mat);
         $queue = 1;
-
+                
+        $bouts->where('status', '!=', -1)->each(function ($bout) {
+            $bout->queue = 1;
+        });
         $bouts->where('queue', '!=', 0)
             ->sortBy('sequence')
             ->each(function ($bout) use (&$queue) {

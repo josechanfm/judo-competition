@@ -621,7 +621,7 @@ class ProgramController extends Controller
         $pdf->SetPrintHeader(false);
         $pdf->SetMargins(15, 10, 15);
         $pdf->SetAutoPageBreak(TRUE, 0);
-        foreach($competition->programs->where('date','2026-03-07') as $program){
+        foreach($competition->programs->where('date','2026-03-14') as $program){
             $settings = $this->tcpdfSetting($program);
             $pdf = $settings['service']->multiPdf(
                 $pdf,

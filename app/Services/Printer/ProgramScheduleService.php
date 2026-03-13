@@ -12,7 +12,7 @@ class ProgramScheduleService
     protected $gameSetting = null;
     protected $title = '';
     protected $title_sub = '';
-    protected $logo_primary = 'images/mja_logo.png';
+    protected $logo_primary = '';
     protected $logo_secondary = null;
 
     protected $startX = 15; //面頁基點X軸
@@ -33,10 +33,10 @@ class ProgramScheduleService
     {
         // 定義字型配置
         $fontConfig = [
-            'defaultFont' => 'NotoSerifTC', // 設置預設字型
+            'defaultFont' => 'NotoSerifCJKhk', // 設置預設字型
             'fontdata' => [
-                'R' => 'NotoSerifTC-Regular.ttf',
-                'B' => 'NotoSerifTC-Bold.ttf',
+                'R' => 'NotoSerifCJKhk-Regular.ttf',
+                'B' => 'NotoSerifCJKhk-Bold.ttf',
             ]
         ];
 
@@ -51,7 +51,7 @@ class ProgramScheduleService
             'mode' => 'utf-8',
             'format' => 'A4',
             'default_font_size' => 12,
-            'default_font' => 'NotoSerifTC',
+            'default_font' => 'NotoSerifCJKhk',
             'margin_left' => 15,
             'margin_right' => 15,
             'margin_top' => 25,
@@ -67,6 +67,10 @@ class ProgramScheduleService
                 'notoseriftc' => [
                     'R' => 'NotoSerifTC-Regular.ttf',
                     'B' => 'NotoSerifTC-Bold.ttf',
+                ],
+                'notoserifcjkhk' => [
+                    'R' => 'NotoSerifCJKhk-Regular.ttf',
+                    'B' => 'NotoSerifCJKhk-Bold.ttf',
                 ]
             ],
         ];
@@ -183,7 +187,7 @@ protected function generateScheduleHtml($records)
                 font-size: 14px; /* 增加基礎字體大小 */
             }
             .tableRight{
-                width: 300px;
+                width: 200px;
                 border-collapse: collapse;
             }
             .tableRight td  {
@@ -194,11 +198,11 @@ protected function generateScheduleHtml($records)
             }
             .tableLeft {
                 float:left;
-                width: 550px;
+                width: 575px;
                 border-collapse: collapse;
             }
             .tableLeft td  {
-                height:28px;
+                height:28.6px;
                 text-align: center;
                 vertical-align: middle;
                 border: 1px solid #000; 
@@ -235,17 +239,11 @@ protected function generateScheduleHtml($records)
     <table class="tableRight">
         <tr>
             <td style="font-size:14px;"></td> <!-- 增加字體大小 -->
-            <td style="font-size:14px;"></td>
-            <td style="font-size:14px;"></td>
         </tr>
         <tr>
             <td style="font-size:14px;"></td>
-            <td style="font-size:14px;"></td>
-            <td style="font-size:14px;"></td>
         </tr>
         <tr>
-            <td style="font-size:14px;"></td>
-            <td style="font-size:14px;"></td>
             <td style="font-size:14px;"></td>
         </tr>
     </table>
@@ -261,13 +259,13 @@ protected function generateScheduleHtml($records)
         $data .= '<table class="tableLeft">';
         $data .= '<tr>';
         $data .= '<td rowspan="4" style="width:42px;border:none!important;font-size:18px;"><div class="arc"></div>' . ($record['sequence'] ?? '') . '</td>'; // 增加序列號字體
-        $data .= '<td rowspan="4" style="width:80px;font-size:16px;">' . ($record['weight'] ?? '') . '<br><font style="font-size:12px;font-weight:bold">' . mb_substr($record['category'] ?? '', 0, 10) . '</font><br><font style="font-size:11px;font-weight:bold">' . ($record['round'] ?? '') . '</font></td>'; // 增加重量和類別字體
+        $data .= '<td rowspan="4" style="width:80px;font-size:24px;">' . ($record['weight'] ?? '') . '<br><font style="font-size:12px;font-weight:bold">' . mb_substr($record['category'] ?? '', 0, 10) . '</font><br><font style="font-size:11px;font-weight:bold">' . ($record['round'] ?? '') . '</font></td>'; // 增加重量和類別字體
         if($record['white_is_weight_passed'] == 0){
             $data .= '<td rowspan="2" style="width:190px; font-size:15px;"><del>' . mb_substr($record['white_player'] ?? '', 0, 18) . '</del></td>'; // 增加白方選手字體
         }else {
             $data .= '<td rowspan="2" style="width:190px; font-size:15px;">' . mb_substr($record['white_player'] ?? '', 0, 18) . '</td>'; // 增加白方選手字體
         }
-        $data .= '<td rowspan="2" style="width:140px; font-size:14px;">' . ($record['white_team'] ?? '') . '</td>'; // 增加白方隊伍字體
+        $data .= '<td rowspan="2" style="width:150px; font-size:14px;">' . ($record['white_team'] ?? '') . '</td>'; // 增加白方隊伍字體
         $data .= '<td style="font-size:14px;"></td>'; // 增加其他單元格字體
         $data .= '<td style="font-size:14px;"></td>';
         $data .= '<td style="font-size:14px;"></td>';

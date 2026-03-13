@@ -386,20 +386,23 @@ class PdfHelper
         }
         
         // 標題放在中間（但限制寬度避免與右側內容重疊）
-        $titleWidth = $lineX - $centeredX + 10;
+        if ($logo_primary){
+            $titleWidth = $lineX + $leftMargin;
+        }else {
+            $titleWidth = $lineX - $centeredX; // 標題寬度為分隔線左側減去間距
+        }
 
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);
             $this->pdf->setXY($centeredX, $y);
-            $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
-          
+            $this->pdf->Cell($titleWidth, $h, $title, 0, 1, 'C', 0, '', 0);
         } else {
-            $this->pdf->setFont($titleFont, 'B', 20);
-            $this->pdf->setXY($centeredX, $y);
-            $this->pdf->Cell($titleWidth, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
+            $this->pdf->setFont($titleFont, 'B', 24);
+            $this->pdf->setXY($centeredX , $y);
+            $this->pdf->Cell($titleWidth, $h / 1.4, $title, 0, 1, 'C', 0, '', 0);
             $this->pdf->setFont($titleFont, 'B', 13);
-            $this->pdf->setXY($centeredX, $y + ($h / 1.6));
-            $this->pdf->Cell($titleWidth, $h - ($h / 1.6), $title_sub, 0, 0, 'C', 0, '', 0);
+            $this->pdf->setXY($centeredX, $y + ($h / 1.4));
+            $this->pdf->Cell($titleWidth, $h - ($h / 1.4) - 3, $title_sub, 0, 0, 'C', 0, '', 0);
         }
         
         // 其他內容（橢圓數據）放在右邊並垂直置中

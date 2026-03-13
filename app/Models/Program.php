@@ -216,11 +216,10 @@ class Program extends Model
             elseif (in_array($this->category->code, ['C', 'D', 'E'])) {
                 $value += 0.2;
             }
-
             if ($sign === '+') {
                 if (in_array($this->category->code, ['E', 'D', 'C'])) {
                     $value += 10;
-                } elseif (in_array($this->category->code, ['B'])) {
+                } elseif (in_array($this->category->code, ['B','BC'])) {
                     $value += 20;
                 } elseif (in_array($this->category->code, ['A'])) {
                     $value = 999;

@@ -142,7 +142,7 @@ class BoutController extends Controller
         ])) {
             $winnerColor = 'blue';
             $winnerId = $bout->blue;
-            $loserId = $bout->blue; 
+            $loserId = $bout->white; 
         }
         // 初始化分數
         $w_score = 0;
@@ -248,7 +248,7 @@ class BoutController extends Controller
         }
 
         // KOS 賽制排名處理
-        if ($bout->competition_system === 'kos' && in_array($bout->turn, [1, 2])) {
+        if (($bout->competition_system === 'kos' || $bout->competition_system === 'erm') && in_array($bout->turn, [1, 2])) {
             
             $winnerFighterId = $winnerId; // 直接使用勝者ID
             $loserFighterId = $winnerColor === 'white' ? $bout->blue : $bout->white;

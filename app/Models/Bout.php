@@ -681,8 +681,10 @@ class Bout extends Model
 
     public function whiteRiseFromQueue($bout)
     {
-        if($this->whiteRiseFrom($bout)?->queue == 0){
+        if($this->whiteRiseFrom($bout)?->queue == 0 || $bout->white == -1){
             return '無人晉級';
+        }else if($bout->white_rise_from < 0 || $this->whiteRiseFrom($bout)->loser_rise_to == $bout->white_rise_from){
+            return '第' . ($this->whiteRiseFrom($bout)->queue ?? '') . '場敗者';
         }else {
             return '第' . ($this->whiteRiseFrom($bout)->queue ?? '') . '場勝者';
         }
@@ -690,8 +692,10 @@ class Bout extends Model
 
     public function blueRiseFromQueue($bout)
     {
-        if($this->blueRiseFrom($bout)?->queue == 0){
+        if($this->blueRiseFrom($bout)?->queue == 0 || $bout->blue == -1){
             return '無人晉級';
+        }else if ($bout->blue_rise_from < 0 || $this->blueRiseFrom($bout)->loser_rise_to == $bout->blue_rise_from ){
+            return '第' . ($this->blueRiseFrom($bout)->queue ?? '') . '場敗者';
         }else {
             return '第' . ($this->blueRiseFrom($bout)->queue ?? '') . '場勝者';
         }

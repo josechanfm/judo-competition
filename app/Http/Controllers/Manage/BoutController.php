@@ -39,17 +39,17 @@ class BoutController extends Controller
         // 判斷勝者顏色
         if (in_array($status, [
             BoutResult::STATUS_WHITE_WIN,
-            BoutResult::STATUS_WHITE_ABSTAIN,
-            BoutResult::STATUS_WHITE_MEDICAL,
-            BoutResult::STATUS_WHITE_HANSOKUMAKE
+            BoutResult::STATUS_BLUE_ABSTAIN,
+            BoutResult::STATUS_BLUE_MEDICAL,
+            BoutResult::STATUS_BLUE_HANSOKUMAKE
         ])) {
             $winnerColor = 'white';
             $winnerId = $bout->white; // 白方選手的 ID
         } elseif (in_array($status, [
             BoutResult::STATUS_BLUE_WIN,
-            BoutResult::STATUS_BLUE_ABSTAIN,
-            BoutResult::STATUS_BLUE_MEDICAL,
-            BoutResult::STATUS_BLUE_HANSOKUMAKE
+            BoutResult::STATUS_WHITE_ABSTAIN,
+            BoutResult::STATUS_WHITE_MEDICAL,
+            BoutResult::STATUS_WHITE_HANSOKUMAKE
         ])) {
             $winnerColor = 'blue';
             $winnerId = $bout->blue; // 藍方選手的 ID
@@ -153,7 +153,7 @@ class BoutController extends Controller
             $this->updateNextBoutFighter($bout, $winnerId);
         }
         // KOS 賽制排名處理
-        if ($bout->competition_system === 'kos' && in_array($bout->turn, [1, 2])) {
+        if (($bout->competition_system === 'kos' || $bout->competition_system === 'erm')  && in_array($bout->turn, [1, 2])) {
             
             $winnerFighterId = $winnerId; // 直接使用勝者ID
             $loserFighterId = $winnerColor === 'white' ? $bout->blue : $bout->white;
@@ -188,7 +188,13 @@ class BoutController extends Controller
             // 根據 turn 設置排名
             if ($bout->turn == 2) {
                 // 季軍賽：負方為第3名
-                $loserProgramAthlete->update(['rank' => 3]);
+                if($bout->program->competition_system == 'erm'){
+                    $loserProgramAthlete->update(['rank' => 0]);
+                    $winnerProgramAthlete->update(['rank' => 3]);
+                }else {
+                    $loserProgramAthlete->update(['rank' => 3]);
+                }
+
                 
                 \Log::info('KOS 季軍排名設置', [
                     'bout_id' => $bout->id,

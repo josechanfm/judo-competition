@@ -10,7 +10,7 @@ class CompetitionResultService
 {
     private $pdf;
     private $title = "賽事結果總表";
-    private $logo_primary = 'images/mja_logo.png';
+    private $logo_primary = '';
     private $title_sub = null;
     private $logo_secondary;
     private $titleFont = 'notoserifcjkhk';

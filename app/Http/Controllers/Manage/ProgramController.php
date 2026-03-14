@@ -71,7 +71,6 @@ class ProgramController extends Controller
      */
     public function show(Competition $competition, Program $program)
     {
-        $this->setRankForRRB($program);
         if (request()->wantsJson()) {
             return response()->json([
                 'program' => $program,

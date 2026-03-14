@@ -253,13 +253,13 @@ protected function generateScheduleHtml($records)
     foreach ($records as $record) {
         // 檢查 status 是否為 -1，決定是否添加灰色背景
         $containerClass = ($record['status'] == -1) ? 'cancelled-bout' : 'tableMain';
-
+        $weightSize = ($record['weight'] == '無限量級') ? 'font-size:18px' : 'font-size:24px';
         $data .= '<table class="'. $containerClass . '"><tr>';
         $data .= '<td>';
         $data .= '<table class="tableLeft">';
         $data .= '<tr>';
         $data .= '<td rowspan="4" style="width:42px;border:none!important;font-size:18px;"><div class="arc"></div>' . ($record['sequence'] ?? '') . '</td>'; // 增加序列號字體
-        $data .= '<td rowspan="4" style="width:80px;font-size:24px;">' . ($record['weight'] ?? '') . '<br><font style="font-size:12px;font-weight:bold">' . mb_substr($record['category'] ?? '', 0, 10) . '</font><br><font style="font-size:11px;font-weight:bold">' . ($record['round'] ?? '') . '</font></td>'; // 增加重量和類別字體
+        $data .= "<td rowspan='4' style='width:80px;$weightSize'>" . ($record['weight'] ?? '') . '<br><font style="font-size:12px;font-weight:bold">' . mb_substr($record['category'] ?? '', 0, 10) . '</font><br><font style="font-size:11px;font-weight:bold">' . ($record['round'] ?? '') . '</font></td>'; // 增加重量和類別字體
         if($record['white_is_weight_passed'] == 0){
             $data .= '<td rowspan="2" style="width:190px; font-size:15px;"><del>' . mb_substr($record['white_player'] ?? '', 0, 18) . '</del></td>'; // 增加白方選手字體
         }else {

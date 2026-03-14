@@ -10,7 +10,7 @@ class WinnerService{
     protected $gameSetting=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $logo_primary='images/jua_logo.png';
+    protected $logo_primary='';
     protected $logo_secondary=null;
     protected $gender='Men';
     protected $report_title='Final Results';

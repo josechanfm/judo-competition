@@ -619,7 +619,7 @@ class PdfHelper
     public function header4($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
     {
         $w = 190;
-        $h = 20;
+        $h = 22;
         $r = 3;
         
         // 計算置中的 x 座標 (假設頁面寬度為 210mm A4)
@@ -728,7 +728,7 @@ class PdfHelper
             $this->pdf->setXY($titleStartX, $y);
             $this->pdf->Cell($titleWidth, $h / 1, $title, 0, 1, 'C', 0, '', 0);
         } else {
-            $this->pdf->setFont($titleFont, 'B', 20);
+            $this->pdf->setFont($titleFont, 'B', 24);
             $this->pdf->setXY($titleStartX, $y);
             $this->pdf->Cell($titleWidth, $h / 1.6, $title, 0, 1, 'C', 0, '', 0);
             $this->pdf->setFont($titleFont, 'B', 13);

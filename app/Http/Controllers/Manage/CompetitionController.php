@@ -202,7 +202,8 @@ class CompetitionController extends Controller
         
         // 可以自定義標題和logo
         $resultService->setTitle(
-            $competition->name
+            $competition->name,
+            $competition->name_secondary
         );
         
         // 生成按分類的賽果表格 PDF

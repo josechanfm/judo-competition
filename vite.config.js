@@ -5,10 +5,10 @@ import svgLoader from 'vite-svg-loader';
 
 export default defineConfig({
     server: {
-        host: '0.0.0.0',
-        hmr: {
-            host: process.env.VITE_HOST ?? '169.254.174.2',
-        },
+        // host: '0.0.0.0',
+        // hmr: {
+        //     host: process.env.VITE_HOST ?? '169.254.174.2',
+        // },
     },
     plugins: [
         laravel({

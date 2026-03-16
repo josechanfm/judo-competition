@@ -115,6 +115,11 @@ Route::middleware('auth')->group(function () {
 });
 
 
+Route::prefix('tracker')->group(function () {
+    Route::get('/scan_qrcode', [App\Http\Controllers\Tracker\LoginController::class, 'scanQrcode']);
+    Route::get('check-in', [App\Http\Controllers\Tracker\CheckInController::class, 'index']);
+});
+
 
 
 require __DIR__ . '/auth.php';

@@ -54,7 +54,6 @@ class ProgramScheduleController extends Controller
                 foreach ($sectionNumbers as $section) {
                     // 獲取該場地和賽區的所有比賽
                     $bouts = $competition->bouts()
-                        ->where('date', '2026-03-14')
                         ->where('mat', $mat)
                         ->where('section', $section)
                         ->where('queue', '!=', 0)

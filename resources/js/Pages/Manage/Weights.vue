@@ -72,7 +72,7 @@
             </template>
             <template v-if="column.key === 'athlete'">
               <span>
-                {{ record.athlete.name }}
+                {{ record.athlete.name + record.athlete.name_secondary }}
               </span>
             </template>
             <template v-else-if="column.key === 'program'">

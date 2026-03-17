@@ -52,7 +52,15 @@
         </div>
       </template>
     </a-page-header>
-
+    <div>
+      <div v-for="day in competition.days" :key="date">
+        <div v-for="section in competition.section_number">
+          <div v-for="mat in competition.mat_number" :key="mat">
+            Date: {{ day }} Section:{{ section }} Mat: {{ mat }}
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- 主要內容區域 -->
     <template v-if="competition?.status >= 2">
       <div class="flex h-[calc(100vh-120px)]">
@@ -102,10 +110,17 @@
               </div>
             </div>
           </div>
-
+          {{ competition.bouts }}
           <!-- 場地卡片網格 -->
           <div v-if="currentSection?.mats" class="flex-1 overflow-y-auto p-3">
-            {{ currentSection }}
+            <div v-for="mat in currentSection.mats">
+              <div>{{ mat.program.competition_category.name }}</div>
+              <div>{{ mat.program.date }} {{ mat.program.weight_code }} {{ mat.program.competition_system }}{{ mat.program.chart_size }}</div>
+              <!-- <div v-for="b in mat.bout">
+                <div>{{ b }}</div>
+              </div> -->
+              <hr>
+            </div>
           </div>
         </div>
 

@@ -10,7 +10,7 @@ use Inertia\Inertia;
 class CheckInController extends Controller
 {
     public function index(){
-        $competition=Competition::find(5);
+        $competition=Competition::find(3);
         $competition->programAthletes = $competition->programAthletes()->get();
         $competition->programsBouts;
         $date = $competition->days[0];
@@ -18,7 +18,6 @@ class CheckInController extends Controller
         $competition->bouts = $competition->bouts()
             ->where('queue', '!=', 0)
             ->orderBy('queue')
-            ->with(['result'])
             ->get()
             ->map(function ($bout) {
                 // 將 convertWeight 函數加入每個 bout 物件

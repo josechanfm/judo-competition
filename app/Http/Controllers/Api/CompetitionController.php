@@ -27,15 +27,40 @@ class CompetitionController extends Controller
                 'error' => 'Competition not found'
             ], 404);
         }
-
-        $bouts = $competition->bouts()
-            ->where('mat', $request->mat)
-            ->where('section', $request->section)
-            ->where('date', $request->date)
-            ->where('queue', '!=', 0)
-            ->where('status', 0)
-            ->orderBy('queue')
-            ->get();
+        $competitionBouts = $competition->bouts();
+        if($request->has('date')){
+            $competitionBouts->where('date',$request->date);
+        }
+        if($request->has('section')){
+            $competitionBouts->where('section',$request->section);
+        }
+        if($request->has('mat')){
+            $competitionBouts->where('mat',$request->mat);
+        }
+        if($request->has('status')){
+            if($request->status!="null"){
+                $competitionBouts->where('status',$request->status);
+            }
+        }else{
+            $competitionBouts->where('status',0);
+        }
+        if($request->has('queue')){
+            if($request->queue!='null'){
+                $competitionBouts->where('queue', $request->queue);
+            }
+        }else{
+            $competitionBouts->where('queue', '!=', 0);
+        }
+        $bouts=$competitionBouts->get();
+    // dd($request->all(), $bouts);
+        // $bouts = $competition->bouts()
+        //     ->where('mat', $request->mat)
+        //     ->where('section', $request->section)
+        //     ->where('date', $request->date)
+        //     ->where('queue', '!=', 0)
+        //     ->where('status', 0)
+        //     ->orderBy('queue')
+        //     ->get();
 
         // 重新整理數據
         $formattedBouts = $bouts->map(function ($bout) {

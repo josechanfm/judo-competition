@@ -45,7 +45,7 @@ class Competition extends Model implements HasMedia
     {
         $programIds = $this->programs->pluck('id');
         return Bout::whereIn('program_id', $programIds);
-        // return $this->hasManyThrough(Bout::class, Program::class);
+        //return $this->hasManyThrough(Bout::class, Program::class);
     }
 
     public function filterAthletes()

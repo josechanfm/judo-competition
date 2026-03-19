@@ -110,7 +110,8 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/print/referee_list', [App\Http\Controllers\Manage\Printer\RefereeController::class, 'printPdf']);
     Route::post('manage/competition/{competition}/send/athletes_card',[App\Http\Controllers\Manage\AthleteController::class , 'sendAthletesCardEmail'])->name('manage.send.athletesCard.email');
     Route::get('manage/competition/{competition}/test/athletes_card',[App\Http\Controllers\Manage\AthleteController::class , 'testA5athletesCard'])->name('manage.test.athletesCard.email');
-    
+    Route::get('manage/compeititon/{competition}/team-athletes-result-table',[App\Http\Controllers\Manage\AthleteController::class, 'generateAllTeamsAthletesResult'])->name('manage.competition.team-athletes-result-table');
+    Route::get('manage/compeititon/{competition}/fail-weighIn-table',[App\Http\Controllers\Manage\AthleteController::class, 'generateAllFailWeighInAthletes'])->name('manage.competition.fail-weighIn-table');
     Route::get('competition/{competition}/reset',[App\Http\Controllers\Manage\AthleteController::class, 'resetBoutQuence']);
 });
 

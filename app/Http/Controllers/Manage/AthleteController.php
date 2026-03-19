@@ -456,6 +456,67 @@ class AthleteController extends Controller
         ->header('Content-Type', 'application/pdf');
     }
 
+    public function generateAllFailWeighInAthletes(Competition $competition){
+        $failAthletes = $competition->programAthletes()->with('athlete', 'team', 'program')->where('is_weight_passed', 0)->get();
+
+
+        $TeamAthletesService = new TeamAthletesService();
+
+        $TeamAthletesService->setTitle(
+            $competition->name,
+            $competition->name_secondary
+        );
+        
+        $pdf = $TeamAthletesService->generateAllFailWeighInAthletes($failAthletes);
+
+        return response($pdf->Output("{$competition->name}過磅失敗表.pdf", 'I'))
+        ->header('Content-Type', 'application/pdf');
+    }
+
+    public function generateAllTeamsAthletesResult(Competition $competition)
+    {
+        $competition->load('programs', 'competition_type', 'teams');
+        $teams = $competition->teams()->with(['athletes', 'athletes.programs'])->orderBy('abbreviation')->get();
+        $teams->map(function ($team) {
+            $gold = 0;
+            $silver = 0;
+            $bronze = 0;
+            $total = 0;
+            foreach ($team->athletes as $a) {
+                $gold = $gold + $a->programAthletes->where('rank', 1)->where('abstain',null)->where('is_weight_passed',1)->count();
+                $silver += $a->programAthletes->where('rank', 2)->where('abstain',null)->where('is_weight_passed',1)->count();
+                $bronze += $a->programAthletes->where('rank', 3)->where('abstain',null)->where('is_weight_passed',1)->count();
+            }
+            $total  = $gold + $silver + $bronze;
+            $a = (object)[
+                'gold' => $gold,
+                'silver' => $silver,
+                'bronze' => $bronze,
+                'total' => $total
+            ];
+            return $team->medals = $a;
+        });
+        $teams = $teams->sortByDesc(function ($t) {
+            return $t->medals->bronze;
+        })->sortByDesc(function ($t) {
+            return $t->medals->silver;
+        })->sortByDesc(function ($t) {
+            return $t->medals->gold;
+        })->values();
+        // dd($teams[0]);
+        $TeamAthletesService = new TeamAthletesService();
+
+        $TeamAthletesService->setTitle(
+            $competition->name,
+            $competition->name_secondary
+        );
+        
+        $pdf = $TeamAthletesService->generateAllTeamsAthletesResult($teams);
+
+        return response($pdf->Output("{$competition->name}成績排名榜.pdf", 'I'))
+        ->header('Content-Type', 'application/pdf');
+    }
+
     public function exportAthletesIDCard(Competition $competition){
         $programAthletes = $competition->categories->flatMap(function ($category) {
             return $category->programs->flatMap(function ($program) use ($category) {

@@ -73,6 +73,10 @@ class ProgramAthlete extends Model
         );
     }
 
+    public function team()
+    {
+        return $this->hasOneThrough(Team::class, Athlete::class, 'id', 'id', 'athlete_id', 'team_id');
+    }
     public function setRank(int $rank)
     {
         $this->rank = $rank;

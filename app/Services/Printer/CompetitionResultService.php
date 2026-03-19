@@ -146,7 +146,7 @@ class CompetitionResultService
                 // 重新添加分類標題和組別標題
                 $this->pdf->SetY($currentY);
                 $this->pdf->SetFont('notoserifcjkhk', 'B', 16);
-                $this->pdf->Cell(0, 10, $category->name . ' (續)', 0, 1, 'C');
+                $this->pdf->Cell(0, 10, $groupName . ' (續)', 0, 1, 'C');
                 $currentY = $this->pdf->GetY() + 5;
                 
                 $this->pdf->SetY($currentY);

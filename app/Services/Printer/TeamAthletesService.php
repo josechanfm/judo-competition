@@ -85,6 +85,201 @@ class TeamAthletesService
         return $this->pdf;
     }
 
+    public function generateAllTeamsAthletesResult($teams){
+        $this->pdf->AddPage();
+    
+        // 设置字体        
+        $helper = new PdfHelper($this->pdf);
+        $helper->header4(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont);
+        
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 14); // 减小全局字体
+
+        $this->pdf->SetY($this->pdf->GetY() + 13);
+        $this->pdf->Cell(0, 5, '學校成績排名榜', 0, 1, 'C');
+        $this->pdf->Ln(5); // 减小间距
+        
+        // 生成表格HTML
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 8);
+        $this->pdf->setX(12);
+        $html = $this->generateResultTableHTML($teams);
+        
+        // 输出HTML内容
+        $this->pdf->writeHTML($html, true, false, true, false, '');
+        
+        return $this->pdf;
+
+    }
+
+    public function generateAllFailWeighInAthletes($failAthletes)
+    {
+        $this->pdf->AddPage();
+        
+        // 設置字體        
+        $helper = new PdfHelper($this->pdf);
+        $helper->header4(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont);
+        
+        $this->pdf->SetFont('notoserifcjkhk', 'B', 16); // 加大標題字體為16
+        $this->pdf->SetY($this->pdf->GetY() + 13);
+        $this->pdf->Cell(0, 5, '過榜失敗表', 0, 1, 'C');
+        $this->pdf->Ln(8); // 加大間距為8
+        
+        // 計算每頁顯示的筆數 - 調整為40條
+        $rowsPerPage = 25;
+        
+        // 計算總頁數
+        $totalRows = $failAthletes->count();
+        $totalPages = ceil($totalRows / $rowsPerPage);
+        
+        // 分頁處理
+        for ($page = 0; $page < $totalPages; $page++) {
+            // 如果不是第一頁，新增頁面
+            if ($page > 0) {
+                $this->pdf->AddPage();
+                
+                // 重新加入頁首
+                $helper->header4(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $this->titleFont);
+                $this->pdf->SetFont('notoserifcjkhk', 'B', 16);
+                $this->pdf->SetY($this->pdf->GetY() + 13);
+                $this->pdf->Cell(0, 5, '過榜失敗表', 0, 1, 'C');
+                $this->pdf->Ln(8);
+            }
+            
+            // 使用 Collection 的 slice 方法取得當前頁面的資料
+            $offset = $page * $rowsPerPage;
+            $pageAthletes = $failAthletes->slice($offset, $rowsPerPage);
+            
+            // 設定表格內容字體為10（比原來的8大）
+            $this->pdf->SetFont('notoserifcjkhk', '', 10);
+            $this->pdf->setX(12);
+            $html = $this->generateAllFailWeighInAthletesHTML($pageAthletes, $offset + 1, $page, $totalPages);
+            
+            // 輸出HTML內容
+            $this->pdf->writeHTML($html, true, false, true, false, '');
+        }
+        
+        return $this->pdf;
+    }
+
+    private function generateAllFailWeighInAthletesHTML($failAthletes, $startIndex = 1, $currentPage = 0, $totalPages = 1)
+    {
+        // 調整表格樣式，加大字體和間距
+        $html = '<table border="0.5" cellpadding="4" cellspacing="0" style="line-height:1.4; width:99%; border-collapse: collapse;">';
+        
+        // 表頭 - 加大字體和內邊距
+        $html .= '<thead><tr>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:5px 2px; width:5%; font-size:9px;">序</th>';
+        $html .= '<th colspan="2" style="font-weight:bold; text-align:center; border:1px solid #000; padding:5px 2px; width:30%; font-size:9px;">學校</th>';
+        $html .= '<th colspan="2" style="font-weight:bold; text-align:center; border:1px solid #000; padding:5px 2px; width:40%; font-size:9px;">運動員姓名</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:5px 2px; width:10%; font-size:9px;">組別</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:5px 2px; width:10%; font-size:9px;">公斤級</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:5px 2px; width:10%; font-size:9px;">過磅體重</th>';
+        $html .= '</tr></thead>';
+        
+        // 表格內容 - 加大字體和內邊距
+        $html .= '<tbody>';
+        
+        $index = $startIndex;
+        foreach ($failAthletes as $programAthlete) {
+            // 確保相關資料存在
+            $athlete = $programAthlete->athlete;
+            $team = $programAthlete->team;
+            $program = $programAthlete->program;
+            
+            // 獲取組別名稱
+            $category = $program->category->name ?? 'N/A';
+            
+            // 報名公斤級
+            $registeredWeight = $program->convertWeight();
+            
+            // 過磅體重
+            $weighInWeight = $programAthlete->weigh_in_weight ?? $programAthlete->weight ?? 'N/A';
+            
+            $html .= '<tr>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:4px 2px; width:5%; font-size:10px;">' . $index . '</td>';
+            $html .= '<td style="border:1px solid #000; padding:4px 2px; width:9%; font-size:10px;">' . htmlspecialchars($team->abbreviation ?? 'N/A') . '</td>';
+            $html .= '<td style="border:1px solid #000; padding:4px 2px; width:21%; font-size:10px;">' . htmlspecialchars($team->name ?? 'N/A') . '</td>';
+            $html .= '<td style="border:1px solid #000; padding:4px 2px; width:15%; font-size:10px;">' . htmlspecialchars($athlete->name ?? '') . '</td>';
+                        $html .= '<td style="border:1px solid #000; padding:4px 2px; width:25%; font-size:10px;">' . htmlspecialchars($athlete->name_secondary ?? '') . '</td>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:4px 2px; width:10%; font-size:10px;">' . htmlspecialchars($category) . '</td>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:4px 2px; width:10%; font-size:10px;">' . htmlspecialchars($registeredWeight) . '</td>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:4px 2px; width:10%; font-size:10px;">' . htmlspecialchars($weighInWeight == 0 ? '沒有過磅' : $weighInWeight) . '</td>';
+            $html .= '</tr>';
+            
+            $index++;
+        }
+        
+        $html .= '</tbody></table>';
+        
+        return $html;
+    }
+
+    private function generateResultTableHTML($teams)
+    {
+        $html = '<table border="0.5" cellpadding="2" cellspacing="0" style="line-height:1.2; width:99%; border-collapse: collapse;">';
+        
+        // 表頭 - 簡單黑白樣式
+        $html .= '<thead><tr>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:3px 1px; width:5%;">序</th>';
+        $html .= '<th colspan="2" style="font-weight:bold; text-align:center; border:1px solid #000; padding:3px 1px; width:40%;">學校</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:3px 1px; width:15%;">金牌</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:3px 1px; width:15%;">銀牌</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:3px 1px; width:15%;">銅牌</th>';
+        $html .= '<th style="font-weight:bold; text-align:center; border:1px solid #000; padding:3px 1px; width:10%;">總計</th>';
+        $html .= '</tr></thead>';
+        
+        // 表格內容
+        $html .= '<tbody>';
+        
+        $index = 1;
+        foreach ($teams as $team) {
+            // 確保 medals 物件存在
+            if (!isset($team->medals)) {
+                $team->medals = (object)[
+                    'gold' => 0,
+                    'silver' => 0,
+                    'bronze' => 0,
+                    'total' => 0
+                ];
+            }
+            
+            $html .= '<tr>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;width:5%;">' . $index . '</td>';
+            $html .= '<td style="border:1px solid #000; padding:2px 1px;width:10%;">' . htmlspecialchars($team->abbreviation ?? $team->name) . '</td>';
+            $html .= '<td style="border:1px solid #000; padding:2px 1px;width:30%;">' . htmlspecialchars($team->name ?? '') . '</td>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;width:15%;">' . $team->medals->gold . '</td>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;width:15%;">' . $team->medals->silver . '</td>';
+            $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;width:15%;">' . $team->medals->bronze . '</td>';
+            $html .= '<td style="border:1px solid #000; text-align:center; font-weight:bold; padding:2px 1px;width:10%;">' . $team->medals->total . '</td>';
+            $html .= '</tr>';
+            
+            $index++;
+        }
+    
+        $html .= '<tr style="font-weight:bold;">';
+    $html .= '<td colspan="3" style="border:1px solid #000; text-align:right; padding:2px 1px;">總計</td>';
+    
+    $totalGold = $teams->sum(function($team) {
+        return $team->medals->gold ?? 0;
+    });
+    $totalSilver = $teams->sum(function($team) {
+        return $team->medals->silver ?? 0;
+    });
+    $totalBronze = $teams->sum(function($team) {
+        return $team->medals->bronze ?? 0;
+    });
+    $totalMedals = $teams->sum(function($team) {
+        return $team->medals->total ?? 0;
+    });
+    
+    $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;">' . $totalGold . '</td>';
+    $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;">' . $totalSilver . '</td>';
+    $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;">' . $totalBronze . '</td>';
+    $html .= '<td style="border:1px solid #000; text-align:center; padding:2px 1px;">' . $totalMedals . '</td>';
+    $html .= '</tr>';
+        $html .= '</tbody></table>';
+        
+        return $html;
+    }
     private function generateTableHTML($teams)
     {
         

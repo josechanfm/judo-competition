@@ -10,7 +10,7 @@ class RoundRobbinOption2Service{
     protected $pdf=null;
     protected $title='Judo Competition of Asia Pacific';
     protected $title_sub='Judo Union of Asia';
-    protected $logo_primary = '';
+    protected $logo_primary = 'images/mja_logo.png';
     protected $logo_secondary=null;
 
     protected $startX=25; //面頁基點X軸
@@ -146,19 +146,20 @@ class RoundRobbinOption2Service{
         <th class="num2">Rank</th></tr>';
 
         for($i=0;$i<$cnt;$i++){
+            // dd($players);
             $nameStyle = '';
-            if(isset($players[$i]['pivot']['is_weight_passed']) && $players[$i]['pivot']['is_weight_passed'] == 0){
+            if(isset($players[$i]['is_weight_passed']) && ($players[$i]['is_weight_passed'] == 0 || $players[$i]['abstain'] == 1)){
                 $nameStyle = ' text-decoration: line-through;';
             }
             $tbl.='<tr><td class="num1">'.($i+1).'</td><td class="playerbox">'.
                 '<table border="0" cellpadding="0" cellspacing="0" width="100%">'.
                 '<tr>'.
                 '<td width="50%" style="vertical-align:top;border:none;' . $nameStyle .'">'.
-                $this->smartTruncate($players[$i]['name']).'<div>'. $this->smartTruncate($players[$i]['name_secondary']) .'</div>'.
+                $this->smartTruncate($players[$i]->athlete->name).'<div>'. $this->smartTruncate($players[$i]->athlete->name_secondary) .'</div>'.
                 '</td>'.
                 '<td width="50%" style="vertical-align:center;border:none;text-align:right; font-size:8px;">'.
-                '<div>'. $this->smartTruncate($players[$i]['team']['abbreviation']) .'</div>'.
-                ($players[$i]['team']['name'] ).
+                '<div>'. $this->smartTruncate($players[$i]->athlete->team->abbreviation) .'</div>'.
+                ($players[$i]->athlete->team->name).
                 '</td>'.
                 '</tr>'.
                 '</table>'.
@@ -167,10 +168,20 @@ class RoundRobbinOption2Service{
                 if($i==$j){
                     $tbl.='<td class="block"></td>';
                 }else{
-                    $tbl.='<td></td>';
+                    if($players[$i]->battleBout($players[$j])->winner == -1){
+                        $tbl.='<td></td>';
+                    }else {
+                        $tbl.='<td style="text-align:centent">' . (($players[$i]->battleBout($players[$j])->white == $players[$i]->id) ? $players[$i]->battleBout($players[$j])->result?->w_score : $players[$i]->battleBout($players[$j])->result?->b_score) . '</td>';
+                    }
                 }
             }
-            $tbl.='<td></td><td></td><td></td></tr>';
+            $tbl.='<td style="text-align:centent">' . $players[$i]->score . '</td>';
+            $tbl.='<td style="text-align:centent">' . $players[$i]->collectMark() . '</td>';
+            if(isset($players[$i]['is_weight_passed']) && ($players[$i]['is_weight_passed'] == 0 || $players[$i]['abstain'] == 1)){
+                $tbl.='<td class="block"></td></tr>';
+            }else {
+                $tbl.='<td style="text-align:centent">' . $players[$i]->rank . '</td></tr>';
+            }
         }
         $tbl.='
         </table>
@@ -240,21 +251,21 @@ class RoundRobbinOption2Service{
             $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'DF', $this->styleBoxLine, $this->boxWhiteColor);
             $this->pdf->RoundedRect($x, $y+$h, $w, $h, $r, '0110', 'DF', $this->styleBoxLine, $this->boxBlueColor);
             $this->pdf->setXY($x + 1, $y);
-            if(isset($players[$g[0]]['pivot']['is_weight_passed']) && $players[$g[0]]['pivot']['is_weight_passed'] == 0){
+            if(isset($players[$g[0]]->is_weight_passed) && $players[$g[0]]->is_weight_passed == 0){
                 $this->pdf->setFont($this->generalFont, 'BD', 8);
             }
-            $this->pdf->Cell($this->boxW , $h - 4, $players[$g[0]]['name'] . $players[$g[0]]['name_secondary'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW , $h - 4, $players[$g[0]]->athlete->name . $players[$g[0]]->athlete->name_secondary, 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + ($h/5));
             $this->pdf->setFont($this->generalFont, 'B', 8);
-            $this->pdf->Cell($this->boxW, $h,($players[$g[0]]['team']['abbreviation'] ? $players[$g[0]]['team']['abbreviation'] . '-' : '') . $players[$g[0]]['team']['name'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h,($players[$g[0]]->athlete->team->abbreviation ? $players[$g[0]]->athlete->team->abbreviation . '-' : '') . $players[$g[0]]['team']['name'], 0, 1, 'L', 0, '', 0);
             $this->pdf->setXY($x + 1, $y + $h - 2);
-            if(isset($players[$g[1]]['pivot']['is_weight_passed']) && $players[$g[1]]['pivot']['is_weight_passed'] == 0){
+            if(isset($players[$g[1]]->is_weight_passed) && $players[$g[1]]->is_weight_passed == 0){
                 $this->pdf->setFont($this->generalFont, 'BD', 8);
             }
-            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]['name'] . $players[$g[1]]['name_secondary'], 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h, $players[$g[1]]->athlete->name . $players[$g[1]]->athlete->name_secondary, 0, 1, 'L', 0, '', 0);
             $this->pdf->setFont($this->generalFont, 'B', 8);
             $this->pdf->setXY($x + 1, $y + $h + ($h/5));
-            $this->pdf->Cell($this->boxW, $h,($players[$g[1]]['team']['abbreviation'] ? $players[$g[1]]['team']['abbreviation'] . '-' : '') . $players[$g[1]]['team']['name'] , 0, 1, 'L', 0, '', 0);
+            $this->pdf->Cell($this->boxW, $h,($players[$g[1]]->athlete->team->abbreviation ? $players[$g[1]]->athlete->team->abbreviation . '-' : '') . $players[$g[1]]['team']['name'] , 0, 1, 'L', 0, '', 0);
             $this->pdf->RoundedRect($x+$this->boxW, $y+($h/2), $gap, $h, $r, '0000', 'DF', $style, array(254,206,50));
             $this->pdf->circle($x+$this->boxW+$gap+2, $y+($h/2)+($h/2), 2, 0, 360, 'DF', $this->styleCircle, $this->circleColor);
             $x1=$x+$this->boxW+$gap;
@@ -299,15 +310,19 @@ class RoundRobbinOption2Service{
         $w = $w - 10;
         $h = 12;
         $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1111', 'DF', $this->styleResult1, $this->resultColor1);
-        $this->pdf->setXY($x, $y - 2);
-        $this->pdf->SetFont($this->generalFont, 'B', 14);
-        $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
-        $this->pdf->setXY($x, $y + 3);
-        $this->pdf->SetFont($this->generalFont, 'B', 14);
-        $this->pdf->Cell($w, 10, 'Resultados', 0, 1, 'C', 0, '', 0);
-        $this->pdf->setXY($x, $y + 3);
-        $this->pdf->SetFont($this->generalFont, 'B', 14);
-        $this->pdf->Cell($w, 10, 'Resultados', 0, 1, 'C', 0, '', 0);
+        if($this->title_sub){
+            $this->pdf->setXY($x, $y - 2);
+            $this->pdf->SetFont($this->generalFont, 'B', 14);
+            $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
+            $this->pdf->setXY($x, $y + 3);
+            $this->pdf->SetFont($this->generalFont, 'B', 14);
+            $this->pdf->Cell($w, 10, 'Resultados', 0, 1, 'C', 0, '', 0);
+        }else {
+            $this->pdf->setXY($x, $y);
+            $this->pdf->SetFont($this->generalFont, 'B', 16);
+            $this->pdf->Cell($w, 10, '比賽結果', 0, 1, 'C', 0, '', 0);
+        }
+
     }
     private function smartTruncate($name, $maxLength = 15)
     {

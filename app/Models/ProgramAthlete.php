@@ -105,4 +105,17 @@ class ProgramAthlete extends Model
 
         return $bout;
     }
+
+    public function battleBout($otherAthlete)
+    {
+        return Bout::where(function ($query) use ($otherAthlete) {
+            // 情況1: 當前運動員是 blue，另一個是 white
+            $query->where('blue', $this->id)
+                ->where('white', $otherAthlete->id);
+        })->orWhere(function ($query) use ($otherAthlete) {
+            // 情況2: 當前運動員是 white，另一個是 blue
+            $query->where('white', $this->id)
+                ->where('blue', $otherAthlete->id);
+        })->first(); // 或使用 ->get() 如果可能有多場比賽
+    }
 }

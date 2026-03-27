@@ -59,6 +59,7 @@ class TeamAthletesService
 
         return $this->pdf;
     }
+
     public function generateAllTeamsAthletesStatistics($competition, $teams)
     {
         // 添加页面
@@ -109,7 +110,9 @@ class TeamAthletesService
         return $this->pdf;
 
     }
-
+    public function generateAllCheckInAthletes($athletes){
+        
+    }
     public function generateAllFailWeighInAthletes($failAthletes)
     {
         $this->pdf->AddPage();

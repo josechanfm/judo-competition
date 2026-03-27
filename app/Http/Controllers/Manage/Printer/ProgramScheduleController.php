@@ -49,12 +49,13 @@ class ProgramScheduleController extends Controller
         $allBouts = [];
         
         // 遍歷所有場地和賽區
-
+        foreach ($competition->days as $day){
             foreach ($matNumbers as $mat) {
                 foreach ($sectionNumbers as $section) {
                     // 獲取該場地和賽區的所有比賽
                     $bouts = $competition->bouts()
                         ->where('mat', $mat)
+                        ->where('date', $day)
                         ->where('section', $section)
                         ->where('queue', '!=', 0)
                         ->orderBy('queue')
@@ -91,7 +92,7 @@ class ProgramScheduleController extends Controller
                     }
                 }
             }
-       
+        }
         
         // 如果沒有找到任何比賽，返回空結果
         if (empty($allBouts)) {

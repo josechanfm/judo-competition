@@ -456,9 +456,16 @@ class AthleteController extends Controller
         ->header('Content-Type', 'application/pdf');
     }
 
-    public function generateAllFailWeighInAthletes(Competition $competition){
-        $failAthletes = $competition->programAthletes()->with('athlete', 'team', 'program')->where('is_weight_passed', 0)->get();
-
+    public function generateAllFailWeighInAthletes(Competition $competition)
+    {
+        $failAthletes = $competition->programAthletes()
+            ->with('athlete', 'team', 'program')
+            ->where('is_weight_passed', 0)
+            ->where('weight', 0) 
+            ->get()
+            ->sortBy(function($item) {
+                return $item->team->name ?? $item->team->id; // 按队伍名称或ID排序
+            });
 
         $TeamAthletesService = new TeamAthletesService();
 
@@ -470,7 +477,7 @@ class AthleteController extends Controller
         $pdf = $TeamAthletesService->generateAllFailWeighInAthletes($failAthletes);
 
         return response($pdf->Output("{$competition->name}過磅失敗表.pdf", 'I'))
-        ->header('Content-Type', 'application/pdf');
+            ->header('Content-Type', 'application/pdf');
     }
 
     public function generateAllTeamsAthletesResult(Competition $competition)
@@ -538,6 +545,34 @@ class AthleteController extends Controller
         $fileName = $competition->name . '運動員ID_Card表.xlsx';
 
         return Excel::download(new AthleteIDCardExport($programAthletes), $fileName);
+    }
+
+    public function generateAllCheckInAthletes(Competition $competition, Request $request)
+    {
+        $matNumbers = range(1, $competition->mat_number);
+        $sectionNumbers = range(1, $competition->section_number);
+
+        foreach ($competition->days as $day){
+            foreach ($matNumbers as $mat) {
+                foreach ($sectionNumbers as $section) {
+                    // 獲取該場地和賽區的所有比賽
+                    $programs = $competition->programs()
+                        ->where('mat', $mat)
+                        ->where('date', $day)
+                        ->where('section', $section)
+                        ->get();
+                }
+            }
+        }
+
+        $TeamAthletesService = new TeamAthletesService();
+
+        $TeamAthletesService->setTitle(
+            $competition->name,
+            $competition->name_secondary
+        );
+
+        return $TeamAthletesService->generateAllCheckInAthletes($programs);
     }
 
     public function sendAthletesCardEmail(Competition $competition)

@@ -26,5 +26,4 @@ class Athlete extends Model
     {
         return $this->belongsToMany(Program::class, 'program_athlete', 'athlete_id', 'program_id');
     }
-    
 }

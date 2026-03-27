@@ -658,9 +658,11 @@ class ProgramController extends Controller
                 $programAthletes = $program->programAthletes()
                     ->whereIn('rank',[1,2,3])
                     ->where('is_weight_passed',1)
+                    ->where('abstain', null)
                     ->orderBy('rank')
                     ->take(4)
                     ->get();
+                // dd($programAthletes);
             } else {
                 // awarding_method == 0，顯示總人數-1，最多4個
                 $totalAthletes = $program->programAthletes()->count();
@@ -678,7 +680,7 @@ class ProgramController extends Controller
             // dd($programAthletes);
             // 生成獲獎者列表
             if($program->status == 4){
-            for ($i = 0; $i < $display_count; $i++) {
+            for ($i = 0; $i < $programAthletes->count(); $i++) {
                 // 直接使用 rank 作為獎項（如果有的話），否則使用預設順序
                 if (isset($programAthletes[$i]) && $programAthletes[$i]) {
                     $award = $programAthletes[$i]->rank;
@@ -972,7 +974,7 @@ class ProgramController extends Controller
             case 'rrb':
                 $settings = File::json(storage_path('setting/game_round_robbin_option2.json'));
                 $service = new RoundRobbinOption2Service($settings);
-                $players = $program->athletes()->orderBy('seat')->get();
+                $players = $program->programAthletes()->orderBy('seat')->get();
                 $repechagePlayers = null;
                 break;
             case 'erm':

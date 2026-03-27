@@ -73,27 +73,11 @@
                       <SaveOutlined />save
                     </div></a-button
                   >
-                  <a-button type="link">
+                  <a-button type="link" @click="showPrintDialog">
                     <div class="flex items-center gap-2">
                       <DownloadOutlined />Print pdf
                     </div></a-button
                   >
-                  <!-- <a-button
-                    v-if="edit == false"
-                    type="link"
-                    @click="
-                      () => {
-                        this.edit = true;
-                      }
-                    "
-                  >
-                    <div class="flex items-center gap-2"><EditOutlined />Edit</div>
-                  </a-button>
-                  <a-button v-if="edit == true" type="link" @click="this.savePrograms">
-                    <div class="flex items-center gap-2">
-                      <SaveOutlined /> Edit
-                    </div></a-button
-                  > -->
                 </div>
               </div>
               <a-table :dataSource="programs" :columns="columns">
@@ -196,7 +180,7 @@
                       <a-button type="link" @click="cancelDrag">Cancel</a-button>
                     </template>
                   </div>
-                  <a-button type="link">
+                  <a-button type="link" @click="showPrintDialog">
                     <template #icon> <DownloadOutlined /> </template>Print pdf</a-button
                   >
                 </div>
@@ -321,77 +305,6 @@
                           </div>
                         </div>
                       </draggable>
-                      <!-- <draggable
-                        :list="partitionedPrograms[day][section][mat]"
-                        handle=".handle"
-                        group="programs"
-                        :id="`programs_${day}_${section}_${mat}`"
-                        :emptyInsertThreshold="200"
-                        @end="onDragEnd"
-                        item-key="id"
-                      >
-                        <template #footer>
-                          <div class="absolute w-full mt-6">
-                            <a-empty
-                              v-if="partitionedPrograms[day][section][mat].length === 0"
-                            >
-                              <template #description>
-                                <p>尚未安排項目</p>
-                                <p>拖動項目以安排場次</p>
-                              </template>
-                            </a-empty>
-                          </div>
-                        </template>
-                        <template #item="{ element, index }">
-                          <a-list-item :id="element.id">
-                            <div class="flex items-center px-5 w-full">
-                              <div class="w-12">
-                                <a-checkbox
-                                  v-if="isBatchEditing"
-                                  :checked="isProgramChecked(element)"
-                                  :value="element.id"
-                                  :id="`chk-${element.id}`"
-                                  @change="toggleProgramChecked(element)"
-                                />
-                                <a-tag v-else>{{ index + 1 }}</a-tag>
-                              </div>
-                              <div class="flex-1">
-                                <div class="mb-2">
-                                  <a-tag>
-                                    {{ element.category.name }}
-                                  </a-tag>
-                                  <a-tag class="uppercase"
-                                    >{{ element.competition_system_name }}
-                                  </a-tag>
-                                  {{ element.name }}
-                                </div>
-                                <div class="text-sm text-neutral-500">
-                                  共 {{ element.athletes_count }} 人，{{
-                                    element.bouts_count
-                                  }}
-                                  場次
-                                </div>
-                              </div>
-
-                              <div>
-                                <a-button
-                                  type="text"
-                                  class="handle"
-                                  v-if="
-                                    competition.status < COMPETITION_STATUS.program_arranged &&
-                                    competition.status >= COMPETITION_STATUS.athletes_confirmed &&
-                                    editing
-                                  "
-                                >
-                                  <template #icon>
-                                    <HolderOutlined />
-                                  </template>
-                                </a-button>
-                              </div>
-                            </div>
-                          </a-list-item>
-                        </template>
-                      </draggable> -->
                     </a-card>
                   </div>
                 </div>
@@ -400,31 +313,132 @@
           </div>
           <div class="w-72 flex flex-col">
             <div class="">
-              <h3 class="font-bold text-lg mb-3">More function</h3>
-              <div class="flex flex-col gap-2"><a>View Bouts</a></div>
-            </div>
-            <div class="">
-              <h3 class="font-bold text-lg mb-3">Print Files</h3>
+              <h3 class="font-bold text-lg mb-3">打印文件</h3>
               <div class="flex flex-col gap-2">
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.program.export.medal-quantity', competition.id)">預計獎牌數量表(EXCEL)</a>
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.program.export.program-time', competition.id)">各組別項目表</a>
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.generateAllProgramsOnlineTable', competition.id)">所有上線表</a>
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.allSchedule', competition.id)">所有賽程表</a>
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.result-table', {'competition':competition.id,'blankMedals':false})">賽果表(未完成)</a>
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.athletes.export.id-card', competition.id)">運動員IDCard表</a>
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.team-athletes-result-table',competition.id)">學校/屬會成績表</a>   
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.fail-weighIn-table',competition.id)">過磅失敗表</a>   
-                <!-- <a>比賽秩序表</a> -->
-                <!-- <a>各場地安排</a>
-                
-                <a>全部賽程表</a>
-                <a>全部上線表</a> -->
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.program.export.medal-quantity', competition.id)"
+                >預計獎牌數量表(EXCEL)</a>
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.program.export.program-time', competition.id)"
+                >各組別項目表</a>
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.generateAllProgramsOnlineTable', competition.id)"
+                >所有上線表</a>
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.allSchedule',competition.id)"
+                >所有賽程表</a>  
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.result-table', {'competition':competition.id,'blankMedals':false})"
+                >賽果表(未完成)</a>
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.athletes.export.id-card', competition.id)"
+                >運動員IDCard表</a>
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.team-athletes-result-table',competition.id)"
+                >學校/屬會成績表</a>
+                <a 
+                  class="text-blue-500" 
+                  target="_blank" 
+                  :href="route('manage.competition.fail-weighIn-table',competition.id)"
+                >過磅失敗表</a>
+              </div>
+              <h3 class="font-bold text-lg mb-3 pt-2">其他文件</h3>
+              <div class="flex flex-col gap-2">
+                <a
+                  class="text-blue-500"
+                  @click="showPrintDialogWithParams()"
+                >打印更多</a>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Print Dialog Modal -->
+    <a-modal
+      v-model:open="printDialogVisible"
+      title="列印文件設定"
+      :footer="null"
+      width="500px"
+    >
+      <div class="flex flex-col gap-4 py-4">
+        <div class="flex flex-col gap-2">
+          <label class="font-semibold">選擇文件類型</label>
+          <a-select v-model:value="selectedPrintType" placeholder="請選擇要列印的文件">
+            <a-select-option value="onlineTable">上線表 (依日期)</a-select-option>
+            <a-select-option value="schedule">賽程表 (依日期)</a-select-option>
+          </a-select>
+        </div>
+
+        <!-- Date Selection (顯示當選擇依日期相關選項時) -->
+        <div 
+          class="flex flex-col gap-2"
+        >
+          <label class="font-semibold">選擇日期</label>
+          <a-select v-model:value="selectedDate" placeholder="請選擇日期">
+            <a-select-option 
+              v-for="day in competition.days" 
+              :key="day" 
+              :value="day"
+            >
+              {{ day }}
+            </a-select-option>
+          </a-select>
+        </div>
+
+        <!-- Section Selection (顯示當選擇依場次相關選項時) -->
+        <div 
+          class="flex flex-col gap-2"
+        >
+          <label class="font-semibold">選擇場次 (Section)</label>
+          <a-select v-model:value="selectedSection" placeholder="請選擇場次">
+            <a-select-option 
+              v-for="section in competition.section_number" 
+              :key="section" 
+              :value="section"
+            >
+              Section {{ section }}
+            </a-select-option>
+          </a-select>
+        </div>
+
+        <!-- Mat Selection (顯示當選擇依場地相關選項時) -->
+        <div 
+          class="flex flex-col gap-2"
+        >
+          <label class="font-semibold">選擇場地 (Mat)</label>
+          <a-select v-model:value="selectedMat" placeholder="請選擇場地">
+            <a-select-option 
+              v-for="mat in competition.mat_number" 
+              :key="mat" 
+              :value="mat"
+            >
+              Mat {{ mat }}
+            </a-select-option>
+          </a-select>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-4">
+          <a-button @click="printDialogVisible = false">取消</a-button>
+          <a-button type="primary" @click="generatePrintFile">確認列印</a-button>
+        </div>
+      </div>
+    </a-modal>
   </ProgramLayout>
 </template>
 
@@ -560,6 +574,12 @@ export default {
           range: "${label} must be between ${min} and ${max}",
         },
       },
+      // Print dialog related data
+      printDialogVisible: false,
+      selectedPrintType: null,
+      selectedDate: null,
+      selectedSection: 1,
+      selectedMat: 1,
     };
   },
   computed: {
@@ -606,8 +626,37 @@ export default {
       }
     },
   },
-  created() {},
+  created() {
+    // 初始化 selectedDate 為第一個日期
+    if (this.competition.days && this.competition.days.length > 0) {
+      this.selectedDate = this.competition.days[0];
+    }
+  },
   methods: {
+    showPrintDialog() {
+      this.printDialogVisible = true;
+    },
+    showPrintDialogWithParams() {
+      this.printDialogVisible = true;
+    },
+    generatePrintFile() {
+      let url = null;
+
+      switch (this.selectedPrintType) {
+        case "onlineTables":
+          url = route('manage.competition.generateAllProgramsOnlineTable', this.competition.id);
+          break;
+        case "schedules":
+          url = route('manage.competition.allSchedule', this.competition.id);
+          break;
+      }
+
+      if (url) {
+        window.open(url, '_blank');
+        this.printDialogVisible = false;
+        message.success('正在生成文件...');
+      }
+    },
     onCreateRecord() {
       this.modal.title = "Create";
       this.modal.isOpen = true;

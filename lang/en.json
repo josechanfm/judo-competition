@@ -211,6 +211,8 @@
     "competitions.status.uninitialized": "Uninitialized",
     "competitions.system_and_program_arrangement": "Arranging",
     "competitions.time_and_mat_arrangement": "Time and Mat",
+    "competitions.token": "Token",
+    "competitions.token_hint": "Used by the API and scoring devices to identify this competition. Changing it will require connected devices to enter the new token.",
     "competitions.total": ":total competitions",
     "competitions.type": "Competition Type",
     "competitions.weight": "Weight Group",

@@ -210,6 +210,8 @@
     "competitions.status.uninitialized": "未初始化",
     "competitions.system_and_program_arrangement": "賽制及項目安排",
     "competitions.time_and_mat_arrangement": "比賽時間及場地安排",
+    "competitions.token": "識別碼",
+    "competitions.token_hint": "API 與計分裝置用此識別碼識別賽事；更改後已連線的裝置必須重新輸入。",
     "competitions.total": ":total 項賽事",
     "competitions.type": "比賽類型",
     "competitions.weight": "公斤級",

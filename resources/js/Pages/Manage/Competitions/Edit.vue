@@ -71,6 +71,24 @@
                     </a-form-item>
                   </div>
                 </div>
+                <div class="flex justify-between gap-3">
+                  <div class="w-full">
+                    <a-form-item
+                      :label="$t('competitions.token')"
+                      name="token"
+                      :validate-status="$page.props.errors.token ? 'error' : ''"
+                      :help="$page.props.errors.token"
+                    >
+                      <a-input
+                        v-model:value="competition.token"
+                        autocomplete="off"
+                      />
+                      <div class="text-xs text-gray-500 mt-1">
+                        {{ $t("competitions.token_hint") }}
+                      </div>
+                    </a-form-item>
+                  </div>
+                </div>
                 <div class="">
                   <a-form-item
                     :label="$t('competitions.country_or_region')"
@@ -452,43 +470,10 @@ export default {
       disabledDate: null,
       tmpContestTime: null,
       setting_index: 0,
-      columns: [
-        {
-          title: "Name",
-          dataIndex: "name",
-        },
-        {
-          title: "Country",
-          dataIndex: "country",
-        },
-        {
-          title: "Date Start",
-          dataIndex: "date_start",
-        },
-        {
-          title: "Date End",
-          dataIndex: "date_end",
-        },
-        {
-          title: "Mat Number",
-          dataIndex: "mat_number",
-        },
-        {
-          title: "Section Number",
-          dataIndex: "section_number",
-        },
-        {
-          title: "Status",
-          dataIndex: "status",
-        },
-        {
-          title: "Operation",
-          dataIndex: "operation",
-        },
-      ],
       rules: {
         country: { required: true },
         name: { required: true },
+        token: { required: true },
         name_secondary: { required: true },
         date_start: { required: true },
         date_end: { required: true },

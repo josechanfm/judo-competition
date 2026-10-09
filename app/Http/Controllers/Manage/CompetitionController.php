@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use App\Models\Competition;
 use App\Models\CompetitionReferee;
@@ -170,6 +171,9 @@ class CompetitionController extends Controller
             'days' => 'required',
             'remark' => '',
             'categories' => '',
+            // token 是計分裝置／API 識別賽事的公開鍵，必須唯一
+            // （Api\* 全部用 where('token', ...) 查賽事，重複會撈錯賽事）
+            'token' => ['required', 'string', 'max:255', Rule::unique('competitions', 'token')->ignore($competition->id)],
             'competition_type.name' => 'required_if:competition_type,true',
             'competition_type.language' => 'required_if:compcompetition_typeetition,true',
             'competition_type.is_language_secondary_enabled' => 'required_if:competition_type,true|boolean',

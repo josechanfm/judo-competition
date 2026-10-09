@@ -84,41 +84,6 @@ export default {
         title: "Record Modal",
         data: {},
       },
-      columns: [
-        {
-          title: "Name",
-          dataIndex: "name",
-        },
-        {
-          title: "Country",
-          dataIndex: "country",
-        },
-        {
-          title: "Date Start",
-          dataIndex: "date_start",
-        },
-        {
-          title: "Date End",
-          dataIndex: "date_end",
-        },
-        {
-          title: "Mat Number",
-          dataIndex: "mat_number",
-        },
-        {
-          title: "Section Number",
-          dataIndex: "section_number",
-        },
-        { title: "Token", dataIndex: "token" },
-        {
-          title: "Status",
-          dataIndex: "status",
-        },
-        {
-          title: "Operation",
-          dataIndex: "operation",
-        },
-      ],
       rules: {
         game_type_id: { required: true },
         country: { required: true },
@@ -142,6 +107,20 @@ export default {
     };
   },
   computed: {
+    // 表頭要跟著語系切換 → 放 computed（放 data() 會被凍結，見專案 i18n 慣例）
+    columns() {
+      return [
+        { title: this.$t("competitions.name"), dataIndex: "name" },
+        { title: this.$t("competitions.country_or_region"), dataIndex: "country" },
+        { title: this.$t("start_date"), dataIndex: "date_start" },
+        { title: this.$t("end_date"), dataIndex: "date_end" },
+        { title: this.$t("mat_number"), dataIndex: "mat_number" },
+        { title: this.$t("section_number"), dataIndex: "section_number" },
+        { title: this.$t("competitions.token"), dataIndex: "token" },
+        { title: this.$t("competitions.status"), dataIndex: "status" },
+        { title: this.$t("action"), dataIndex: "operation" },
+      ];
+    },
     selectLanguage() {
       return this.languages.map((x) => {
         console.log(x);

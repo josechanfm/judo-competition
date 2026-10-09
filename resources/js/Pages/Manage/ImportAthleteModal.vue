@@ -68,10 +68,9 @@ export default {
       const formData = new FormData();
       formData.append("file", this.files[0].originFileObj);
 
-      // TODO: handle import athlete list
       window.axios
         .post(
-          route("admin.competitions.athletes.import"),
+          route("manage.competition.athletes.import", this.$page.props.competition.id),
           formData,
           {
             headers: {
@@ -80,10 +79,15 @@ export default {
           }
         )
         .then(({ data }) => {
-          this.$message.success("匯入成功");
           this.files = [];
-          this.errors = data.errors;
+          this.errors = data.errors || [];
           this.imported = true;
+
+          if (this.errors.length === 0) {
+            this.$message.success("匯入成功");
+          } else {
+            this.$message.warning("匯入完成，但有部分資料未導入");
+          }
 
           this.$emit("imported");
         })

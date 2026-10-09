@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Manage;
 
 use App\Exports\AthleteIDCardExport;
+use App\Exports\WeightInExcelExport;
 use App\Imports\NameSecondaryImport;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\AthletesImport;
+use App\Imports\WeightInImport;
 use App\Jobs\SendAthleteCardJob;
 use App\Mail\TestMail;
 use App\Models\Athlete;
@@ -20,6 +22,7 @@ use Illuminate\Http\Request;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\Filters\Filter;
 use Spatie\QueryBuilder\QueryBuilder;
+use App\Services\Printer\AthleteCheckInService;
 use App\Services\Printer\AthletePdfService;
 use App\Services\Printer\AthleteWeighInService;
 use App\Services\Printer\TeamAthletesService;
@@ -38,7 +41,7 @@ class AthleteController extends Controller
     public function index(Competition $competition)
     {
         $competition->athletes;
-        $programs = $competition->programs;
+        $programs = $competition->programs()->orderByCategoryAndWeightGroup()->get();
         $teams = $competition->teams;
         // dd($competition->programAthletes);
         return Inertia::render('Manage/Athletes', [
@@ -65,6 +68,7 @@ class AthleteController extends Controller
         // dd($request->all());
         $validated = $request->validate([
             'name' => 'required',
+            'name_secondary' => '',
             'new_team' => '',
             'programs' => '',
             'team' => '',
@@ -81,7 +85,7 @@ class AthleteController extends Controller
 
         $athlete = Athlete::Create([...$validated, 'competition_id' => $competition->id]);
 
-        foreach ($validated['programs'] as $p) {
+        foreach ($validated['programs'] ?? [] as $p) {
             ProgramAthlete::Create(['program_id' => $p, 'athlete_id' => $athlete->id]);
         }
 
@@ -177,12 +181,20 @@ class AthleteController extends Controller
         // remove all athletes in programs
 
         $import = new AthletesImport($competition);
-        // $import->failures()
         $import->import(request()->file('file'));
-        // dd($import->failures());
-        // dd('aaaa');
+
+        $errors = $import->failures()
+            ->map(function ($failure) {
+                return [
+                    'row' => $failure->row(),
+                    'errors' => $failure->errors(),
+                ];
+            })
+            ->values()
+            ->all();
+
         return response()->json([
-            'errors' => []
+            'errors' => $errors,
         ]);
     }
     /**
@@ -194,10 +206,12 @@ class AthleteController extends Controller
         // dd($request);
         $validated = $request->validate([
             'name' => 'required',
+            'name_secondary' => '',
             // TODO: add filtering
             'name_display' => '',
             'gender' => 'required',
-            'programs' => '',
+            'programs' => 'nullable|array',
+            'programs.*' => 'integer',
             'new_team' => '',
             'team' => '',
             'team.*.name' => 'unique:teams',
@@ -209,11 +223,23 @@ class AthleteController extends Controller
             $validated['team_id'] = $team->id;
         }
 
-        foreach ($validated['programs'] as $p) {
-            ProgramAthlete::Create(['program_id' => $p, 'athlete_id' => $athlete->id]);
-        }
+        // 只接受這場賽事底下的項目，避免跨賽事指派
+        $programIds = $competition->programs()
+            ->whereIn('programs.id', $validated['programs'] ?? [])
+            ->pluck('programs.id')
+            ->all();
+
+        // 用 sync 同步項目：移除的項目會被刪掉、新加入的會新增，
+        // 保留的紀錄（座位、過磅、確認…）原封不動。
+        // 原本是逐筆 ProgramAthlete::create()，所以移除項目不會生效、
+        // 重複儲存還會產生重複的 program_athlete 紀錄。
+        $athlete->programs()->sync($programIds);
+
+        unset($validated['programs'], $validated['new_team'], $validated['team']);
 
         $athlete->update($validated);
+
+        return redirect()->back();
     }
 
     /**
@@ -250,7 +276,7 @@ class AthleteController extends Controller
         $competition->categories;
         // dd($competition->programAthletes[0]);
         return Inertia::render('Manage/Weights', [
-            'programs'=>$competition->programs()->with('programAthletes')->get(),
+            'programs'=>$competition->programs()->with('programAthletes')->orderByCategoryAndWeightGroup()->get(),
             'competition' => $competition,
         ]);
     }
@@ -307,6 +333,56 @@ class AthleteController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * 重置過磅資料：只清空「體重」與「過磅結果」，不動鎖定(confirm)與場次。
+     */
+    private function clearWeighInData($query): void
+    {
+        $query->update([
+            'weight' => null,
+            'is_weight_passed' => null,
+        ]);
+    }
+
+    // 單一選手
+    public function resetWeightChecked(Competition $competition, ProgramAthlete $programAthlete)
+    {
+        $this->assertProgramBelongsToCompetition($competition, $programAthlete->program);
+
+        $this->clearWeighInData(ProgramAthlete::whereKey($programAthlete->id));
+
+        return redirect()->back();
+    }
+
+    // 單一項目
+    public function resetProgramWeights(Competition $competition, Program $program)
+    {
+        $this->assertProgramBelongsToCompetition($competition, $program);
+
+        $this->clearWeighInData($program->programAthletes());
+
+        return redirect()->back();
+    }
+
+    // 整場賽事（所有項目）
+    public function resetAllWeights(Competition $competition)
+    {
+        $programIds = $competition->programs()->pluck('programs.id');
+
+        $this->clearWeighInData(ProgramAthlete::whereIn('program_id', $programIds));
+
+        return redirect()->back();
+    }
+
+    private function assertProgramBelongsToCompetition(Competition $competition, ?Program $program): void
+    {
+        $category = $program?->competitionCategory;
+
+        if (! $category || (int) $category->competition_id !== (int) $competition->id) {
+            abort(404);
+        }
+    }
+
     public function resetBoutQuence(Competition $competition){
 
         $service = (new BoutGenerationService($competition));
@@ -316,6 +392,38 @@ class AthleteController extends Controller
         $service->invalidateByeBouts();
         // dd('aaaa');
         $service->resequence();
+    }
+
+    /**
+     * 匯出整場賽事的過磅資料（Excel），供工作人員填寫後再匯入。
+     */
+    public function exportWeightIn(Competition $competition)
+    {
+        $name = preg_replace('/[\/\\\\:*?"<>|]/', '-', (string) ($competition->name ?? 'competition'));
+
+        return Excel::download(
+            new WeightInExcelExport($competition),
+            $name . '過磅資料_' . now()->format('Y-m-d') . '.xlsx'
+        );
+    }
+
+    /**
+     * 匯入過磅資料（體重 + 過磅結果），只更新這兩個欄位。
+     */
+    public function importWeightIn(Request $request, Competition $competition)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+        ]);
+
+        $import = new WeightInImport($competition);
+
+        Excel::import($import, $request->file('file'));
+
+        return response()->json([
+            'updated' => $import->updated,
+            'errors' => $import->errors,
+        ]);
     }
     
     public function generateIdCards(Competition $competition)
@@ -347,6 +455,7 @@ class AthleteController extends Controller
         }
 
         $pdfService = new AthletePdfService();
+        $pdfService->useCompetitionIdCardSettings($competition);
         $pdf = $pdfService->generateIdCard($programAthletes);
 
         return response($pdf->Output("{$competition->name}_id_cards.pdf", 'I'))
@@ -367,6 +476,7 @@ class AthleteController extends Controller
             $competition->name,
             $competition->name_secondary
         );
+        $weighInService->setCompetitionLogo($competition);
         
         $pdf = $weighInService->generateAllWeighInTable($programs);
 
@@ -408,6 +518,7 @@ class AthleteController extends Controller
             $competition->name,
             $competition->name_secondary
         );
+        $TeamAthletesService->setCompetitionLogo($competition);
         
         $pdf = $TeamAthletesService->generateAllTeamsAthletes($competition,$teams);
 
@@ -449,6 +560,7 @@ class AthleteController extends Controller
             $competition->name,
             $competition->name_secondary
         );
+        $TeamAthletesService->setCompetitionLogo($competition);
         
         $pdf = $TeamAthletesService->generateAllTeamsAthletesStatistics($competition,$teams);
 
@@ -473,6 +585,7 @@ class AthleteController extends Controller
             $competition->name,
             $competition->name_secondary
         );
+        $TeamAthletesService->setCompetitionLogo($competition);
         
         $pdf = $TeamAthletesService->generateAllFailWeighInAthletes($failAthletes);
 
@@ -517,6 +630,7 @@ class AthleteController extends Controller
             $competition->name,
             $competition->name_secondary
         );
+        $TeamAthletesService->setCompetitionLogo($competition);
         
         $pdf = $TeamAthletesService->generateAllTeamsAthletesResult($teams);
 
@@ -547,32 +661,53 @@ class AthleteController extends Controller
         return Excel::download(new AthleteIDCardExport($programAthletes), $fileName);
     }
 
-    public function generateAllCheckInAthletes(Competition $competition, Request $request)
+    /**
+     * 運動員簽到表 PDF：每一個「日期 + 場地 + 時段」一頁，列出該時段要出賽的運動員。
+     */
+    public function generateAllCheckInAthletes(Competition $competition)
     {
         $matNumbers = range(1, $competition->mat_number);
         $sectionNumbers = range(1, $competition->section_number);
 
-        foreach ($competition->days as $day){
+        $groups = [];
+
+        foreach ($competition->days ?? [] as $day) {
             foreach ($matNumbers as $mat) {
                 foreach ($sectionNumbers as $section) {
-                    // 獲取該場地和賽區的所有比賽
                     $programs = $competition->programs()
                         ->where('mat', $mat)
                         ->where('date', $day)
                         ->where('section', $section)
-                        ->get();
+                        ->orderBy('sequence')
+                        ->with(['competitionCategory', 'programAthletes.athlete.team'])
+                        ->get()
+                        // 只有「未過磅」或「過磅成功」的運動員要簽到
+                        ->filter(fn ($program) => $program->programAthletes->contains(
+                            fn ($programAthlete) => is_null($programAthlete->is_weight_passed)
+                                || (int) $programAthlete->is_weight_passed === 1
+                        ));
+
+                    $groups[] = [
+                        'date' => $day,
+                        'mat' => $mat,
+                        'section' => $section,
+                        'programs' => $programs,
+                    ];
                 }
             }
         }
 
-        $TeamAthletesService = new TeamAthletesService();
-
-        $TeamAthletesService->setTitle(
+        $checkInService = new AthleteCheckInService();
+        $checkInService->setTitle(
             $competition->name,
             $competition->name_secondary
         );
+        $checkInService->setCompetitionLogo($competition);
 
-        return $TeamAthletesService->generateAllCheckInAthletes($programs);
+        $pdf = $checkInService->generate(collect($groups));
+
+        return response($pdf->Output("{$competition->name}運動員簽到表.pdf", 'I'))
+            ->header('Content-Type', 'application/pdf');
     }
 
     public function sendAthletesCardEmail(Competition $competition)
@@ -640,6 +775,7 @@ class AthleteController extends Controller
         foreach ($programAthletes as $programAthlete) {
             // 使用 AthletePdfService 生成運動員證
             $service = new AthletePdfService();
+            $service->useCompetitionIdCardSettings($competition);
             $pdf = $service->generateOneIdCard($programAthlete);
             $path = 'public/pdf/athlte_cards/' . $programAthlete->name . $programAthlete->name_secondary . '.pdf';
             Storage::put($path, $pdf);

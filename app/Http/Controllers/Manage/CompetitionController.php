@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Manage;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Models\Competition;
+use App\Models\CompetitionReferee;
 use App\Models\CompetitionCategory;
 use App\Models\CompetitionType;
 use App\Models\Config;
@@ -14,6 +16,8 @@ use App\Models\GameType;
 use App\Models\Country;
 use App\Models\GameCategory;
 use App\Models\Program;
+use App\Services\CompetitionExportService;
+use App\Services\CompetitionImportService;
 use App\Services\Printer\CompetitionResultService;
 
 class CompetitionController extends Controller
@@ -182,9 +186,80 @@ class CompetitionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Competition $competition)
     {
-        //
+        DB::transaction(function () use ($competition) {
+            // competition_referee 沒有設定 foreign key，資料庫不會自動清除，需手動刪除
+            CompetitionReferee::where('competition_id', $competition->id)->delete();
+
+            // 刪除賽事相關的媒體檔案（標誌、抽籤背景、抽籤封面、證書）
+            foreach (['logo', 'draw-background', 'draw-cover', 'certificate'] as $collection) {
+                $competition->clearMediaCollection($collection);
+            }
+
+            // 其餘關聯資料由資料庫 FK cascade 一併刪除：
+            // competition_categories → programs → bouts → bout_results / program_athlete
+            // athletes / teams / competition_type
+            $competition->delete();
+        });
+
+        return redirect()->route('manage.competitions.index');
+    }
+
+    /**
+     * Cancel the specified competition.
+     */
+    public function cancel(Competition $competition)
+    {
+        $competition->update(['is_cancelled' => true]);
+
+        return redirect()->back();
+    }
+
+    /**
+     * 匯出整場賽事（ZIP：data.json + media/）。
+     */
+    public function export(Competition $competition, CompetitionExportService $exporter)
+    {
+        try {
+            $file = $exporter->export($competition);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+
+        return response()
+            ->download($file['path'], $file['filename'])
+            ->deleteFileAfterSend(true);
+    }
+
+    /**
+     * 匯入賽事備份。一律建立一場新賽事，不改動既有資料。
+     */
+    public function import(Request $request, CompetitionImportService $importer)
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:zip'],
+        ]);
+
+        try {
+            $competition = $importer->import($request->file('file')->getRealPath());
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'message' => $e->getMessage() ?: 'Import failed.',
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'competition' => [
+                'id' => $competition->id,
+                'name' => $competition->name,
+            ],
+        ]);
     }
 
     public function resultTable(Competition $competition, $blankMedals = false)
@@ -205,6 +280,7 @@ class CompetitionController extends Controller
             $competition->name,
             $competition->name_secondary
         );
+        $resultService->setCompetitionLogo($competition);
         
         // 生成按分類的賽果表格 PDF
         $pdf = $resultService->generateAllResultTableByCategory($programsByCategory, $blankMedals);

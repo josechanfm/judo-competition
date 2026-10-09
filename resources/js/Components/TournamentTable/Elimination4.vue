@@ -70,7 +70,9 @@
 </template>
 
 <script>
+import winnerLines from "@/Components/TournamentTable/winnerLines";
 export default {
+  mixins: [winnerLines],
   components: {},
   props: ["competition_system", "bouts"],
   data() {
@@ -145,6 +147,13 @@ table.gridLine td {
 .bottomRight.win {
   border-bottom: 3px solid red !important;
   border-right: 3px solid red !important;
+}
+/* 第一輪兩名選手合併處：依勝者是上(白)/下(藍)只讓該側的線變紅 */
+.win-top {
+  border-top: 3px solid red !important;
+}
+.win-bottom {
+  border-bottom: 3px solid red !important;
 }
 
 .alignRightBottom {

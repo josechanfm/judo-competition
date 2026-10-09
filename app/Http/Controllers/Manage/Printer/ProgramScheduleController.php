@@ -27,9 +27,12 @@ class ProgramScheduleController extends Controller
                 'weight' => $bout->program->convertWeight(),
                 'round' => $bout->bout_name,
                 'event_date' => $bout->date,
+                'status' => $bout->status,
                 'white_player' => $bout?->white_player->name ?? '',
+                'white_is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? '',
                 'white_team' => $bout?->white_player->team->name ?? '',
                 'blue_player' => $bout?->blue_player->name ?? '',
+                'blue_is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '',
                 'blue_team' => $bout?->blue_player->team->name ?? '',
                 'time' => $bout->duration_formatted,
             ];
@@ -105,6 +108,7 @@ class ProgramScheduleController extends Controller
             $competition->name,
             $competition->name_secondary
         );
+        $service->setCompetitionLogo($competition);
         return $service->allSchedulesPdf($allBouts);
     }
 

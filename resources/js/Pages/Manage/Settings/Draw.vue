@@ -1,35 +1,37 @@
 <template>
   <a-form layout="vertical">
-    <a-form-item label="抽籤大屏" class="form-group">
+    <a-form-item :label="$t('draw_screen')" class="form-group">
       <div class="grid lg:grid-cols-2 gap-12">
-        <a-form-item label="抽籤背景圖片" help="抽籤時的背景圖片">
+        <a-form-item :label="$t('draw_background')" :help="$t('draw_background_help')">
           <div class="w-full aspect-video mb-3">
-            <img class="w-full h-full" :src="draw.background" />
+            <img class="w-full h-full object-cover" :src="draw.background" :alt="$t('draw_background')" />
           </div>
           <a-upload
             v-model:file-list="newBackground"
             :multiple="false"
             name="file"
-            :action="route('manage.competition.setting.update-draw-background', [competition])"
+            :action="route('manage.competition.setting.update-draw-background', [competition.id])"
             :headers="headers"
+            @change="reload"
           >
-            <a-button> 更換背景 </a-button>
+            <a-button> {{ $t('draw_background_change') }} </a-button>
           </a-upload>
         </a-form-item>
 
-        <a-form-item label="抽籤封面" help="當抽籤大屏空閒時顯示的圖片">
+        <a-form-item :label="$t('draw_cover')" :help="$t('draw_cover_help')">
           <div class="w-full aspect-video mb-3">
-            <img class="w-full h-full" :src="draw.cover" />
+            <img class="w-full h-full object-cover" :src="draw.cover" :alt="$t('draw_cover')" />
           </div>
 
           <a-upload
             v-model:file-list="newCover"
             name="file"
             :multiple="false"
-            :action="route('manage.competition.setting.update-draw-cover', [competition])"
+            :action="route('manage.competition.setting.update-draw-cover', [competition.id])"
             :headers="headers"
+            @change="reload"
           >
-            <a-button> 更換封面 </a-button>
+            <a-button> {{ $t('draw_cover_change') }} </a-button>
           </a-upload>
         </a-form-item>
       </div>
@@ -42,8 +44,11 @@ import Cookie from 'js-cookie'
 
 export default {
   name: "Draw",
-  inject: ["competition"],
   props: {
+    competition: {
+      type: Object,
+      required: true,
+    },
     draw: {
       type: Object,
       required: true,
@@ -51,8 +56,8 @@ export default {
   },
   data() {
     return {
-      newCover: null,
-      newBackground: null,
+      newCover: [],
+      newBackground: [],
     };
   },
   setup() {
@@ -60,6 +65,16 @@ export default {
         'X-XSRF-TOKEN': Cookie.get('XSRF-TOKEN')
     }
     return { headers };
+  },
+  methods: {
+    // 上傳完成後重載頁面資料，讓新圖立刻顯示
+    reload(info) {
+      if (info?.file?.status === 'done') {
+        this.newBackground = [];
+        this.newCover = [];
+        this.$inertia.reload({ only: ['draw'] });
+      }
+    },
   },
 };
 </script>

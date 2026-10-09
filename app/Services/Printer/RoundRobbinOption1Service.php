@@ -1,10 +1,14 @@
 <?php
 namespace App\Services\Printer;
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 
+use App\Services\CustomTCPDF;
 use TCPDF;
 
 class RoundRobbinOption1Service{
+    use UsesCompetitionLogo;
+
     
     protected $gameSetting=array(
         '2'=>array(
@@ -156,7 +160,7 @@ class RoundRobbinOption1Service{
     }
 
     public function pdf($players=[],$winners=[], $sequences=[], $winnerList=[], $ellipseData = []){
-        $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $this->pdf = new CustomTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         $this->playerCount=count($players);
         foreach($this->gameSetting[$this->playerCount] as $key=>$value){
             $this->$key=$value;

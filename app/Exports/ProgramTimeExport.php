@@ -19,25 +19,68 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
     protected $programs;
     protected $timeSlots = [];
     protected $venueAllocations = [];
-    protected $venueSchedules = [];
-    protected $venueLoad = [];
     protected $venueAPrograms = [];
     protected $venueBPrograms = [];
     protected $venueAGroupedPrograms = [];
     protected $venueBGroupedPrograms = [];
 
+    /**
+     * 項目統計快取：program id => athletes / matches / match_seconds / total_seconds / group_type / label
+     */
+    protected $stats = [];
+
     public function __construct(Competition $competition)
     {
         $this->competition = $competition;
         // 确保按 competitioncategory 正确排序
+        // 注意：不能用 ->with('athletes')。Program::getAthletesAttribute() 覆寫了 athletes
+        // 屬性存取，Eloquent 會優先走 accessor（每次重新查 SQL），eager load 等於無效，
+        // 改用 withCount，統一由 computeProgramStats() 讀 athletes_count。
         $this->programs = $competition->programs()
-            ->with(['competitionCategory', 'athletes'])
+            ->with(['competitionCategory'])
+            ->withCount('athletes')
             ->orderBy('competition_category_id')
             ->get();
         $this->initializeTimeSlots();
+        $this->computeProgramStats();
         $this->simpleAllocatePrograms(); // 改用簡單的平均分配
         $this->organizeByVenue();
         $this->groupProgramsByCategory();
+    }
+
+    /**
+     * 先把每個項目的統計資料算好。
+     *
+     * 這些值（場數、單場時間、總時間、組別、顯示名稱）在排序、分場地、
+     * 產出列資料與小計時會反覆用到，原本每次都重算，效能很差
+     * （實測 64 個項目會發出 4000+ 次查詢）。
+     */
+    private function computeProgramStats(): void
+    {
+        foreach ($this->programs as $program) {
+            $athletesCount = (int) ($program->athletes_count ?? 0);
+            $matchSeconds = (int) ($program->duration ?? 0);
+            $matchesCount = $this->calculateMatchesCount($athletesCount, $program->competition_system);
+
+            $this->stats[$program->id] = [
+                'athletes' => $athletesCount,
+                'matches' => $matchesCount,
+                'match_seconds' => $matchSeconds,
+                'total_seconds' => $matchesCount * $matchSeconds,
+                'group_type' => $this->getGroupType($program),
+                'label' => $program->convertGender() . $program->competitionCategory->name . $program->convertWeight(),
+            ];
+        }
+    }
+
+    private function stats($program): array
+    {
+        return $this->stats[$program->id];
+    }
+
+    private function totalSeconds($program): int
+    {
+        return $this->stats[$program->id]['total_seconds'];
     }
 
     public function collection()
@@ -77,51 +120,26 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
     }
 
     /**
-     * 简单平均分配项目到场地
+     * 依組別把項目分配到兩個場地。
+     *
+     * 同一個組別內，先按「項目總時間」由大到小排序，再依序丟給目前總時間較少的場地
+     * （LPT / Longest Processing Time first），讓兩個場地的總時間盡量接近。
+     * 原本的做法是另外限制「A 場地只能放 ceil(n/2) 個項目」，反而讓兩邊比較不平衡。
      */
     private function simpleAllocatePrograms(): void
     {
-        // 先按 competition_category_id 分组
-        $groupedPrograms = [];
-        foreach ($this->programs as $program) {
-            $categoryId = $program->competition_category_id;
-            if (!isset($groupedPrograms[$categoryId])) {
-                $groupedPrograms[$categoryId] = [];
-            }
-            $groupedPrograms[$categoryId][] = $program;
-        }
-
-        // 对每个分组内的项目进行平均分配
-        foreach ($groupedPrograms as $categoryId => $programs) {
-            $totalPrograms = count($programs);
-            $venueAPrograms = [];
-            $venueBPrograms = [];
-            
-            // 计算每个场地应该分配的项目数量
-            $venueACount = ceil($totalPrograms / 2);
-            $venueBCount = $totalPrograms - $venueACount;
-            
-            // 按项目总时间排序，大的先分配
-            usort($programs, function($a, $b) {
-                $aSeconds = $this->calculateTotalSeconds($a);
-                $bSeconds = $this->calculateTotalSeconds($b);
-                return $bSeconds - $aSeconds;
-            });
-            
-            // 交替分配到两个场地，尽量保持时间平衡
+        foreach ($this->programs->groupBy('competition_category_id') as $programs) {
             $venueATotalTime = 0;
             $venueBTotalTime = 0;
-            
-            foreach ($programs as $program) {
-                $programTime = $this->calculateTotalSeconds($program);
-                
-                if (count($venueAPrograms) < $venueACount && 
-                    (count($venueBPrograms) >= $venueBCount || $venueATotalTime <= $venueBTotalTime)) {
-                    $venueAPrograms[] = $program;
+
+            // 時間長的先放，平衡效果最好
+            foreach ($programs->sortByDesc(fn ($program) => $this->totalSeconds($program)) as $program) {
+                $programTime = $this->totalSeconds($program);
+
+                if ($venueATotalTime <= $venueBTotalTime) {
                     $venueATotalTime += $programTime;
                     $this->allocateToVenueSimple($program, '場地A', $programTime);
                 } else {
-                    $venueBPrograms[] = $program;
                     $venueBTotalTime += $programTime;
                     $this->allocateToVenueSimple($program, '場地B', $programTime);
                 }
@@ -131,22 +149,25 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     /**
      * 简单分配到场地
+     *
+     * $totalSeconds 是整個項目的總時間（場數 × 單場時間），不是單場時間。
+     * 注意：這裡記錄的 start_time / end_time 目前 Excel 並沒有輸出，只有 venue 會被讀取。
      */
-    private function allocateToVenueSimple($program, string $venue, int $duration): void
+    private function allocateToVenueSimple($program, string $venue, int $totalSeconds): void
     {
         // 根据组别决定时段
-        $groupType = $this->getGroupType($program);
+        $groupType = $this->stats($program)['group_type'];
         $timeSlot = ($groupType === '兒童組') ? 'morning' : 'afternoon';
         
         $startTime = $this->timeSlots[$timeSlot]['start'];
-        $endTime = $this->calculateEndTime($startTime, $duration);
+        $endTime = $this->calculateEndTime($startTime, $totalSeconds);
 
         $this->venueAllocations[$program->id] = [
             'time_slot_name' => $this->timeSlots[$timeSlot]['name'],
             'venue' => $venue,
             'start_time' => $startTime,
             'end_time' => $endTime,
-            'duration' => $duration
+            'duration' => $totalSeconds
         ];
     }
 
@@ -202,9 +223,10 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
                 $data[] = $programRow;
                 
                 // 累加统计
-                $categoryAthletesTotal += $program->athletes->count();
-                $categoryMatchesTotal += $this->calculateMatchesCount($program->athletes->count(), $program->competition_system);
-                $categoryDurationTotal += $this->calculateTotalSeconds($program);
+                $stats = $this->stats($program);
+                $categoryAthletesTotal += $stats['athletes'];
+                $categoryMatchesTotal += $stats['matches'];
+                $categoryDurationTotal += $stats['total_seconds'];
             }
             
             // 添加分类总计行
@@ -260,26 +282,15 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
      */
     private function prepareProgramRow($program): array
     {
-        $athletesCount = $program->athletes->count();
-        $matchDurationSeconds = $program->duration;
-        $contestSystem = $program->competition_system;
-        
-        $matchesCount = $this->calculateMatchesCount($athletesCount, $contestSystem);
-        $totalSeconds = $matchesCount * $matchDurationSeconds;
-        
-        $matchTimeFormatted = $this->formatTime($matchDurationSeconds);
-        $totalTimeFormatted = $this->formatTime($totalSeconds);
-        
-        $allocation = $this->getProgramAllocation($program);
-        $groupType = $this->getGroupType($program);
+        $stats = $this->stats($program);
 
         return [
-            $program->convertGender() . $program->competitionCategory->name . $program->convertWeight(),
-            $this->getContestSystemName($contestSystem),
-            $athletesCount,
-            $matchTimeFormatted,
-            $matchesCount,
-            $totalTimeFormatted,
+            $stats['label'],
+            $this->getContestSystemName($program->competition_system),
+            $stats['athletes'],
+            $this->formatTime($stats['match_seconds']),
+            $stats['matches'],
+            $this->formatTime($stats['total_seconds']),
         ];
     }
 
@@ -347,52 +358,41 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
         return $this->venueAllocations[$program->id] ?? null;
     }
 
-    private function calculateTotalSeconds($program): int
-    {
-        $athletesCount = $program->athletes->count();
-        $contestSystem = $program->competition_system;
-        $matchesCount = $this->calculateMatchesCount($athletesCount, $contestSystem);
-        
-        return $matchesCount * $program->duration;
-    }
-
     private function calculateEndTime(string $startTime, int $durationSeconds): string
     {
         $startTimestamp = strtotime($startTime);
         $endTimestamp = $startTimestamp + $durationSeconds;
-        return date('F:i:s', $endTimestamp);
+
+        // 原本寫 date('F:i:s')，F 是「英文月份全名」而非時，會產生 "September:05:00" 這種值
+        return date('H:i:s', $endTimestamp);
     }
 
     private function getGroupType($program): string
     {
         $categoryName = $program->competitionCategory->name ?? '';
-        
-        if (strpos($categoryName, '兒童') !== false) {
-            return '兒童組';
-        } elseif (strpos($categoryName, '少年') !== false) {
-            return '少年組';
-        } elseif (strpos($categoryName, '青少年') !== false) {
-            return '少年組';
-        } else {
-            return '公開組';
-        }
+
+        // 「青少年」也包含「少年」，所以不需要額外的分支（原本那個 elseif 永遠不會執行）
+        return match (true) {
+            str_contains($categoryName, '兒童') => '兒童組',
+            str_contains($categoryName, '少年') => '少年組',
+            default => '公開組',
+        };
     }
 
-    private function calculateMatchesCount(int $athletesCount, string $contestSystem): int
+    private function calculateMatchesCount(int $athletesCount, ?string $contestSystem): int
     {
-        switch ($contestSystem) {
-            case 'kos': // 單淘汰
-                return $athletesCount - 1;
-                
-            case 'rrb': // 循環賽
-                return ($athletesCount * ($athletesCount - 1)) / 2;
-                
-            case 'erm': // 8 強復活賽（雙敗淘汰制）
-                return $athletesCount - 1 + 4;
-
-            default:
-                return 0;
+        // 沒有（或只有一位）運動員的項目不應該產生場次，
+        // 否則 kos 會得到 -1、erm 會得到 3，把小計帶成負數
+        if ($athletesCount < 2) {
+            return 0;
         }
+
+        return match ($contestSystem) {
+            'kos' => $athletesCount - 1,                                   // 單淘汰
+            'rrb' => intdiv($athletesCount * ($athletesCount - 1), 2),      // 循環賽
+            'erm' => $athletesCount - 1 + 4,                                // 8 強復活賽（雙敗淘汰制）
+            default => 0,
+        };
     }
 
     private function formatTime(int $seconds): string
@@ -404,7 +404,7 @@ class ProgramTimeExport implements FromCollection, WithHeadings, WithMapping, Wi
         return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
     }
 
-    private function getContestSystemName(string $contestSystem): string
+    private function getContestSystemName(?string $contestSystem): string
     {
         $systems = [
             'kos' => '單淘汰賽',

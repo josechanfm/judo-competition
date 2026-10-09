@@ -115,7 +115,7 @@
           <div v-if="currentSection?.mats" class="flex-1 overflow-y-auto p-3">
             <div v-for="mat in currentSection.mats">
               <div>{{ mat.program.competition_category.name }}</div>
-              <div>{{ mat.program.date }} {{ mat.program.weight_code }} {{ mat.program.competition_system }}{{ mat.program.chart_size }}</div>
+              <div>{{ mat.program.date }} {{ mat.program.weight_code }} {{ $t("competition_system." + mat.program.competition_system) }}{{ mat.program.chart_size }}</div>
               <!-- <div v-for="b in mat.bout">
                 <div>{{ b }}</div>
               </div> -->

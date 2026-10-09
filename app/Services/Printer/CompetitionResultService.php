@@ -2,12 +2,16 @@
 
 namespace App\Services\Printer;
 
+use App\Services\CustomTCPDF;
 use TCPDF;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 
 class CompetitionResultService
 {
+    use UsesCompetitionLogo;
+
     private $pdf;
     private $title = "賽事結果總表";
     private $logo_primary = '';
@@ -18,14 +22,14 @@ class CompetitionResultService
 
     public function __construct()
     {
-        $this->pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        $this->pdf = new CustomTCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
         $this->pdf->SetCreator('Sports Club');
         $this->pdf->SetAuthor('Sports Club');
         $this->pdf->SetTitle('Competition Results');
         $this->pdf->SetMargins(15, 40, 15);
         $this->pdf->SetAutoPageBreak(false);
         $this->pdf->setPrintHeader(false);
-        $this->pdf->setPrintFooter(false);
+        $this->pdf->setPrintFooter(true);
     }
 
     public function generateAllResultTableByCategory($programsByCategory, $blankMedals = false)

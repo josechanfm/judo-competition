@@ -2,12 +2,16 @@
 
 namespace App\Services\Printer;
 
+use App\Services\CustomTCPDF;
 use TCPDF;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 
 class AthleteWeighInService
 {
+    use UsesCompetitionLogo;
+
     private $pdf;
     private $title = null;
     private $logo_primary = '';
@@ -33,14 +37,14 @@ class AthleteWeighInService
 
     public function __construct()
     {
-        $this->pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+        $this->pdf = new CustomTCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
         $this->pdf->SetCreator('Sports Club');
         $this->pdf->SetAuthor('Sports Club');
         $this->pdf->SetTitle('Athlete Weigh-In List');
         $this->pdf->SetMargins(15, 40, 15);
         $this->pdf->SetAutoPageBreak(false);
         $this->pdf->setPrintHeader(false);
-        $this->pdf->setPrintFooter(false);
+        $this->pdf->setPrintFooter(true);
     }
 
     public function generateAllWeighInTable($programs)

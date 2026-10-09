@@ -15,6 +15,44 @@ class PdfHelper
         $this->pdf = $pdf;
     }
 
+    /**
+     * 列印用的時間文字（app timezone 是 UTC，印出來要跟現場掛鐘一致；換地區改這裡）
+     * 檔名用請傳 format: 'Y-m-d'（不能有冒號）
+     */
+    public static function printTimestamp(string $timezone = 'Asia/Macau', string $format = 'Y-m-d H:i'): string
+    {
+        return now()->setTimezone($timezone)->format($format);
+    }
+
+    /**
+     * 【統一樣式】所有表格頁腳時間戳：字型、大小、顏色只改這裡
+     * TCPDF 走 CustomTCPDF::Footer()，mPDF 走 self::footerHtml()，兩邊都吃這組常數。
+     */
+    public const TIMESTAMP_FONT = 'helvetica';
+    public const TIMESTAMP_FONT_SIZE = 10;            // 單位：pt
+    public const TIMESTAMP_COLOR = [51, 51, 51];      // 深灰 #333333
+
+    /** 時間戳顏色（mPDF 的 CSS 用） */
+    public static function timestampColor(): string
+    {
+        return sprintf('#%02x%02x%02x', ...self::TIMESTAMP_COLOR);
+    }
+
+    /**
+     * mPDF 用的頁腳 HTML：左下角產生時間、置中頁碼（樣式對齊 CustomTCPDF::Footer()）
+     */
+    public static function footerHtml(): string
+    {
+        $style = 'border: none; font-family: ' . self::TIMESTAMP_FONT
+            . '; font-size: ' . self::TIMESTAMP_FONT_SIZE . 'pt; color: ' . self::timestampColor() . ';';
+
+        return '<table width="100%" style="' . $style . '"><tr>'
+            . '<td width="33%" align="left" style="' . $style . '">' . self::printTimestamp() . '</td>'
+            . '<td width="34%" align="center" style="' . $style . '">{PAGENO}/{nbpg}</td>'
+            . '<td width="33%" align="right" style="' . $style . '"></td>'
+            . '</tr></table>';
+    }
+
     public function header1($x = 0, $y = 0, $title = null, $title_sub = null, $logo_primary = null, $logo_secondary = null, $titleFont = 'times', $ellipseData = null)
     {
         $w = 190;
@@ -209,12 +247,8 @@ class PdfHelper
             $this->pdf->Line($lineX, $lineY1, $lineX, $lineY2);
         }
         
-        // 標題放在中間（但限制寬度避免與右側內容重疊）
-        if ($logo_primary){
-            $titleWidth = $lineX + $leftMargin;
-        }else {
-            $titleWidth = $lineX - $centeredX; // 標題寬度為分隔線左側減去間距
-        }
+        // 標題置中：以整個 header 框寬度為基準，讓標題落在正中間
+        $titleWidth = $w;
         
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);
@@ -354,7 +388,7 @@ class PdfHelper
         if ($ellipseData !== null) {
             $ellipseTitle = $ellipseData["title"];
             $ellipseTitleSub = $ellipseData["title_sub"];
-            $ellipseCount = $ellipseData["count"];
+            $ellipseCount = $ellipseData["count"] ?? "";
 
             $this->pdf->setFont($titleFont, 'B', 14);
             $ellipseTitleWidth = $this->pdf->GetStringWidth($ellipseTitle);
@@ -385,12 +419,8 @@ class PdfHelper
             $this->pdf->Line($lineX, $lineY1, $lineX, $lineY2);
         }
         
-        // 標題放在中間（但限制寬度避免與右側內容重疊）
-        if ($logo_primary){
-            $titleWidth = $lineX + $leftMargin;
-        }else {
-            $titleWidth = $lineX - $centeredX; // 標題寬度為分隔線左側減去間距
-        }
+        // 標題置中：以整個 header 框寬度為基準，讓標題落在正中間
+        $titleWidth = $w;
 
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);
@@ -411,7 +441,7 @@ class PdfHelper
             
             $ellipseTitle = $ellipseData["title"];
             $ellipseTitleSub = $ellipseData["title_sub"];
-            $ellipseCount = $ellipseData["count"];
+            $ellipseCount = $ellipseData["count"] ?? "";
 
             // 計算文字寬度
             $this->pdf->setFont($titleFont, 'B', 11);
@@ -558,12 +588,8 @@ class PdfHelper
             $this->pdf->Line($lineX, $lineY1, $lineX, $lineY2);
         }
         
-        // 標題放在中間（但限制寬度避免與右側內容重疊）
-        if ($logo_primary){
-            $titleWidth = $lineX + $leftMargin;
-        }else {
-            $titleWidth = $lineX - $centeredX; // 標題寬度為分隔線左側減去間距
-        }
+        // 標題置中於整個頁面（與 header1 / header2 一致，中心 = 橫版頁面中心 148.5mm）
+        $titleWidth = $w;
         
         if($title_sub == null){
             $this->pdf->setFont($titleFont, 'B', 24);

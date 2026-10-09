@@ -440,8 +440,7 @@
 
 <script>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-import { Dayjs } from "dayjs";
-import moment from "moment";
+import { isDateOutsideRange, isDateBefore } from "@/Utils/dateRange";
 export default {
   components: {
     AdminLayout,
@@ -527,21 +526,14 @@ export default {
     },
   },
   created() {
-    this.disabledDate = (current) => {
-      if (!this.competition.date_start && !this.competition.date_end) {
-        return false;
-      }
-      return (
-        current < moment(this.competition.date_start).valueOf() ||
-        current > moment(this.competition.date_end).valueOf()
+    this.disabledDate = (current) =>
+      isDateOutsideRange(
+        current,
+        this.competition.date_start,
+        this.competition.date_end
       );
-    };
-    this.endDateDisabled = (current) => {
-      if (!this.competition.date_start) {
-        return false;
-      }
-      return current < moment(this.competition.date_start).valueOf();
-    };
+    this.endDateDisabled = (current) =>
+      isDateBefore(current, this.competition.date_start);
   },
   methods: {
     addTimeToForm() {

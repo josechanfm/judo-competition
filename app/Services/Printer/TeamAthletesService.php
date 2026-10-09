@@ -2,12 +2,16 @@
 
 namespace App\Services\Printer;
 
+use App\Services\CustomTCPDF;
 use TCPDF;
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 use App\Models\Program;
 
 class TeamAthletesService
 {
+    use UsesCompetitionLogo;
+
     private $pdf;
     private $title = "隊伍運動員名單";
     private $logo_primary = '';
@@ -18,14 +22,14 @@ class TeamAthletesService
 
     public function __construct()
     {
-        $this->pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        $this->pdf = new CustomTCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
         $this->pdf->SetCreator('Sports Management System');
         $this->pdf->SetAuthor('Sports Management System');
         $this->pdf->SetTitle('Team Athletes List');
         $this->pdf->SetMargins(15, 40, 15);
         $this->pdf->SetAutoPageBreak(false);
         $this->pdf->setPrintHeader(false);
-        $this->pdf->setPrintFooter(false);
+        $this->pdf->setPrintFooter(true);
     }
 
     public function generateAllTeamsAthletes($competition, $teams)
@@ -109,9 +113,6 @@ class TeamAthletesService
         
         return $this->pdf;
 
-    }
-    public function generateAllCheckInAthletes($athletes){
-        
     }
     public function generateAllFailWeighInAthletes($failAthletes)
     {

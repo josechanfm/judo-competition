@@ -1,10 +1,13 @@
 <?php
 namespace App\Services\Printer;
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 use App\Services\CustomTCPDF;
 use TCPDF;
 
 class RoundRobbinOption2Service{
+    use UsesCompetitionLogo;
+
     
     protected $gameSetting=null;
     protected $pdf=null;
@@ -30,6 +33,9 @@ class RoundRobbinOption2Service{
     protected $repechageMode='QUARTER'; //QUARTER, DOUBLE, FULL 
     protected $round=0;
     protected $playerCount=0;
+
+    // 是否顯示 Won / Score / Rank 的數字（比賽未開始前只顯示欄位標題，裡面留空）
+    protected $showResults=true;
     
     protected $titleFont='times';
     protected $playerFont='times';
@@ -80,6 +86,14 @@ class RoundRobbinOption2Service{
         $this->titleFont = $titleFont;
         $this->playerFont = $playerFont;
         $this->generalFont = $generalFont;
+    }
+
+    /**
+     * 比賽是否已開始。未開始（還沒有人比過）時 Won / Score / Rank 欄只留標題、不顯示數字。
+     */
+    public function setShowResults($showResults = true)
+    {
+        $this->showResults = $showResults;
     }
 
     public function pdf($players = [], $winners = [],  $sequences = [], $winnerList = [], $ellipseData = [], $repechagePlayers = [], $repechage = true){
@@ -175,12 +189,12 @@ class RoundRobbinOption2Service{
                     }
                 }
             }
-            $tbl.='<td style="text-align:centent">' . $players[$i]->score . '</td>';
-            $tbl.='<td style="text-align:centent">' . $players[$i]->collectMark() . '</td>';
+            $tbl.='<td style="text-align:centent">' . ($this->showResults ? $players[$i]->score : '') . '</td>';
+            $tbl.='<td style="text-align:centent">' . ($this->showResults ? $players[$i]->collectMark() : '') . '</td>';
             if(isset($players[$i]['is_weight_passed']) && ($players[$i]['is_weight_passed'] == 0 || $players[$i]['abstain'] == 1)){
                 $tbl.='<td class="block"></td></tr>';
             }else {
-                $tbl.='<td style="text-align:centent">' . $players[$i]->rank . '</td></tr>';
+                $tbl.='<td style="text-align:centent">' . ($this->showResults ? $players[$i]->rank : '') . '</td></tr>';
             }
         }
         $tbl.='

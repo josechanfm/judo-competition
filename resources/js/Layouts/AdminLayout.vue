@@ -8,75 +8,62 @@
       width="250px"
       class="shadow-md"
     >
-      <div class="flex items-center">
-        <div
-          style="height: 64px"
-          class="flex items-center justify-center"
-          :style="collapsed ? 'width: 80px' : ''"
-        >
-          <menu-outlined class="trigger" @click="() => (collapsed = !collapsed)" />
-        </div>
+      <div class="flex items-center justify-center">
         <inertia-link :href="route('manage.competitions.index')" v-if="!collapsed">
           <div
             class="whitespace-nowrap text-white w-full font-medium text-lg flex items-center justify-center"
             style="height: 64px"
           >
-            <div v-if="!collapsed" class="flex flex-col items-center">
-              <judoka-logo class="inline-block h-6" />
-            </div>
-            <span v-else class="italic font-bold overflow-clip w-9">
-              <judoka-logo class="inline-block h-6" />
-            </span>
+            <judoka-logo class="inline-block h-6" />
           </div>
         </inertia-link>
       </div>
       <a-menu v-model:selectedKeys="selectedKeys" theme="light" mode="inline">
         <a-menu-item key="competitions.index">
-          <div class="flex items-center">
+          <inertia-link
+            class="flex items-center"
+            :href="route('manage.competitions.index')"
+          >
             <div class="flex items-center gap-2">
               <div class="pb-1">
-                <user-outlined />
+                <home-outlined />
               </div>
               <div v-if="!collapsed">{{ $t("layout.menu.home") }}</div>
             </div>
-            <inertia-link class="mx-2" :href="route('manage.competitions.index')">
-            </inertia-link>
-          </div>
+          </inertia-link>
         </a-menu-item>
         <a-menu-item key="gameTypes.index">
-          <div class="flex items-center">
+          <inertia-link
+            class="flex items-center"
+            :href="route('manage.gameTypes.index')"
+          >
             <div class="flex items-center gap-2">
               <div class="pb-1">
-                <video-camera-outlined />
+                <appstore-outlined />
               </div>
               <div v-if="!collapsed">{{ $t("layout.menu.competition_type") }}</div>
             </div>
-            <inertia-link class="mx-2" :href="route('manage.gameTypes.index')">
-            </inertia-link>
-          </div>
+          </inertia-link>
         </a-menu-item>
         <a-menu-item key="print.demo">
-          <div class="flex items-center">
+          <inertia-link class="flex items-center" :href="route('manage.print.demo')">
             <div class="flex items-center gap-2">
               <div class="pb-1">
-                <video-camera-outlined />
+                <printer-outlined />
               </div>
               <div v-if="!collapsed">Print Out Demo</div>
             </div>
-            <inertia-link class="mx-2" :href="route('manage.print.demo')"> </inertia-link>
-          </div>
+          </inertia-link>
         </a-menu-item>
         <a-menu-item key="system.index">
-          <div class="flex items-center">
+          <inertia-link class="flex items-center" :href="route('manage.system.index')">
             <div class="flex items-center gap-2">
               <div class="pb-1">
                 <FileTextOutlined />
               </div>
               <div v-if="!collapsed">{{ $t("layout.menu.documentation") }}</div>
             </div>
-            <inertia-link class="mx-2" :href="route('manage.system.index')">
-            </inertia-link>
-          </div>
+          </inertia-link>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
@@ -111,7 +98,9 @@
                 </div>
               </div>
             </div>
-            <button class="text-xl flex justify-center"><LogoutOutlined /></button>
+            <button class="text-xl flex justify-center" @click="logout">
+              <LogoutOutlined />
+            </button>
           </div>
         </div>
       </a-layout-header>
@@ -135,29 +124,27 @@
 import { ref } from "vue";
 import { getActiveLanguage, loadLanguageAsync } from "laravel-vue-i18n";
 import {
-  MenuOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-  GlobalOutlined,
-  UploadOutlined,
-  MenuUnfoldOutlined,
+  AppstoreOutlined,
   FileTextOutlined,
+  GlobalOutlined,
+  HomeOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons-vue";
 import JudokaLogo from "@/Svgs/judoka-logo.svg";
 
 export default {
   components: {
-    MenuOutlined,
-    UserOutlined,
-    VideoCameraOutlined,
-    UploadOutlined,
-    MenuUnfoldOutlined,
-    MenuFoldOutlined,
+    AppstoreOutlined,
     FileTextOutlined,
-    LogoutOutlined,
     GlobalOutlined,
+    HomeOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    PrinterOutlined,
     JudokaLogo,
   },
   setup() {
@@ -178,6 +165,9 @@ export default {
       await window.axios.get(route("app.locale.update", { locale: locale }));
       await loadLanguageAsync(locale);
       console.log(getActiveLanguage());
+    },
+    logout() {
+      window.location.href = route("logout");
     },
   },
 };

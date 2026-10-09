@@ -45,8 +45,100 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         $this->competition = $competition;
     }
 
+    public function normalizeGender($value): ?string
+    {
+        $normalized = trim((string) $value);
+        if ($normalized === '') {
+            return null;
+        }
+
+        $mapped = [
+            'm' => 'M',
+            'male' => 'M',
+            '男' => 'M',
+            '男性' => 'M',
+            'f' => 'F',
+            'female' => 'F',
+            '女' => 'F',
+            '女性' => 'F',
+        ];
+
+        $lower = strtolower($normalized);
+
+        return $mapped[$lower] ?? strtoupper($normalized);
+    }
+
+    public function normalizeCategory($value): ?string
+    {
+        $normalized = trim((string) $value);
+        if ($normalized === '') {
+            return null;
+        }
+
+        $categories = $this->competition->categories ?? collect();
+        $match = $categories->first(function ($category) use ($normalized) {
+            $code = (string) ($category->code ?? '');
+            $name = (string) ($category->name ?? '');
+            $nameSecondary = (string) ($category->name_secondary ?? '');
+
+            return strtolower($code) === strtolower($normalized)
+                || strtolower($name) === strtolower($normalized)
+                || strtolower($nameSecondary) === strtolower($normalized);
+        });
+
+        return $match ? (string) $match->code : $normalized;
+    }
+
+    public function normalizeWeightCode($value, ?string $gender = null): ?string
+    {
+        $normalized = trim((string) $value);
+        if ($normalized === '') {
+            return null;
+        }
+
+        $upper = strtoupper($normalized);
+
+        if (in_array($upper, ['MWULW', 'FWULW'], true)) {
+            return $upper;
+        }
+
+        if (in_array($upper, ['ULW', 'OPEN'], true)) {
+            $genderCode = strtoupper((string) $gender);
+            if (!in_array($genderCode, ['M', 'F'], true)) {
+                $genderCode = 'F';
+            }
+
+            return $genderCode . 'WULW';
+        }
+
+        if (in_array($upper, ['MULW', 'FULW'], true)) {
+            return $upper[0] . 'WULW';
+        }
+
+        if (preg_match('/^(?:M|F)?(\d+)([+-]?)$/', $upper, $matches)) {
+            $weight = $matches[1];
+            $suffix = $matches[2] ?? '';
+            $genderCode = strtoupper((string) $gender);
+
+            if (!in_array($genderCode, ['M', 'F'], true)) {
+                $genderCode = 'F';
+            }
+
+            return $genderCode . 'W' . $weight . $suffix;
+        }
+
+        if (in_array($upper, ['MW', 'FW'], true)) {
+            return $upper . 'ULW';
+        }
+
+        return $upper;
+    }
+
     public function collection(Collection $rows): void
     {
+        // 記錄每個項目(program)已加入的選手姓名，用來去除「相同姓名 + 相同項目」的重複報名
+        $enrolledNames = [];
+
         // dd($rows);
         foreach ($rows as $index => $row) {
             $count = count(array_filter($row->take(8)->toArray(), function ($value) {
@@ -55,6 +147,23 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
             if ($count == 0) {
                 continue;
             }
+            $row = $row->mapWithKeys(function ($value, $key) use ($row) {
+                if ($key === 'gender') {
+                    return ['gender' => $this->normalizeGender($value)];
+                }
+
+                if ($key === 'category') {
+                    return ['category' => $this->normalizeCategory($value)];
+                }
+
+                if ($key === 'weight_code') {
+                    $gender = $this->normalizeGender($row->get('gender'));
+                    return ['weight_code' => $this->normalizeWeightCode($value, $gender)];
+                }
+
+                return [$key => $value];
+            });
+
             $categories = $this->competition->categories()->pluck('id', 'code');
             // dd($row);
             $validator = Validator::make($row->toArray(), [
@@ -99,11 +208,15 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
                 ->where('weight_code', $row['weight_code'])
                 ->first();
 
+            // 去除重複報名：以「姓名 = name + name_secondary」+ 同一「項目(program)」去重，只保留第一筆
+            $athleteName = trim((string)($row['name'] ?? '') . (string)($row['name_secondary'] ?? ''));
+            if ($athleteName !== '' && isset($enrolledNames[$program->id][strtolower($athleteName)])) {
+                continue; // 已有相同姓名報名同一項目，跳過以免重複
+            }
+            if ($athleteName !== '') {
+                $enrolledNames[$program->id][strtolower($athleteName)] = true;
+            }
 
-            //                if ($program === null) {
-            //                    dd($row);
-            //                }
-            // dd($row);
             // 創建代表隊資料
             $team = $this->createTeam($row);
             // 創建選手資料
@@ -119,7 +232,7 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
         return Team::firstOrCreate([
             'competition_id' => $this->competition->id,
             'name' => $row['team_name'],
-            'abbreviation' => $row['team_code'],
+            'abbreviation' => $row['team_code'] ?? NULL,
         ]);
     }
 
@@ -137,6 +250,11 @@ class AthletesImport implements ToCollection, WithStartRow, SkipsOnFailure, With
 
     private function enrollToProgram(Program $program, Athlete $athlete, Team $team,  $row)
     {
+        // 保險：若該選手已存在於同一項目中，不再重複加入
+        if ($program->programAthletes()->where('athlete_id', $athlete->id)->exists()) {
+            return;
+        }
+
         $program->athletes()->attach($athlete->id, [
             'program_id' => $program->id,
             'athlete_id' => $athlete->id,

@@ -12,7 +12,11 @@
     <div class="py-12 mx-8">
       <div class="mb-8 flex justify-between flex-col md:flex-row">
         <div class="text-xl font-bold">{{ $t("competitions.manage") }}</div>
-        <div>
+        <div class="flex gap-2 mt-2 md:mt-0">
+          <a-button class="bg-white" @click="importOpen = true">
+            <template #icon><UploadOutlined /></template>
+            {{ $t("competitions.import") }}
+          </a-button>
           <inertia-link :href="route('manage.competitions.create')"
             ><a-button class="bg-white">{{ $t("competitions.create") }}</a-button>
           </inertia-link>
@@ -34,6 +38,13 @@
               <a-button :href="route('manage.competition.progress', record.id)">{{
                 $t("action.progress")
               }}</a-button>
+              <a-button
+                :href="route('manage.competitions.export', record.id)"
+                :title="$t('competitions.export_hint')"
+              >
+                <template #icon><DownloadOutlined /></template>
+                {{ $t("competitions.export") }}
+              </a-button>
             </template>
             <template v-else>
               {{ record[column.dataIndex] }}
@@ -41,21 +52,29 @@
           </template>
         </a-table>
       </div>
+
+      <ImportCompetitionModal v-model:open="importOpen" @imported="onImported" />
     </div>
   </AdminLayout>
 </template>
 
 <script>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
-import { Dayjs } from "dayjs";
+import ImportCompetitionModal from "../ImportCompetitionModal.vue";
+import { isDateOutsideRange, isDateBefore } from "@/Utils/dateRange";
+import { DownloadOutlined, UploadOutlined } from "@ant-design/icons-vue";
 import moment from "moment";
 export default {
   components: {
     AdminLayout,
+    ImportCompetitionModal,
+    DownloadOutlined,
+    UploadOutlined,
   },
   props: ["countries", "gameTypes", "competitions", "languages"],
   data() {
     return {
+      importOpen: false,
       dateFormat: "YYYY-MM-DD",
       disabledDate: null,
       tmpContestTime: null,
@@ -138,21 +157,14 @@ export default {
     },
   },
   created() {
-    this.disabledDate = (current) => {
-      if (!this.modal.data.date_start && !this.modal.data.date_end) {
-        return false;
-      }
-      return (
-        current < moment(this.modal.data.date_start).valueOf() ||
-        current > moment(this.modal.data.date_end).valueOf()
+    this.disabledDate = (current) =>
+      isDateOutsideRange(
+        current,
+        this.modal.data.date_start,
+        this.modal.data.date_end
       );
-    };
-    this.endDateDisabled = (current) => {
-      if (!this.modal.data.date_start) {
-        return false;
-      }
-      return current < moment(this.modal.date_start).valueOf();
-    };
+    this.endDateDisabled = (current) =>
+      isDateBefore(current, this.modal.data.date_start);
   },
   methods: {
     onCreateRecord() {
@@ -227,6 +239,10 @@ export default {
         .catch((error) => {
           console.log("error", error);
         });
+    },
+    onImported() {
+      this.importOpen = false;
+      this.$inertia.reload();
     },
   },
 };

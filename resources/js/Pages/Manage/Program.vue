@@ -1,116 +1,223 @@
 <template>
-  <inertia-head :title="program.weight_code" />
+  <inertia-head :title="programTitle" />
 
   <ProgramLayout :competition="competition">
-    <!-- Section, Mat sequences
-    <a-switch v-model:checked="masterSequence" @change="rebuildBouts" />
-    <br />
-    <a-button :href="route('manage.competition.program.gen_bouts', program.id)"
-      >Create Bouts</a-button
-    > -->
-    <div class="py-12 xl:mx-16 mx-8">
-      <div class="overflow-hidden flex flex-col gap-3">
-        <div class="grid grid-cols-4 gap-12 py-4">
-          <a-card class="shadow-lg">
-            <a-statistic title="Status" value="Ready to start" />
+    <a-page-header :title="programTitle">
+      <template #tags>
+        <a-tag v-if="program.competition_system" color="processing">
+          {{ $t("competition_system." + program.competition_system) }}
+        </a-tag>
+        <a-tag>{{ program.date }}</a-tag>
+      </template>
+      <template #extra>
+        <a-button
+          type="primary"
+          class="bg-blue-500"
+          :href="
+            route('manage.competition.program.generateCert', {
+              competition: competition.id,
+              program: program.id,
+            })
+          "
+          target="_blank"
+        >
+          <template #icon><DownloadOutlined /></template>
+          {{ $t("program.download_certificate") }}
+        </a-button>
+      </template>
+    </a-page-header>
+
+    <div class="py-8 xl:mx-16 mx-8">
+      <div class="flex flex-col gap-4">
+        <!-- 概要 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <a-card class="shadow-md">
+            <a-statistic :title="$t('status')" :value="$t('athletes.ready_to_start')" />
           </a-card>
-          <a-card class="shadow-lg">
-            <a-statistic title="Date" :value="program.date" />
+          <a-card class="shadow-md">
+            <a-statistic :title="$t('date')" :value="program.date ?? '-'" />
           </a-card>
-          <a-card class="shadow-lg">
-            <a-statistic title="Bouts" :value="program.bouts.length" />
+          <a-card class="shadow-md">
+            <a-statistic :title="$t('program.bout_count')" :value="program.bouts.length" />
           </a-card>
-          <a-card class="shadow-lg">
-            <a-statistic title="Atheles" :value="athletes ? athletes.length : 0" />
+          <a-card class="shadow-md">
+            <a-statistic :title="$t('athletes')" :value="athletes ? athletes.length : 0" />
           </a-card>
         </div>
-        <div class="grid grid-cols-4 gap-12">
-          <div class="col-span-2 flex flex-col gap-6">
-            <div class="py-2 bg-white overflow-hidden shadow-sm sm:rounded-lg p-4">
-              <div class="flex font-bold text-lg mb-2 justify-between">
-                <div>Athletes list</div>
-                <!-- <div>
-                  <a-popconfirm
-                    placement="rightTop"
-                    ok-text="Yes"
-                    cancel-text="No"
-                    @confirm="joinAthlete(selectAthlete)"
-                  >
-                    <template #icon> </template>
-                    <template #title>
-                      <a-select
-                        class="w-40"
-                        v-model:value="selectAthlete"
-                        :options="selectAthletes"
-                      ></a-select>
-                    </template>
-                    <a-button type="primary" class="bg-blue-500">Add athletes</a-button>
-                  </a-popconfirm>
-                </div> -->
+        <div class="flex flex-col gap-6">
+          <!-- 運動員名單 -->
+          <a-card class="shadow-md" :body-style="{ padding: '16px 20px 4px' }">
+            <template #title>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span>{{ $t("athletes.title") }}</span>
+                <a-tag>
+                  {{ $t("athletes_total", { total: athletes ? athletes.length : 0 }) }}
+                </a-tag>
               </div>
-              <a-table :dataSource="athletes" :columns="athleteColumns">
-                <template #bodyCell="{ column, record }">
-                  <template v-if="column.dataIndex === 'operation'">
-                    <div class="space-x-2">
-                      <a-popconfirm
-                        title="Is to remove this athlete from the program?"
-                        ok-text="Yes"
-                        cancel-text="No"
-                        @confirm="moveAthlete(record)"
-                      >
-                        <a-button>Delete</a-button>
-                      </a-popconfirm>
-                    </div>
-                  </template>
-                  <template v-else-if="column.dataIndex == 'is_weight_passed'">
-                    {{ record.pivot.is_weight_passed }}
-                  </template>
-                  <template v-else-if="column.dataIndex == 'seed'">
-                    {{ record.pivot.seed }}
-                  </template>
-                </template>
-              </a-table>
-            </div>
-          </div>
-          <div class="col-span-2 flex flex-col gap-6">
-            <a-card class="w-full">
-              <template #title
-                ><div class="flex justify-between"><div class="font-normal">Competition result</div>
-                <a class="text-blue-500" target="_blank" :href="route('manage.competition.program.generateCert', {'competition':competition.id ,'program':program.id})">下載證書</a>
-                </div></template
-              >
-            </a-card>
-            <a-card class="w-full" v-if="program.competition_system">
-              <template #title>
-                <div class="flex justify-between">
-                  {{ program.competition_system }}
-                  <div class="font-normal">Online table</div>
-                  <div class="">
-                    <a
-                      :href="
-                        route(
-                          'manage.print.' +
-                            competition_systems[program.competition_system],
-                          { program: program.id }
-                        )
-                      "
-                      target="_blank"
-                      >Print Pdf</a
+            </template>
+            <a-table
+              :data-source="athletes"
+              :columns="athleteColumns"
+              :row-key="(record) => record.id"
+              :pagination="false"
+              :scroll="{ x: 680 }"
+              size="middle"
+            >
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'operation'">
+                  <a-space :size="4">
+                    <a-button type="primary" class="bg-blue-500" @click="onEditAthlete(record)">
+                      <template #icon><EditOutlined /></template>
+                      {{ $t("action.edit") }}
+                    </a-button>
+                    <a-popconfirm
+                      :title="$t('program.confirm_remove_athlete')"
+                      :ok-text="$t('ok')"
+                      :cancel-text="$t('action.cancel')"
+                      @confirm="moveAthlete(record)"
                     >
-                  </div>
-                </div></template
-              >
-              <component
-                v-if="program.bouts.length > 0"
-                :is="tournamentTable"
-                :contestSystem="program.competition_system"
-                :bouts="bouts"
-              />
-            </a-card>
-          </div>
+                      <a-button danger>
+                        <template #icon><DeleteOutlined /></template>
+                        {{ $t("remove") }}
+                      </a-button>
+                    </a-popconfirm>
+                  </a-space>
+                </template>
+                <template v-else-if="column.key === 'gender'">
+                  {{
+                    record.gender === "M"
+                      ? $t("gender.male")
+                      : record.gender === "F"
+                      ? $t("gender.female")
+                      : record.gender
+                  }}
+                </template>
+                <template v-else-if="column.key === 'is_weight_passed'">
+                  <a-tag v-if="record.pivot.is_weight_passed == 1" color="success">
+                    {{ $t("weights.result.passed") }}
+                  </a-tag>
+                  <a-tag v-else-if="record.pivot.is_weight_passed == 0" color="error">
+                    {{ $t("weights.result.failed") }}
+                  </a-tag>
+                  <span v-else class="text-slate-400">
+                    {{ $t("weights.result.pending") }}
+                  </span>
+                </template>
+                <template v-else-if="column.key === 'seed'">
+                  {{ record.pivot.seed ?? "-" }}
+                </template>
+                <template v-else-if="column.key === 'rank'">
+                  {{ record.pivot.rank || "-" }}
+                </template>
+              </template>
+            </a-table>
+          </a-card>
+          <!-- 上線表 -->
+          <a-card class="shadow-md">
+            <template #title>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span>{{ $t("draw_control.online_table") }}</span>
+                <a-button
+                  v-if="program.competition_system"
+                  type="primary"
+                  class="bg-blue-500"
+                  :href="
+                    route('manage.competition.program.generateOnlineTable', [
+                      competition.id,
+                      program.id,
+                    ])
+                  "
+                  target="_blank"
+                >
+                  <template #icon><PrinterOutlined /></template>
+                  {{ $t("programs.print_pdf") }}
+                </a-button>
+              </div>
+            </template>
+            <component
+              v-if="program.bouts.length > 0"
+              :is="tournamentTable"
+              :contestSystem="program.competition_system"
+              :bouts="bouts"
+            />
+            <a-empty v-else :description="$t('bouts.not_found')" />
+          </a-card>
         </div>
       </div>
     </div>
+
+    <!-- 編輯運動員 -->
+    <a-modal
+      v-model:open="editModal.isOpen"
+      :title="$t('action.edit')"
+      :footer="null"
+      width="720px"
+    >
+      <a-form ref="editFormRef" :model="editModal.data" layout="vertical" :rules="editRules">
+        <div class="flex flex-col">
+          <div class="flex justify-between gap-3">
+            <div class="w-1/2">
+              <a-form-item :label="$t('name')" name="name">
+                <a-input type="input" v-model:value="editModal.data.name" />
+              </a-form-item>
+            </div>
+            <div class="w-1/2">
+              <a-form-item :label="$t('athletes.name_secondary')" name="name_secondary">
+                <a-input type="input" v-model:value="editModal.data.name_secondary" />
+              </a-form-item>
+            </div>
+          </div>
+          <div class="flex justify-between gap-3">
+            <div class="w-1/2">
+              <a-form-item :label="$t('display_name')" name="name_display">
+                <a-input type="input" v-model:value="editModal.data.name_display" />
+              </a-form-item>
+            </div>
+            <div class="w-1/2">
+              <a-form-item :label="$t('gender')" name="gender">
+                <a-select v-model:value="editModal.data.gender" :options="genderOptions" />
+              </a-form-item>
+            </div>
+          </div>
+          <div class="flex justify-between gap-3">
+            <div class="w-1/2">
+              <a-form-item :label="$t('program.seed')" name="seed">
+                <a-input-number
+                  v-model:value="editModal.data.seed"
+                  class="w-full"
+                  :min="1"
+                  :precision="0"
+                />
+              </a-form-item>
+            </div>
+            <div class="w-1/2">
+              <a-form-item :label="$t('program.rank')" name="rank">
+                <a-input-number
+                  v-model:value="editModal.data.rank"
+                  class="w-full"
+                  :min="1"
+                  :precision="0"
+                />
+              </a-form-item>
+            </div>
+          </div>
+          <div class="text-right">
+            <a-form-item>
+              <a-button
+                class="bg-blue-500"
+                type="primary"
+                :loading="saving"
+                @click="onUpdateProgramAthlete"
+                >{{ $t("athletes.update") }}</a-button
+              >
+              <a-button style="margin-left: 10px" @click="editModal.isOpen = false"
+                >{{ $t("athletes.close") }}</a-button
+              >
+            </a-form-item>
+          </div>
+        </div>
+      </a-form>
+    </a-modal>
   </ProgramLayout>
 </template>
 
@@ -121,6 +228,13 @@ import Tournament8 from "@/Components/TournamentTable/Elimination8.vue";
 import Tournament16 from "@/Components/TournamentTable/Elimination16.vue";
 import Tournament32 from "@/Components/TournamentTable/Elimination32.vue";
 import Tournament64 from "@/Components/TournamentTable/Elimination64.vue";
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  PrinterOutlined,
+} from "@ant-design/icons-vue";
+import { weightGroupLabel as weightGroupLabelUtil } from "@/Utils/weightParser";
 
 export default {
   components: {
@@ -130,127 +244,85 @@ export default {
     Tournament16,
     Tournament32,
     Tournament64,
+    DeleteOutlined,
+    DownloadOutlined,
+    EditOutlined,
+    PrinterOutlined,
   },
   props: ["competition", "program", "athletes"],
   data() {
     return {
       masterSequence: false,
       bouts: [],
-      selectAthlete: "",
-      selectAthletes: [],
-      competition_systems: {
-        erm: "tournament_quarter",
-        kos: "tournament_knockout",
-        rrb: "round_robbin_option2",
-      },
-      tournamentTable: "Tournament" + this.program.chart_size,
-      dateFormat: "YYYY-MM-DD",
-      playersList: [
-        {
-          name: "player 1",
-          win: [1, 0],
-        },
-        {
-          name: "player 2",
-          win: [0, 0],
-        },
-        {
-          name: "player 3",
-          win: [1, 1],
-        },
-        {
-          name: "player 4",
-          win: [0, 0],
-        },
-      ],
-      modal: {
+      saving: false,
+      editModal: {
         isOpen: false,
-        mode: null,
-        title: "Record Modal",
         data: {},
       },
-      boutColumns: [
-        {
-          title: "In program Sequence",
-          dataIndex: "in_program_sequence",
-        },
-        {
-          title: "Sequence",
-          dataIndex: "sequence",
-        },
-        {
-          title: "Queue",
-          dataIndex: "queue",
-        },
-        {
-          title: "Round",
-          dataIndex: "round",
-        },
-        {
-          title: "White",
-          dataIndex: "white",
-        },
-        {
-          title: "Blue",
-          dataIndex: "blue",
-        },
-        {
-          title: "White from",
-          dataIndex: "white_rise_from",
-        },
-        {
-          title: "Blue from",
-          dataIndex: "blue_rise_from",
-        },
-      ],
-      athleteColumns: [
-        {
-          title: "Name Display",
-          dataIndex: "name_display",
-        },
-        {
-          title: "Gender",
-          dataIndex: "gender",
-        },
-        {
-          title: "Weigh Passed",
-          dataIndex: "is_weight_passed",
-        },
-        {
-          title: "Seed",
-          dataIndex: "seed",
-        },
-        {
-          title: "Operation",
-          dataIndex: "operation",
-        },
-      ],
-      rules: {
-        country: { required: true },
+      tournamentTable: "Tournament" + this.program.chart_size,
+      editRules: {
         name: { required: true },
-        date_start: { required: true },
-        date_end: { required: true },
-      },
-      validateMessages: {
-        required: "${label} is required!",
-        types: {
-          email: "${label} is not a valid email!",
-          number: "${label} is not a valid number!",
-        },
-        number: {
-          range: "${label} must be between ${min} and ${max}",
-        },
+        gender: { required: true },
       },
     };
   },
+  computed: {
+    // 標題：公斤級 + 組別（Inertia 序列化的關聯是 snake_case：competition_category）
+    programTitle() {
+      const weightLabel = this.weightGroupLabel(this.program.weight_code);
+      const categoryName = this.program.competition_category?.name ?? "";
+      return `${weightLabel} ${categoryName}`.trim();
+    },
+    // 欄位標題要跟隨語系變動，因此放 computed（放 data 會被凍結）
+    athleteColumns() {
+      return [
+        {
+          key: "name_display",
+          title: this.$t("display_name"),
+          dataIndex: "name_display",
+          width: 160,
+        },
+        {
+          key: "gender",
+          title: this.$t("gender"),
+          dataIndex: "gender",
+          width: 70,
+        },
+        {
+          key: "is_weight_passed",
+          title: this.$t("weights.column.result"),
+          dataIndex: "is_weight_passed",
+          width: 120,
+        },
+        {
+          key: "seed",
+          title: this.$t("program.seed"),
+          dataIndex: "seed",
+          width: 60,
+        },
+        {
+          key: "rank",
+          title: this.$t("program.rank"),
+          dataIndex: "rank",
+          width: 60,
+        },
+        {
+          key: "operation",
+          title: this.$t("action"),
+          dataIndex: "operation",
+          width: 210,
+        },
+      ];
+    },
+    genderOptions() {
+      return [
+        { value: "M", label: this.$t("gender.male") },
+        { value: "F", label: this.$t("gender.female") },
+      ];
+    },
+  },
   created() {
     this.rebuildBouts();
-    this.selectAthletes = this.athletes.map(function (x) {
-      return {
-        label: x.name,
-        value: x.id,
-      };
-    });
   },
   methods: {
     rebuildBouts() {
@@ -265,7 +337,9 @@ export default {
         }
         this.bouts.push(b);
       });
-      if (this.program.competition_system == "kos") {
+      // KOS 的賽程索引需要位移以對應各尺寸寫死的表格；
+      // 但 4 人表（chart_size = 4）的索引本來就對齊，插入空字串反而會把選手清空。
+      if (this.program.competition_system == "kos" && this.program.chart_size > 4) {
         this.bouts.splice(this.program.chart_size - 2, 0, "");
         this.bouts.splice(this.program.chart_size - 1, 0, "");
         this.bouts.splice(this.program.chart_size - 4, 0, "");
@@ -273,27 +347,73 @@ export default {
       }
     },
     joinAthlete(athlete) {
-      console.log(athlete);
       this.$inertia.post(
         route("manage.program.joinAthlete", {
           program: this.program.id,
           athlete: athlete,
         }),
+        null,
         {
-          onSuccess: (page) => {},
+          preserveScroll: true,
         }
       );
     },
-    moveAthlete(athlete) {
+    moveAthlete(record) {
       this.$inertia.delete(
         route("manage.program.removeAthlete", {
           program: this.program.id,
-          athlete: athlete.id,
+          athlete: record.id,
         }),
         {
-          onSuccess: (page) => {},
+          preserveScroll: true,
         }
       );
+    },
+    // 編輯此項目下的運動員（基本資料 + program_athlete 的種子/排名）
+    onEditAthlete(record) {
+      this.editModal.data = {
+        id: record.id,
+        name: record.name ?? "",
+        name_secondary: record.name_secondary ?? "",
+        name_display: record.name_display ?? "",
+        gender: record.gender ?? null,
+        // 種子 / 排名來自 program_athlete（pivot）；0 代表沒有值，顯示空白
+        seed: record.pivot?.seed || null,
+        rank: record.pivot?.rank || null,
+      };
+      this.editModal.isOpen = true;
+    },
+    onUpdateProgramAthlete() {
+      this.$refs.editFormRef
+        .validateFields()
+        .then(() => {
+          this.saving = true;
+          this.$inertia.put(
+            route("manage.program.updateAthlete", {
+              program: this.program.id,
+              athlete: this.editModal.data.id,
+            }),
+            this.editModal.data,
+            {
+              preserveScroll: true,
+              onSuccess: () => {
+                this.$message.success(this.$t("programs.save_success"));
+                this.editModal.isOpen = false;
+              },
+              onError: () => {
+                this.$message.error(this.$t("save_failed"));
+              },
+              onFinish: () => {
+                this.saving = false;
+              },
+            }
+          );
+        })
+        .catch(() => {});
+    },
+    // 公斤級代碼 (MW60- / FW42+ / MWULW) → 目前語系的顯示名稱
+    weightGroupLabel(weightCode) {
+      return weightGroupLabelUtil(weightCode, this.$t);
     },
   },
 };

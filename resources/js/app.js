@@ -17,7 +17,10 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(i18nVue, {
-                resolve: async lang => import(`../../lang/${lang}.json`)
+                resolve: async lang => import(`../../lang/${lang}.json`),
+                fallbackLang: 'en',
+                // 當目前語言缺少某個 key 時，回退使用 en.json，避免畫面直接顯示 key 名稱
+                fallbackMissingTranslations: true,
             })
             .use(ZiggyVue, Ziggy)
             .use(Antd)

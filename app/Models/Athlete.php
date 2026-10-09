@@ -24,6 +24,9 @@ class Athlete extends Model
 
     public function programs()
     {
-        return $this->belongsToMany(Program::class, 'program_athlete', 'athlete_id', 'program_id');
+        // 依「組別 → 公斤級」排序，讓列表的項目欄、編輯視窗已選標籤、
+        // 以及各種 PDF 匯出的項目順序都一致（不是依 pivot 寫入順序）。
+        return $this->belongsToMany(Program::class, 'program_athlete', 'athlete_id', 'program_id')
+            ->orderByCategoryAndWeightGroup();
     }
 }

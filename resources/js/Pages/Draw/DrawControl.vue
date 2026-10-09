@@ -1,9 +1,50 @@
 <template>
   <ProgramLayout :competition="competition">
-    <a-page-header title="Draw">
+    <a-page-header :title="$t('draw')">
       <template #extra>
+        <template
+          v-if="
+            competition.status >= COMPETITION_STATUS.program_arranged &&
+            competition.status < COMPETITION_STATUS.seat_locked
+          "
+        >
+          <span class="mr-2 text-sm text-slate-500">{{ $t("draw_control.method") }}</span>
+          <a-select
+            v-model:value="drawMethod"
+            :options="drawMethodOptions"
+            class="w-44 mr-1"
+            @change="onDrawMethodChange"
+          />
+          <a-tooltip :title="drawMethodHint" class="mr-2">
+            <InfoCircleOutlined class="text-slate-400 cursor-help" />
+          </a-tooltip>
+          <a-button
+            danger
+            class="mr-2"
+            :loading="resetAllLoading"
+            :disabled="drawnProgramCount === 0"
+            @click="confirmResetAll"
+          >
+            {{ $t("draw_control.reset_all") }}
+            <template v-if="drawnProgramCount > 0">
+              ({{ drawnProgramCount }})
+            </template>
+          </a-button>
+        </template>
         <a-button type="link" v-if="competition.status > COMPETITION_STATUS.seat_locked">
-          lock
+          {{ $t("lock_seat") }}
+        </a-button>
+        <a-button
+          class="mr-2"
+          :loading="drawAllLoading"
+          :disabled="pendingProgramCount === 0"
+          @click="confirmDrawAll"
+          v-if="competition.status === COMPETITION_STATUS.program_arranged"
+        >
+          {{ $t("draw_control.draw_all") }}
+          <template v-if="pendingProgramCount > 0">
+            ({{ pendingProgramCount }})
+          </template>
         </a-button>
         <a-button
           type="primary"
@@ -13,13 +54,15 @@
             competition.status === COMPETITION_STATUS.program_arranged && allProgramsDrew
           "
         >
-          Lock draw
+          {{ $t("lock_seat") }}
         </a-button>
         <span></span>
       </template>
 
       <template #tags>
-        <a-tag color="success" v-if="allProgramsDrew"> All programs drew </a-tag>
+        <a-tag color="success" v-if="allProgramsDrew">
+          {{ $t("all_programs_drew") }}
+        </a-tag>
       </template>
     </a-page-header>
 
@@ -39,7 +82,7 @@
             <template #icon>
               <PoweroffOutlined />
             </template>
-            draw screen
+            {{ $t("draw_screen") }}
           </a-button>
         </a>
         <a-button
@@ -54,7 +97,7 @@
           <template #icon>
             <PoweroffOutlined />
           </template>
-          close draw screen
+          {{ $t("close_draw_screen") }}
         </a-button>
       </div>
 
@@ -62,8 +105,8 @@
         <a-alert
           type="info"
           show-icon
-          message="all programs drew"
-          description="If there are no issues with the lottery result, please lock the draw."
+          :message="$t('all_drew')"
+          :description="$t('all_drew_description')"
           v-if="
             allProgramsDrew && competition.status === COMPETITION_STATUS.program_arranged
           "
@@ -72,14 +115,14 @@
         <a-alert
           type="success"
           show-icon
-          message="The lottery result has been locked."
-          description="The lottery result has been locked."
+          :message="$t('draw_control.locked')"
+          :description="$t('draw_control.locked')"
           v-if="competition.status > COMPETITION_STATUS.seat_locked"
         />
       </div>
 
-      <div class="p-6 flex flex-col lg:flex-row gap-4">
-        <div class="w-full">
+      <div class="p-6 flex flex-col xl:flex-row gap-4">
+        <div class="w-full xl:flex-1">
           <a-card
             :active-tab-key="activeGender"
             :tab-list="genderTabList"
@@ -101,8 +144,8 @@
                       :data-status="item.status"
                     >
                       <div class="flex">
-                        <a-tag v-if="item.status > 0" color="success">Finish</a-tag>
-                        <a-tag v-else color="processing">Pending draw</a-tag>
+                        <a-tag v-if="item.status > 0" color="success">{{ $t("finished") }}</a-tag>
+                        <a-tag v-else color="processing">{{ $t("draw_control.pending_draw") }}</a-tag>
                         {{ item.weight_code }}
                       </div>
                     </a-list-item>
@@ -113,18 +156,22 @@
           </a-card>
         </div>
 
-        <div class="shrink-0 w-2/3 flex items-center justify-center">
+        <div class="w-full xl:w-2/3 xl:shrink-0 flex items-center justify-center">
           <a-empty v-if="!activeProgramId">
             <template #description>
-              <h3 class="text-lg text-slate-500 font-bold">Program not yet selected</h3>
-              <p class="text-slate-500">Please select a program from the left</p>
+              <h3 class="text-lg text-slate-500 font-bold">
+                {{ $t("draw_control.no_program_selected") }}
+              </h3>
+              <p class="text-slate-500">
+                {{ $t("draw_control.select_program_hint") }}
+              </p>
             </template>
           </a-empty>
           <div v-else>
             <a-card>
               <template #title>
                 {{ activeProgram.name }}
-                共{{ athletes.length }}人
+                {{ $t("draw_control.athletes_count", { count: athletes.length }) }}
               </template>
               <template #extra>
                 <div class="flex gap-3">
@@ -134,16 +181,20 @@
                       activeProgramId,
                     ])" 
                       target="_blank">
-                    <a-button type="link" @click="download">上線表</a-button>
+                    <a-button type="link" @click="download">{{ $t("draw_control.online_table") }}</a-button>
                   </a>
                   </template>
                   <template v-if="competition.status < COMPETITION_STATUS.seat_locked">
                     <div class="flex gap-3" v-if="activeProgram.status > 0">
-                      <a-button type="link" danger @click="reset">Reset</a-button>
-                      <a-button type="link" danger @click="draw"> Redraw </a-button>
+                      <a-button type="link" danger @click="reset">
+                        {{ $t("draw_control.reset") }}
+                      </a-button>
+                      <a-button type="link" danger @click="draw">
+                        {{ $t("draw_control.redraw") }}
+                      </a-button>
                     </div>
                     <a-button type="primary" class="bg-blue-500" @click="draw" v-else>
-                      Draw
+                      {{ $t("draw") }}
                     </a-button>
                   </template>
                   <!-- <a
@@ -175,13 +226,15 @@
                       {{ item.seat }}
                     </div>
                     <div v-if="item.athlete">
-                      <div>{{ item.athlete.name }}</div>
-                      <div>{{ item.athlete.team.abbreviation }}</div>
-                      <div v-if="competition.competition_type.is_language_secondary_enabled">
-                        {{ item.name_secondary }}
+                      <div v-if="item.athlete.name">{{ item.athlete.name }}</div>
+                      <div v-if="item.athlete.name_secondary">
+                        {{ item.athlete.name_secondary }}
+                      </div>
+                      <div v-if="item.athlete.team">
+                        {{ item.athlete.team.abbreviation || item.athlete.team.name }}
                       </div>
                     </div>
-                    <div v-else>Bye</div>
+                    <div v-else>{{ $t("draw_control.bye") }}</div>
                   </div>
                 </template>
               </a-list>
@@ -203,7 +256,7 @@
                 <InfoCircleOutlined />
               </template>
 
-              Group information
+              {{ $t("draw_control.group_info") }}
             </a-button>
             <a-button
               type="link"
@@ -215,7 +268,7 @@
                 <FileTextOutlined />
               </template>
 
-              Show list
+              {{ $t("draw_control.show_list") }}
             </a-button>
             <a-button
               type="link"
@@ -227,7 +280,7 @@
                 <PlayCircleOutlined />
               </template>
 
-              Start drawing
+              {{ $t("draw_control.start_draw") }}
             </a-button>
             <a-button
               type="link"
@@ -239,7 +292,7 @@
                 <UndoOutlined />
               </template>
 
-              Show cover
+              {{ $t("draw_control.show_cover") }}
             </a-button>
           </div>
         </div>
@@ -251,13 +304,13 @@
         <a-card>
           <a-empty>
             <template #description>
-              <h3 class="font-bold text-lg">no schedule</h3>
-              <p>no schedule hint</p>
+              <h3 class="font-bold text-lg">{{ $t("no_schedule") }}</h3>
+              <p>{{ $t("no_schedule_hint") }}</p>
               <inertia-link
                 :href="route('manage.competition.programs.index', competition.id)"
               >
                 <a-button type="primary" class="bg-blue-500">
-                  no schedule action
+                  {{ $t("no_schedule_action") }}
                 </a-button>
               </inertia-link>
             </template>
@@ -277,10 +330,16 @@ import {
   InfoCircleOutlined,
   FileTextOutlined,
   UndoOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
-import { COMPETITION_STATUS } from "@/constants.js";
+import { COMPETITION_STATUS, PROGRAM_STATUS } from "@/constants.js";
+import { Modal } from "ant-design-vue";
 import { uniqBy } from "lodash";
-import { ref } from "vue";
+import { createVNode, ref } from "vue";
+
+// 抽籤方式：random = 一般抽籤、team_separated = 同隊分開（存在 localStorage）
+const DRAW_METHODS = ["random", "team_separated"];
+const DRAW_METHOD_STORAGE_KEY = "draw_method";
 
 export default {
   name: "DrawControl",
@@ -328,6 +387,14 @@ export default {
       bc,
     };
   },
+  created() {
+    // 沿用上次選的抽籤方式
+    const saved = window.localStorage.getItem(DRAW_METHOD_STORAGE_KEY);
+
+    if (DRAW_METHODS.includes(saved)) {
+      this.drawMethod = saved;
+    }
+  },
   data() {
     return {
       activeGender: "M",
@@ -336,6 +403,9 @@ export default {
       athletes: [],
       nowActive: "",
       showResult: false,
+      drawAllLoading: false,
+      resetAllLoading: false,
+      drawMethod: "random",
     };
   },
   computed: {
@@ -379,6 +449,26 @@ export default {
     },
     allProgramsDrew() {
       return this.programs.every((program) => program.status > 0);
+    },
+    pendingProgramCount() {
+      return this.programs.filter(
+        (program) => program.status === PROGRAM_STATUS.created
+      ).length;
+    },
+    drawnProgramCount() {
+      return this.programs.filter((program) => program.status > 0).length;
+    },
+    drawMethodOptions() {
+      return [
+        { value: "random", label: this.$t("draw_control.method.random") },
+        {
+          value: "team_separated",
+          label: this.$t("draw_control.method.team_separated"),
+        },
+      ];
+    },
+    drawMethodHint() {
+      return this.$t(`draw_control.method_hint.${this.drawMethod}`);
     },
     padAthleteList() {
       const athletes = [...this.athletes];
@@ -445,7 +535,8 @@ export default {
           route("manage.competition.program.draw", [
             this.competition.id,
             this.activeProgramId,
-          ])
+          ]),
+          { method: this.drawMethod }
         )
         .then(({ data }) => {
           this.activeProgram.status = 1;
@@ -461,6 +552,11 @@ export default {
           ])
         )
         .then(({ data }) => {
+          // 重設後座位會歸零，重新載入名單讓畫面同步
+          if (this.activeProgram) {
+            this.activeProgram.status = 0;
+          }
+          this.loadProgram();
         });
     },
     download(){
@@ -528,10 +624,111 @@ export default {
     clearDraw() {
       // TODO: clear draw result
     },
+    confirmDrawAll() {
+      if (this.pendingProgramCount === 0) {
+        this.$message.info(this.$t("draw_control.draw_all_none"));
+        return;
+      }
+
+      Modal.confirm({
+        title: this.$t("draw_control.draw_all"),
+        content: this.$t("draw_control.draw_all_confirm", {
+          count: this.pendingProgramCount,
+        }),
+        okText: this.$t("ok"),
+        cancelText: this.$t("action.cancel"),
+        icon: createVNode(ExclamationCircleOutlined),
+        style: "top:20vh",
+        onOk: () => this.drawAll(),
+      });
+    },
+    drawAll() {
+      this.drawAllLoading = true;
+
+      return window.axios
+        .post(
+          route("manage.competition.program.draw-all", [this.competition.id]),
+          { method: this.drawMethod }
+        )
+        .then(({ data }) => {
+          // 依伺服器回傳結果更新本地項目狀態，避免重新載入頁面
+          data.programs.forEach((updated) => {
+            const program = this.programs.find((p) => p.id === updated.id);
+            if (program) program.status = updated.status;
+          });
+
+          if (this.activeProgramId) {
+            this.loadProgram();
+          }
+
+          this.$message.success(
+            this.$t("draw_control.draw_all_success", { count: data.drawn_count })
+          );
+        })
+        .catch(() => {
+          this.$message.error(this.$t("draw_control.draw_all_failed"));
+        })
+        .finally(() => {
+          this.drawAllLoading = false;
+        });
+    },
     lockSeat() {
       this.$inertia.post(
         route("manage.competition.program.lock-seat", [this.competition.id])
       );
+    },
+    onDrawMethodChange(value) {
+      window.localStorage.setItem(DRAW_METHOD_STORAGE_KEY, value);
+    },
+    confirmResetAll() {
+      if (this.drawnProgramCount === 0) {
+        this.$message.info(this.$t("draw_control.reset_all_none"));
+        return;
+      }
+
+      Modal.confirm({
+        title: this.$t("draw_control.reset_all"),
+        content: this.$t("draw_control.reset_all_confirm", {
+          count: this.drawnProgramCount,
+        }),
+        okText: this.$t("ok"),
+        cancelText: this.$t("action.cancel"),
+        okButtonProps: { danger: true },
+        icon: createVNode(ExclamationCircleOutlined),
+        style: "top:20vh",
+        onOk: () => this.resetAll(),
+      });
+    },
+    resetAll() {
+      this.resetAllLoading = true;
+
+      return window.axios
+        .post(
+          route("manage.competition.program.reset-all", [this.competition.id])
+        )
+        .then(({ data }) => {
+          // 依伺服器回傳結果更新本地項目狀態，避免重新載入頁面
+          data.programs.forEach((updated) => {
+            const program = this.programs.find((p) => p.id === updated.id);
+            if (program) program.status = updated.status;
+          });
+
+          this.athletes = [];
+
+          if (this.activeProgramId) {
+            this.loadProgram();
+          }
+
+          this.$message.success(
+            this.$t("draw_control.reset_all_success", { count: data.reset_count })
+          );
+        })
+        .catch(() => {
+          this.$message.error(this.$t("draw_control.reset_all_failed"));
+        })
+        .finally(() => {
+          this.resetAllLoading = false;
+        });
     },
   },
 };
@@ -541,7 +738,9 @@ export default {
 :deep(.athlete-list .ant-list-items) {
   @apply grid;
   @apply grid-cols-1;
-  @apply lg:grid-cols-4;
+  @apply sm:grid-cols-2;
+  @apply lg:grid-cols-3;
+  @apply xl:grid-cols-4;
   @apply gap-3;
 }
 .ant-tabs-nav-list {

@@ -329,7 +329,9 @@
 
 <script>
 import RepeatChart from '@/Components/TournamentTable/RepeatChart.vue';
+import winnerLines from '@/Components/TournamentTable/winnerLines';
 export default {
+    mixins: [winnerLines],
     components: {
         RepeatChart
     },

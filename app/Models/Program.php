@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Services\BoutGenerationService;
@@ -40,6 +41,23 @@ class Program extends Model
         'competitionCategory'
     ];
 
+    /**
+     * 依「組別(category) → 公斤級(weight group)」排序。
+     *
+     * - 組別：依建立順序（competition_category_id），與設定頁列出的組別順序一致。
+     * - 公斤級：男子(MW) 先、女子(FW) 後，ULW(無限量級) 最後，其餘依數字由小到大，
+     *   同數字時負級(42-) 在正級(42+) 之前。
+     */
+    public function scopeOrderByCategoryAndWeightGroup(Builder $query): Builder
+    {
+        return $query
+            ->orderBy('programs.competition_category_id')
+            ->orderByRaw("(UPPER(weight_code) LIKE 'F%') ASC")
+            ->orderByRaw("(UPPER(weight_code) LIKE '%ULW') ASC")
+            ->orderByRaw("CAST(REGEXP_REPLACE(weight_code, '[^0-9]', '') AS UNSIGNED) ASC")
+            ->orderBy('weight_code');
+    }
+
     public function bouts()
     {
         return $this->hasMany(Bout::class)->orderBy('in_program_sequence');
@@ -62,7 +80,9 @@ class Program extends Model
 
     public function athletes()
     {
-        return $this->belongsToMany(Athlete::class, 'program_athlete', 'program_id', 'athlete_id')->withPivot('id','is_weight_passed');
+        // withPivot 沒列到的欄位不會出現在 pivot 裡（前端 record.pivot.seed 會是 undefined）
+        return $this->belongsToMany(Athlete::class, 'program_athlete', 'program_id', 'athlete_id')
+            ->withPivot('id', 'is_weight_passed', 'seed', 'rank', 'weight', 'seat');
     }
 
     public function competitionCategory()
@@ -146,9 +166,9 @@ class Program extends Model
         $this->save();
     }
 
-    public function draw(): array
+    public function draw(string $method = DrawService::METHOD_RANDOM): array
     {
-        $athletes = (new DrawService($this))->draw();
+        $athletes = (new DrawService($this, $method))->draw();
 
         foreach ($athletes as $athlete) {
             $this->programAthletes()->where('id', $athlete['id'])->update([

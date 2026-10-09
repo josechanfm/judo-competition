@@ -42,7 +42,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::resource('manage/game_types', App\Http\Controllers\Manage\GameTypeController::class)->names('manage.gameTypes');
+    // 整場賽事的備份／還原（ZIP）。import 要放在 resource 之前，避免被 {competition} 相關路由攔走
+    Route::post('manage/competitions/import', [App\Http\Controllers\Manage\CompetitionController::class, 'import'])->name('manage.competitions.import');
+    Route::get('manage/competitions/{competition}/export', [App\Http\Controllers\Manage\CompetitionController::class, 'export'])->name('manage.competitions.export');
     Route::resource('manage/competitions', App\Http\Controllers\Manage\CompetitionController::class)->names('manage.competitions');
+    Route::post('manage/competitions/{competition}/cancel', [App\Http\Controllers\Manage\CompetitionController::class, 'cancel'])->name('manage.competitions.cancel');
     Route::get('manage/competition/{competition}/qr_code', [App\Http\Controllers\Manage\CompetitionController::class, 'qrCode'])->name('manage.competition.qrCode');
 
     Route::resource('manage/competition/{competition}/programs', App\Http\Controllers\Manage\ProgramController::class)->names('manage.competition.programs');
@@ -54,18 +58,27 @@ Route::middleware('auth')->group(function () {
         Route::post('/draw-background', [App\Http\Controllers\Manage\SettingController::class, 'updateDrawBackground'])->name('update-draw-background');
         Route::post('/draw-cover', [App\Http\Controllers\Manage\SettingController::class, 'updateDrawCover'])->name('update-draw-cover');
         Route::post('/certificate', [App\Http\Controllers\Manage\SettingController::class, 'updateCertificate'])->name('update-certificate');
+        Route::post('/id-card', [App\Http\Controllers\Manage\SettingController::class, 'updateIdCardSettings'])->name('update-id-card');
+        Route::post('/id-card-background', [App\Http\Controllers\Manage\SettingController::class, 'updateIdCardBackground'])->name('update-id-card-background');
+        Route::get('/id-card-preview', [App\Http\Controllers\Manage\SettingController::class, 'previewIdCard'])->name('id-card-preview');
         Route::post('/language', [App\Http\Controllers\Manage\SettingController::class, 'updateLanguage'])->name('update-language');
         Route::delete('/device/{uuid}', [App\Http\Controllers\Manage\SettingController::class, 'removeDevice'])->name('remove-device');
     });
     Route::get('manage/competition/{competition}/athletes/generate-id-cards', [App\Http\Controllers\Manage\AthleteController::class, 'generateIdCards'])->name('athletes.generateIdCards');
     Route::get('manage/competition/{competition}/athletes/generate-weighIn-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllWeighInTable'])->name('generate.all.weighIn.table');
+    Route::get('manage/competition/{competition}/athletes/check-in-table', [App\Http\Controllers\Manage\AthleteController::class, 'generateAllCheckInAthletes'])->name('manage.competition.checkIn-table');
     Route::get('manage/competition/{competition}/athletes/drawControl', [App\Http\Controllers\Manage\AthleteController::class, 'drawControl'])->name('manage.competition.athletes.drawControl');
     Route::get('manage/competition/{competition}/athletes/weights', [App\Http\Controllers\Manage\AthleteController::class, 'Weights'])->name('manage.competition.athletes.weights');
+    // 過磅資料的 Excel 匯出/匯入（必須在 athletes resource 之前，否則會被 show 攔走）
+    Route::get('manage/competition/{competition}/athletes/export_weights', [App\Http\Controllers\Manage\AthleteController::class, 'exportWeightIn'])->name('manage.competition.athletes.weights.export');
+    Route::post('manage/competition/{competition}/athletes/import_weights', [App\Http\Controllers\Manage\AthleteController::class, 'importWeightIn'])->name('manage.competition.athletes.weights.import');
     Route::get('manage/competition/{competition}/drawScreen', [App\Http\Controllers\Manage\AthleteController::class, 'drawScreen'])->name('manage.competition.athletes.draw-screen');
     Route::get('manage/competition/{competition}/generate-all-online-table', [App\Http\Controllers\Manage\ProgramController::class, 'generateAllProgramsOnlineTable'])->name('manage.competition.generateAllProgramsOnlineTable');
     Route::resource('manage/competition/{competition}/athletes', App\Http\Controllers\Manage\AthleteController::class)->names('manage.competition.athletes');
     Route::post('manage/competition/{competition}/programsUpdate', [\App\Http\Controllers\Manage\ProgramController::class, 'programsUpdate'])->name('manage.competition.programs-update');
     Route::post('manage/competition/{competition}/program/{program}/draw', [App\Http\Controllers\Manage\ProgramController::class, 'draw'])->name('manage.competition.program.draw');
+    Route::post('manage/competition/{competition}/program/draw-all', [App\Http\Controllers\Manage\ProgramController::class, 'drawAll'])->name('manage.competition.program.draw-all');
+    Route::post('manage/competition/{competition}/program/reset-all', [App\Http\Controllers\Manage\ProgramController::class, 'resetAll'])->name('manage.competition.program.reset-all');
     Route::post('manage/competition/{competition}/program/{program}/reset-draw', [App\Http\Controllers\Manage\ProgramController::class, 'resetDraw'])->name('manage.competition.program.reset');
     Route::get('manage/competition/{competition}/program/{program}/generate-online-table', [App\Http\Controllers\Manage\ProgramController::class, 'generateOnlineTable'])->name('manage.competition.program.generateOnlineTable');
     Route::get('manage/competition/{competition}/program/{program}/generate-cert', [App\Http\Controllers\Manage\ProgramController::class, 'generateCert'])->name('manage.competition.program.generateCert');
@@ -74,6 +87,10 @@ Route::middleware('auth')->group(function () {
     Route::post('manage/competition/{competition}/program/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.program.lock');
     Route::post('manage/competition/{competition}/program/lock-seat', [App\Http\Controllers\Manage\ProgramController::class, 'lockSeat'])->name('manage.competition.program.lock-seat');
     Route::post('manage/competition/{competition}/athletes/weights-lock', [App\Http\Controllers\Manage\AthleteController::class, 'weightsLock'])->name('manage.competition.athletes.weights.lock');
+    // 重置過磅資料（單人 / 單一項目 / 整場賽事）
+    Route::post('manage/competition/{competition}/athletes/weights-reset-all', [App\Http\Controllers\Manage\AthleteController::class, 'resetAllWeights'])->name('manage.competition.athletes.weights.resetAll');
+    Route::post('manage/competition/{competition}/program/{program}/weights-reset', [App\Http\Controllers\Manage\AthleteController::class, 'resetProgramWeights'])->name('manage.competition.program.weights.reset');
+    Route::post('manage/competition/{competition}/programAthlete/{programAthlete}/weight_reset', [App\Http\Controllers\Manage\AthleteController::class, 'resetWeightChecked'])->name('manage.competition.programAthlete.weightReset');
     Route::post('maange/competition/{competition}/athletes/weights-lock-cancel', [App\Http\Controllers\Manage\AthleteController::class, 'WeightsCancelLock'])->name('manage.competition.athletes.weights.cancelLock');
     Route::post('manage/competition/{competition}/athletes/import', [App\Http\Controllers\Manage\AthleteController::class, 'import'])->name('manage.competition.athletes.import');
     Route::post('manage/competition/{competition}/athletes/lock', [App\Http\Controllers\Manage\AthleteController::class, 'lock'])->name('manage.competition.athletes.lock');
@@ -85,6 +102,7 @@ Route::middleware('auth')->group(function () {
     Route::get('manage/competition/{competition}/all_schedule', [App\Http\Controllers\Manage\Printer\ProgramScheduleController::class, 'printAllSchedule'])->name('manage.competition.allSchedule');
     Route::post('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'joinAthlete'])->name('manage.program.joinAthlete');
     Route::delete('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'removeAthlete'])->name('manage.program.removeAthlete');
+    Route::put('manage/program/{program}/athlete/{athlete}', [App\Http\Controllers\Manage\ProgramController::class, 'updateProgramAthlete'])->name('manage.program.updateAthlete');
     Route::get('manage/competition/{competition}/result-table/{blankMedals}', [App\Http\Controllers\Manage\CompetitionController::class, 'resultTable'])->name('manage.competition.result-table');
     Route::post('manage/competition/{competition}/bouts/update-queue', [App\Http\Controllers\Manage\BoutController::class, 'updateQueue'])->name('manage.competition.bouts.update.queue');
     Route::post('manage/competition/{competition}/bout/{bout}/update/result',[App\Http\Controllers\Manage\BoutController::class , 'createOrUpdateResult'])->name('manage.competition.bout.update.result');

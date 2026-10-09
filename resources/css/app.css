@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Ant Design 圖示垂直對齊 ───────────────────────────────────────────
+   @ant-design/icons 會注入 .anticon { display:inline-block; line-height:0;
+   vertical-align:-0.125em }（Ant 針對自家字型基線刻意做的下沉），因此在
+   inline 排版（按鈕、標籤…只要有「圖示 + 文字」）看起來圖示會比文字低一些。
+   這裡統一改成對齊文字基線再往上微調 0.03em（約 0.4px @14px）。
+
+   註 1：Ant 的 icon 樣式是用 prepend 插到 <head> 最前面，這條寫在後面且
+         特異性相同會蓋掉它，不需要 !important。
+   註 2：vertical-align 對 flex 容器的子項無效，所以側邊選單、Alert 等
+         flex 排版的圖示不會被影響。 */
+.anticon {
+  vertical-align: 0.03em;
+}

@@ -1,23 +1,23 @@
 <template>
     <a-form layout="vertical" class="max-w-3xl">
         <div class="flex flex-col gap-4">
-            <a-form-item :label="$t('contest_language_settings')" class="form-group">
-                <a-form-item :label="$t('contests.lang_primary')">
-                    <a-select class="!w-72" v-model:value="langForm.language">
-                        <a-select-option v-for="lang in languages" :key="lang" :value="lang">
-                            {{ $t('language.' + lang) }}
+            <a-form-item :label="$t('competition_language_settings')" class="form-group">
+                <a-form-item :label="$t('competitions.lang_primary')">
+                    <a-select class="w-full max-w-[288px]" v-model:value="langForm.language">
+                        <a-select-option v-for="lang in languages" :key="lang.value" :value="lang.value">
+                            {{ $t('language.' + lang.value) }}
                         </a-select-option>
                     </a-select>
                 </a-form-item>
 
-                <a-form-item :label="$t('contests.enable_secondary_lang')">
+                <a-form-item :label="$t('competitions.enable_secondary_lang')">
                     <a-switch v-model:checked="langForm.is_language_secondary_enabled" />
                 </a-form-item>
 
-                <a-form-item :label="$t('contests.lang_secondary')" v-if="langForm.is_language_secondary_enabled">
-                    <a-select class="!w-72" v-model:value="langForm.language_secondary">
-                        <a-select-option v-for="lang in languages" :key="lang" :value="lang">
-                            {{ $t('language.' + lang) }}
+                <a-form-item :label="$t('competitions.lang_secondary')" v-if="langForm.is_language_secondary_enabled">
+                    <a-select class="w-full max-w-[288px]" v-model:value="langForm.language_secondary">
+                        <a-select-option v-for="lang in languages" :key="lang.value" :value="lang.value">
+                            {{ $t('language.' + lang.value) }}
                         </a-select-option>
                     </a-select>
                 </a-form-item>
@@ -48,33 +48,38 @@
 </template>
 
 <script>
-import {inject} from "vue";
+import { useForm } from "@inertiajs/vue3";
+
 export default {
     name: "Language",
     props: {
+        competition: {
+            type: Object,
+            required: true,
+        },
         languages: {
             type: Array,
-            required: true
-        }
+            required: true,
+        },
     },
-    setup () {
-        const contest = inject("contest");
+    setup (props) {
+        // 語言欄位存在 competition_type 上，不是在 competition
+        const competitionType = props.competition?.competition_type ?? {};
 
         const langForm = useForm({
-                language: contest.language,
-                language_secondary: contest.language_secondary,
-                is_language_secondary_enabled: contest.is_language_secondary_enabled,
+            language: competitionType.language ?? "en",
+            language_secondary: competitionType.language_secondary ?? null,
+            is_language_secondary_enabled: Boolean(competitionType.is_language_secondary_enabled),
         });
-        return {
-            contest,
-            langForm
-        }
+
+        return { langForm };
     },
     methods: {
         saveLang () {
-            this.langForm.submit('post', route('admin.contests.settings.update-language', {
-                contest: this.contest.id
+            this.langForm.submit('post', route('manage.competition.setting.update-language', {
+                competition: this.competition.id
             }), {
+                preserveScroll: true,
                 onSuccess: () => {
                     this.$message.success(this.$t('saved'));
                 }

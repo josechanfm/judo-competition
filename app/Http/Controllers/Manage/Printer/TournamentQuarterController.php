@@ -76,7 +76,11 @@ class TournamentQuarterController extends Controller
             ['name' => '分組 C'],
             ['name' => '分組 D']
         ];
-        $this->gameSheet->setLogos('images/jua_logo.png', 'images/mja_logo.png');
+        // 這個 demo 路由沒有賽事，所以直接用固定的 LOGO（要用絕對路徑，mPDF 才找得到）
+        $this->gameSheet->setLogos(
+            public_path('images/jua_logo.png'),
+            public_path('images/mja_logo.png')
+        );
 
         $this->gameSheet->setPoolLabel($poolLable);
         // dd($request->winner_line);

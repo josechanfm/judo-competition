@@ -33,6 +33,7 @@ class SendAthleteCardJob implements ShouldQueue
         try {
             // 使用 AthletePdfService 生成運動員證
             $service = new AthletePdfService();
+            $service->useCompetitionIdCardSettings($this->competition);
 
             $pdf = $service->generateOneIdCard($this->athlete);
             // 生成安全的檔案名稱

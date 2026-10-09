@@ -2,9 +2,12 @@
 namespace App\Services\Printer;
 
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 use TCPDF;
 
 class DelegationService{
+    use UsesCompetitionLogo;
+
     
     protected $pdf=null;
     protected $gameSetting=null;
@@ -41,6 +44,8 @@ class DelegationService{
         $this->category=$category;
 
         $this->pdf = new \Mpdf\Mpdf();
+        // 統一頁腳：左下角產生時間、置中頁碼
+        $this->pdf->SetHTMLFooter(PdfHelper::footerHtml());
         //$this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         // $this->pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
         // $this->pdf->SetPrintHeader(false);

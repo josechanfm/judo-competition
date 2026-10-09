@@ -2,9 +2,12 @@
 namespace App\Services\Printer;
 
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 use TCPDF;
 
 class RefereeService{
+    use UsesCompetitionLogo;
+
     
     protected $pdf=null;
     protected $gameSetting=null;
@@ -41,6 +44,8 @@ class RefereeService{
         $this->category=$category;
 
         $this->pdf = new \Mpdf\Mpdf();
+        // 統一頁腳：左下角產生時間、置中頁碼
+        $this->pdf->SetHTMLFooter(PdfHelper::footerHtml());
 
         $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
         //dd($defaultConfig);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', session('locale')) }}">
+<html lang="{{ str_replace('_', '-', session('locale', config('app.locale'))) }}">
 
 <head>
     <meta charset="utf-8">

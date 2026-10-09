@@ -2,9 +2,13 @@
 namespace App\Services\Printer;
 
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
+use App\Services\CustomTCPDF;
 use TCPDF;
 
 class TournamentFullService{
+    use UsesCompetitionLogo;
+
 
     protected $gameSetting=array(
         '4'=>array(
@@ -178,7 +182,7 @@ class TournamentFullService{
         if($poolLabel){
             $this->poolLable=$poolLabel;
         };
-        $this->pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $this->pdf = new CustomTCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
         // set margins
         //$this->pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
         //$this->pdf->SetHeaderMargin(PDF_MARGIN_HEADER);

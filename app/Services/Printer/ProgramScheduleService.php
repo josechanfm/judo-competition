@@ -3,10 +3,13 @@
 namespace App\Services\Printer;
 
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 use TCPDF;
 
 class ProgramScheduleService
 {
+    use UsesCompetitionLogo;
+
 
     protected $pdf = null;
     protected $gameSetting = null;
@@ -75,7 +78,21 @@ class ProgramScheduleService
             ],
         ];
 
-        return new \Mpdf\Mpdf($config);
+        $pdf = new \Mpdf\Mpdf($config);
+
+        // 頁腳：左下角產生時間、中間頁碼
+        $pdf->SetHTMLFooter($this->footerHtml());
+
+        return $pdf;
+    }
+
+    /**
+     * 頁腳 HTML：左下角產生時間、中間頁碼（mPDF 支援 {PAGENO}/{nbpg} 佔位符）
+     */
+    protected function footerHtml(): string
+    {
+        // 頁腳樣式統一由 PdfHelper 提供（helvetica / 8pt / 灰 #787878）
+        return PdfHelper::footerHtml();
     }
 
     public function setLogos($primary = null, $secondary = null)
@@ -96,9 +113,14 @@ class ProgramScheduleService
         $this->pdf->AddPage();
 
         $helper = new PdfHelper($this->pdf);
-        $extra = ["title" => $mat, "title_sub" => $date];
-        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, $extra);
-        
+        // 原本這裡把 $extra 當字型名稱傳進去（SetFont 收到 array 會 TypeError），改成跟 allSchedulesPdf 一樣傳橢圓資料
+        $ellipseData = [
+            "title" => $mat,
+            "title_sub" => $date ? $date : "",
+            "count" => "",
+        ];
+        $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, 'notoserifcjkhk', $ellipseData);
+
         $this->schedule($records);
         $this->pdf->Output('myfile.pdf', 'I');
     }
@@ -135,7 +157,17 @@ class ProgramScheduleService
         }
         
         // 只在最後輸出一次
-        $this->pdf->Output('all_schedules.pdf', 'I');
+        $this->pdf->Output($this->outputFilename(), 'I');
+    }
+
+    /**
+     * 輸出檔名：賽事名 + 所有賽程表 + 列印日期（把檔名不能用的字元換掉）
+     */
+    protected function outputFilename(): string
+    {
+        $name = $this->title . '所有賽程表' . PdfHelper::printTimestamp(format: 'Y-m-d');
+
+        return str_replace(['/', '\\', ':', '*', '?', '"', '<', '>', '|'], '-', $name) . '.pdf';
     }
 
     // 新增方法：只渲染賽程頁面，不輸出

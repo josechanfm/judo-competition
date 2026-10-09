@@ -11,6 +11,7 @@ use Inertia\Inertia;
 use App\Models\Competition;
 use App\Models\Program;
 use App\Services\BoutGenerationService;
+use App\Services\DrawService;
 use App\Services\Printer\TournamentQuarterService;
 use App\Models\Bout;
 use App\Models\Athlete;
@@ -20,6 +21,7 @@ use App\Services\FontService;
 use App\Services\Printer\RoundRobbinOption1Service;
 use App\Services\Printer\RoundRobbinOption2Service;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use PgSql\Lob;
 use TCPDF;
@@ -40,10 +42,7 @@ class ProgramController extends Controller
             'programs' => $competition->programs()
                 //->with('competitionCategory')
                 ->withCount('athletes', 'bouts')
-                ->orderBy('date')
-                ->orderBy('section')
-                ->orderBy('mat')
-                ->orderBy('sequence')
+                ->orderByCategoryAndWeightGroup()
                 ->get(),
             'athletes' => $competition->athletes,
             'competition' => $competition
@@ -120,6 +119,50 @@ class ProgramController extends Controller
 
         return redirect()->back();
     }
+
+    /**
+     * 更新某個項目底下的運動員：基本資料存在 athletes 表，
+     * 種子 (seed) / 排名 (rank) 存在 program_athlete (pivot)。
+     */
+    public function updateProgramAthlete(Program $program, Athlete $athlete, Request $request)
+    {
+        // 前端清空欄位可能送空字串或 null，統一當成 null 再驗證
+        $request->merge([
+            'seed' => $request->input('seed') === '' ? null : $request->input('seed'),
+            'rank' => $request->input('rank') === '' ? null : $request->input('rank'),
+        ]);
+
+        $validated = $request->validate([
+            'name' => 'required',
+            'name_secondary' => '',
+            'name_display' => '',
+            'gender' => 'required',
+            // seed 是 unsignedTinyInteger，rank 是 tinyInteger
+            'seed' => 'nullable|integer|min:1|max:255',
+            'rank' => 'nullable|integer|min:1|max:127',
+        ]);
+
+        $athlete->update([
+            'name' => $validated['name'],
+            'name_secondary' => $validated['name_secondary'] ?? null,
+            'name_display' => $validated['name_display'] ?? null,
+            'gender' => $validated['gender'],
+        ]);
+
+        // program_athlete.seed 可為 NULL（清除時寫 NULL）；
+        // rank 是 NOT NULL default 0，所以清除時要寫 0，寫 NULL 會噴 SQL 錯誤。
+        $seed = $validated['seed'] ?? null;
+        $rank = $validated['rank'] ?? null;
+
+        ProgramAthlete::where('program_id', $program->id)
+            ->where('athlete_id', $athlete->id)
+            ->update([
+                'seed' => ($seed === '' || $seed === null) ? null : (int) $seed,
+                'rank' => ($rank === '' || $rank === null) ? 0 : (int) $rank,
+            ]);
+
+        return redirect()->back();
+    }
     public function progress(Competition $competition, Request $request)
     {
         $competition->programAthletes = $competition->programAthletes()->get();
@@ -148,15 +191,92 @@ class ProgramController extends Controller
         ]);
     }
 
-    public function draw(Competition $competition, Program $program)
+    public function draw(Request $request, Competition $competition, Program $program)
     {
-        $athletes = $program->draw();
+        $athletes = $program->draw($this->drawMethod($request));
 
         $program->confirmDraw();
 
         return response()->json([
             'athletes' => $athletes
         ]);
+    }
+
+    /**
+     * 一鍵抽籤：為所有尚未抽籤（status = 0）的項目一次完成抽籤。
+     * 已抽籤／已鎖定的項目會被略過，避免覆蓋既有賽程；
+     * 全部包在同一個交易內，任何一個項目失敗就整批回復。
+     */
+    public function drawAll(Request $request, Competition $competition)
+    {
+        $method = $this->drawMethod($request);
+
+        $programs = $competition->programs()
+            ->where('status', Program::STATUS_CREATED)
+            ->orderByCategoryAndWeightGroup()
+            ->get();
+
+        DB::transaction(function () use ($programs, $method) {
+            foreach ($programs as $program) {
+                $program->draw($method);
+                $program->confirmDraw();
+            }
+        });
+
+        return response()->json([
+            'drawn_count' => $programs->count(),
+            'programs' => $programs->map(fn (Program $program) => [
+                'id' => $program->id,
+                'status' => $program->status,
+            ])->values(),
+        ]);
+    }
+
+    /**
+     * 一鍵重置：清空整個賽事所有項目的抽籤結果，回到未抽籤狀態。
+     * 抽籤已鎖定（seat_locked）之後不允許重置。
+     */
+    public function resetAll(Competition $competition)
+    {
+        if ($competition->status >= Competition::STATUS_SEAT_LOCKED) {
+            return response()->json([
+                'message' => 'Draw is already locked.',
+            ], 422);
+        }
+
+        $programs = $competition->programs()
+            ->orderByCategoryAndWeightGroup()
+            ->get();
+
+        DB::transaction(function () use ($competition, $programs) {
+            foreach ($programs as $program) {
+                $program->update(['status' => Program::STATUS_CREATED]);
+
+                $program->programAthletes()->update(['seat' => 0]);
+
+                $program->bouts()->update(['white' => 0, 'queue' => 1, 'blue' => 0, 'winner' => 0, 'status' => 0]);
+            }
+
+            (new BoutGenerationService($competition))->resequence();
+        });
+
+        return response()->json([
+            'reset_count' => $programs->count(),
+            'programs' => $programs->map(fn (Program $program) => [
+                'id' => $program->id,
+                'status' => $program->status,
+            ])->values(),
+        ]);
+    }
+
+    /**
+     * 前端傳來的抽籤方式（不合法的值一律當作一般抽籤）。
+     */
+    private function drawMethod(Request $request): string
+    {
+        $method = $request->input('method');
+
+        return is_string($method) ? $method : DrawService::METHOD_RANDOM;
     }
 
     public function resetDraw(Competition $competition, Program $program)
@@ -974,6 +1094,8 @@ class ProgramController extends Controller
             case 'rrb':
                 $settings = File::json(storage_path('setting/game_round_robbin_option2.json'));
                 $service = new RoundRobbinOption2Service($settings);
+                // 比賽未開始前（還沒有人比過）Won / Score / Rank 欄只留標題、不顯示數字
+                $service->setShowResults($program->status >= Program::STATUS_STARTED);
                 $players = $program->programAthletes()->orderBy('seat')->get();
                 $repechagePlayers = null;
                 break;
@@ -986,6 +1108,7 @@ class ProgramController extends Controller
         }
         $service->setFonts('notoserifcjkhk', 'notoserifcjkhk', 'notoserifcjkhk');
         $service->setTitles($program->competition->name, $program->competition->name_secondary);
+        $service->setCompetitionLogo($program->competition);
 
         return [
             'settings' => $settings,

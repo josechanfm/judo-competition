@@ -85,9 +85,27 @@ class CompetitionController extends Controller
             'bouts' => $formattedBouts,
         ]);
     }
-    public function fetchCompetitionData()
+    public function fetchCompetitionData(Request $request)
     {   
-        $competition = Competition::where('token','FI5DymF3I4OK')->first();
+        // 比賽 token 改用參數傳入（query string 或 header 皆可）
+        $token = $request->query('token') ?? $request->header('X-Competition-Token');
+
+        if (!$token) {
+            return response()->json([
+                'error' => 'Missing competition token',
+                'error_code' => 'MISSING_TOKEN',
+            ], 400);
+        }
+
+        $competition = Competition::where('token', $token)->first();
+
+        if (!$competition) {
+            return response()->json([
+                'error' => 'Competition not found',
+                'error_code' => 'COMPETITION_NOT_FOUND',
+            ], 404);
+        }
+
         $version = time();
         
         $categories = $competition->categories->map(function($category) {
@@ -120,6 +138,7 @@ class CompetitionController extends Controller
 
         return response()->json([
             'version' => $version,
+            'name' => $competition->name,
             'categories' => $categories,
             'weights' => $weights ,
             'athletes' => $athletes, 

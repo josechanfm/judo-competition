@@ -81,6 +81,59 @@ export function convertGender(weightCode) {
   }
 }
 
+/**
+ * 公斤級 (weight group) 代碼 → 目前語系的顯示名稱。
+ *
+ *   MW60-  → 男子60公斤以下      (en: Men -60kg)
+ *   FW42+  → 女子42公斤以上      (en: Women +42kg)
+ *   MW60   → 男子60公斤          (en: Men 60kg)
+ *   MWULW  → 男子無限量級        (en: Men Unlimited)
+ *
+ * 解析不出來（或查不到翻譯）時，直接回傳原始代碼，不會顯示出 key 名稱。
+ *
+ * @param {string} weightCode 例如 MW60- / FW42+ / MWULW
+ * @param {(key: string, replacements?: object) => string} t i18n 的 $t（由元件傳入）
+ */
+export function weightGroupLabel(weightCode, t) {
+  if (!weightCode) {
+    return '';
+  }
+
+  if (typeof t !== 'function') {
+    return weightCode;
+  }
+
+  const tokens = /^(?:(M|F|MF)W)?(ULW|\d+)([+-])?$/i.exec(String(weightCode).trim());
+
+  if (!tokens) {
+    return weightCode;
+  }
+
+  const genderKey = `weight.gender.${(tokens[1] ?? '').toUpperCase()}`;
+  const genderLabel = tokens[1] ? t(genderKey) : '';
+  const gender = genderLabel === genderKey ? '' : genderLabel;
+  const weight = tokens[2];
+  const sign = tokens[3];
+
+  const labelKey = weight.toUpperCase() === 'ULW'
+    ? 'weight.label.unlimited'
+    : sign === '-'
+      ? 'weight.label.under'
+      : sign === '+'
+        ? 'weight.label.over'
+        : 'weight.label.exact';
+
+  const label = t(labelKey, { gender, weight });
+
+  // 查不到翻譯時，laravel-vue-i18n 會回傳 key 本身
+  if (!label || label === labelKey || label.includes(':')) {
+    return weightCode;
+  }
+
+  // 沒有性別前綴時（例如 ULW）英文樣板會多出空白
+  return label.trim().replace(/\s+/g, ' ');
+}
+
 export function convertWeight(weightCode) {
   if (!weightCode) return '';
   

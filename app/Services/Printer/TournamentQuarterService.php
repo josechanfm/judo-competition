@@ -3,11 +3,14 @@
 namespace App\Services\Printer;
 
 use App\Helpers\PdfHelper;
+use App\Services\Printer\Concerns\UsesCompetitionLogo;
 use App\Services\CustomTCPDF;
 use TCPDF;
 
 class TournamentQuarterService
 {
+    use UsesCompetitionLogo;
+
     protected $gameSetting;
     protected $pdf = null;
     protected $title = 'Judo Competition of Asia Pacific';
@@ -413,153 +416,153 @@ class TournamentQuarterService
         }
     }
     /* the following are repeated object, might change the variabled values, accordingly, not suggest to use globale variabled. */
-private function boxPlayers($x, $y, $w, $h, $players = ['white' => ['name' => 'white' , 'name_secondary' => '1'], 'blue' => ['name' => 'blue' , 'name_secondary' => '1']])
-{
-    $this->pdf->setFont($this->playerFont, '', $this->playerFontSize);
-    $r = 2.0;
-    $h = $h / 2;
-    
-    // 定義漸變顏色 - 使用銀白色調
-    $lightSilver = [240, 240, 240];  // 較亮的銀色
-    $darkSilver = [180, 180, 180];   // 較暗的銀色
-    
-    if (isset($players['white'])) {
-        // 上半部保持原本的白色背景
-        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-            $this->pdf->StartTransform();
-            // 對於 Mpdf，創建上半部的 clipping path
-            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'CNZ');
-        } else {
-            // 對於 TCPDF，創建 clipping path
-            $this->pdf->StartTransform();
-            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'CNZ');
-        }
+    private function boxPlayers($x, $y, $w, $h, $players = ['white' => ['name' => 'white' , 'name_secondary' => '1'], 'blue' => ['name' => 'blue' , 'name_secondary' => '1']])
+    {
+        $this->pdf->setFont($this->playerFont, '', $this->playerFontSize);
+        $r = 2.0;
+        $h = $h / 2;
         
-        // 上半部填充白色背景
-        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-            $this->pdf->SetFillColorArray([255, 255, 255]);
-            $this->pdf->Rect($x, $y, $w, $h, 'F');
-        } else {
-            $this->pdf->SetFillColor(255, 255, 255);
-            $this->pdf->Rect($x, $y, $w, $h, 'F');
-        }
+        // 定義漸變顏色 - 使用銀白色調
+        $lightSilver = [240, 240, 240];  // 較亮的銀色
+        $darkSilver = [180, 180, 180];   // 較暗的銀色
         
-        // 結束 clipping
-        $this->pdf->StopTransform();
-        
-        // 重新為下半部創建 clipping path
-        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-            $this->pdf->StartTransform();
-            // 對於 Mpdf，創建下半部的 clipping path
-            $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'CNZ');
-        } else {
-            // 對於 TCPDF，創建 clipping path
-            $this->pdf->StartTransform();
-            $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'CNZ');
-        }
-        
-        // 下半部使用漸變銀色（從亮到暗）
-        $gradientHeight = $h;
-        $steps = 15;
-        
-        // 繪製漸變背景（現在會被限制在圓角內）
-        for ($i = 0; $i < $steps; $i++) {
-            $stepY = $y + $h + ($gradientHeight / $steps) * $i;
-            $stepHeight = $gradientHeight / $steps;
-            
-            // 從較亮的銀色漸變到較暗的銀色
-            $ratio = $i / ($steps - 1); // 使用 steps-1 確保最後一個是純 darkSilver
-            $rColor = $lightSilver[0] + ($darkSilver[0] - $lightSilver[0]) * $ratio;
-            $gColor = $lightSilver[1] + ($darkSilver[1] - $lightSilver[1]) * $ratio;
-            $bColor = $lightSilver[2] + ($darkSilver[2] - $lightSilver[2]) * $ratio;
-            
+        if (isset($players['white'])) {
+            // 上半部保持原本的白色背景
             if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-                $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                $this->pdf->StartTransform();
+                // 對於 Mpdf，創建上半部的 clipping path
+                $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'CNZ');
             } else {
-                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-                $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                // 對於 TCPDF，創建 clipping path
+                $this->pdf->StartTransform();
+                $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'CNZ');
             }
-        }
-        
-        // 結束 clipping
-        $this->pdf->StopTransform();
-        
-        // 繪製上半部圓角邊框（只繪製邊框，不填充）
-        $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'D', $this->styleBoxLine, $this->boxWhiteColor);
-        
-        // 繪製下半部圓角邊框（只繪製邊框，不填充）
-        $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'D', $this->styleBoxLine, $this->boxBlueColor);
-        
-        // 繪製中間分隔線（可選）
-        $this->pdf->SetDrawColor(180, 180, 180);
-        $this->pdf->SetLineWidth(0.1);
-        $this->pdf->Line($x, $y + $h, $x + $w, $y + $h);
-        
-        // 輸出文字內容
-        $this->pdf->setXY($x, $y - $this->athleteGap);
-        $this->pdf->setFont($this->generalFont, '', $this->playerFontSize);
-        if($players['white']['is_weight_passed'] == 0){
-            $this->pdf->setFont($this->generalFont, 'D', $this->playerFontSize);
-        }
-        $this->pdf->Cell($this->boxW, $h, ($players['white']['name'] ? $this->smartTruncate($players['white']['name']) . ' ' : '' ) . $this->smartTruncate($players['white']['name_secondary']) , 0, 1, 'L', 0, '', 0);
-        $this->pdf->setXY($x, $y + $this->athleteGap);
-        $this->pdf->setFont($this->generalFont, '', $this->teamFontSize);
-        $this->pdf->Cell($this->boxW, $h, $players['white']['team'] , 0, 1, 'L', 0, '', 0);
-        $this->pdf->setXY($x, $y + $h - $this->athleteGap);
-        $this->pdf->setFont($this->generalFont, '', $this->playerFontSize);
-        if($players['blue']['is_weight_passed'] == 0){
-            $this->pdf->setFont($this->generalFont, 'D', $this->playerFontSize);
-        }
-        $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . ' ' . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
-        $this->pdf->setFont($this->generalFont, '', $this->teamFontSize);   
-        $this->pdf->setXY($x, $y + $h + $this->athleteGap);
-        $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
-    } else {
-        // 如果只有藍色選手，創建整個區域的 clipping path
-        if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-            $this->pdf->StartTransform();
-            $this->pdf->RoundedRect($x, $y, $w, $h * 2, $r, '1111', 'CNZ');
-        } else {
-            $this->pdf->StartTransform();
-            $this->pdf->RoundedRect($x, $y, $w, $h * 2, $r, '1111', 'CNZ');
-        }
-        
-        // 填充整個區域的銀色漸變背景（從亮到暗）
-        $gradientHeight = $h * 2;
-        $steps = 15;
-        
-        for ($i = 0; $i < $steps; $i++) {
-            $stepY = $y + ($gradientHeight / $steps) * $i;
-            $stepHeight = $gradientHeight / $steps;
             
-            // 從較亮的銀色漸變到較暗的銀色
-            $ratio = $i / ($steps - 1);
-            $rColor = $lightSilver[0] + ($darkSilver[0] - $lightSilver[0]) * $ratio;
-            $gColor = $lightSilver[1] + ($darkSilver[1] - $lightSilver[1]) * $ratio;
-            $bColor = $lightSilver[2] + ($darkSilver[2] - $lightSilver[2]) * $ratio;
-            
+            // 上半部填充白色背景
             if (get_class($this->pdf) == 'Mpdf\Mpdf') {
-                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-                $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                $this->pdf->SetFillColorArray([255, 255, 255]);
+                $this->pdf->Rect($x, $y, $w, $h, 'F');
             } else {
-                $this->pdf->SetFillColor($rColor, $gColor, $bColor);
-                $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                $this->pdf->SetFillColor(255, 255, 255);
+                $this->pdf->Rect($x, $y, $w, $h, 'F');
             }
+            
+            // 結束 clipping
+            $this->pdf->StopTransform();
+            
+            // 重新為下半部創建 clipping path
+            if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+                $this->pdf->StartTransform();
+                // 對於 Mpdf，創建下半部的 clipping path
+                $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'CNZ');
+            } else {
+                // 對於 TCPDF，創建 clipping path
+                $this->pdf->StartTransform();
+                $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'CNZ');
+            }
+            
+            // 下半部使用漸變銀色（從亮到暗）
+            $gradientHeight = $h;
+            $steps = 15;
+            
+            // 繪製漸變背景（現在會被限制在圓角內）
+            for ($i = 0; $i < $steps; $i++) {
+                $stepY = $y + $h + ($gradientHeight / $steps) * $i;
+                $stepHeight = $gradientHeight / $steps;
+                
+                // 從較亮的銀色漸變到較暗的銀色
+                $ratio = $i / ($steps - 1); // 使用 steps-1 確保最後一個是純 darkSilver
+                $rColor = $lightSilver[0] + ($darkSilver[0] - $lightSilver[0]) * $ratio;
+                $gColor = $lightSilver[1] + ($darkSilver[1] - $lightSilver[1]) * $ratio;
+                $bColor = $lightSilver[2] + ($darkSilver[2] - $lightSilver[2]) * $ratio;
+                
+                if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+                    $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                    $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                } else {
+                    $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                    $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                }
+            }
+            
+            // 結束 clipping
+            $this->pdf->StopTransform();
+            
+            // 繪製上半部圓角邊框（只繪製邊框，不填充）
+            $this->pdf->RoundedRect($x, $y, $w, $h, $r, '1001', 'D', $this->styleBoxLine, $this->boxWhiteColor);
+            
+            // 繪製下半部圓角邊框（只繪製邊框，不填充）
+            $this->pdf->RoundedRect($x, $y + $h, $w, $h, $r, '0110', 'D', $this->styleBoxLine, $this->boxBlueColor);
+            
+            // 繪製中間分隔線（可選）
+            $this->pdf->SetDrawColor(180, 180, 180);
+            $this->pdf->SetLineWidth(0.1);
+            $this->pdf->Line($x, $y + $h, $x + $w, $y + $h);
+            
+            // 輸出文字內容
+            $this->pdf->setXY($x, $y - $this->athleteGap);
+            $this->pdf->setFont($this->generalFont, '', $this->playerFontSize);
+            if($players['white']['is_weight_passed'] == 0){
+                $this->pdf->setFont($this->generalFont, 'D', $this->playerFontSize);
+            }
+            $this->pdf->Cell($this->boxW, $h, ($players['white']['name'] ? $this->smartTruncate($players['white']['name']) . ' ' : '' ) . $this->smartTruncate($players['white']['name_secondary']) , 0, 1, 'L', 0, '', 0);
+            $this->pdf->setXY($x, $y + $this->athleteGap);
+            $this->pdf->setFont($this->generalFont, '', $this->teamFontSize);
+            $this->pdf->Cell($this->boxW, $h, $players['white']['team'] , 0, 1, 'L', 0, '', 0);
+            $this->pdf->setXY($x, $y + $h - $this->athleteGap);
+            $this->pdf->setFont($this->generalFont, '', $this->playerFontSize);
+            if($players['blue']['is_weight_passed'] == 0){
+                $this->pdf->setFont($this->generalFont, 'D', $this->playerFontSize);
+            }
+            $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . ' ' . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
+            $this->pdf->setFont($this->generalFont, '', $this->teamFontSize);   
+            $this->pdf->setXY($x, $y + $h + $this->athleteGap);
+            $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
+        } else {
+            // 如果只有藍色選手，創建整個區域的 clipping path
+            if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+                $this->pdf->StartTransform();
+                $this->pdf->RoundedRect($x, $y, $w, $h * 2, $r, '1111', 'CNZ');
+            } else {
+                $this->pdf->StartTransform();
+                $this->pdf->RoundedRect($x, $y, $w, $h * 2, $r, '1111', 'CNZ');
+            }
+            
+            // 填充整個區域的銀色漸變背景（從亮到暗）
+            $gradientHeight = $h * 2;
+            $steps = 15;
+            
+            for ($i = 0; $i < $steps; $i++) {
+                $stepY = $y + ($gradientHeight / $steps) * $i;
+                $stepHeight = $gradientHeight / $steps;
+                
+                // 從較亮的銀色漸變到較暗的銀色
+                $ratio = $i / ($steps - 1);
+                $rColor = $lightSilver[0] + ($darkSilver[0] - $lightSilver[0]) * $ratio;
+                $gColor = $lightSilver[1] + ($darkSilver[1] - $lightSilver[1]) * $ratio;
+                $bColor = $lightSilver[2] + ($darkSilver[2] - $lightSilver[2]) * $ratio;
+                
+                if (get_class($this->pdf) == 'Mpdf\Mpdf') {
+                    $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                    $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                } else {
+                    $this->pdf->SetFillColor($rColor, $gColor, $bColor);
+                    $this->pdf->Rect($x, $stepY, $w, $stepHeight, 'F');
+                }
+            }
+            
+            // 結束 clipping
+            $this->pdf->StopTransform();
+            
+            // 繪製邊框
+            $this->pdf->RoundedRect($x, $y, $w, $h * 2, $r, '1111', 'D', $this->styleBoxLine, $this->boxBlueColor);
+            
+            $this->pdf->setXY($x, $y);
+            $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
+            $this->pdf->setXY($x, $y + $this->athleteGap);
+            $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
         }
-        
-        // 結束 clipping
-        $this->pdf->StopTransform();
-        
-        // 繪製邊框
-        $this->pdf->RoundedRect($x, $y, $w, $h * 2, $r, '1111', 'D', $this->styleBoxLine, $this->boxBlueColor);
-        
-        $this->pdf->setXY($x, $y);
-        $this->pdf->Cell($this->boxW, $h, $this->smartTruncate($players['blue']['name']) . $this->smartTruncate($players['blue']['name_secondary']), 0, 1, 'L', 0, '', 0);
-        $this->pdf->setXY($x, $y + $this->athleteGap);
-        $this->pdf->Cell($this->boxW, $h, $players['blue']['team'] , 0, 1, 'L', 0, '', 0);
     }
-}
     
     private function arcLine($x, $y, $arcW, $h, $num = 0, $winner = 0, $first = false, $players = null)
     {

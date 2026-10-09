@@ -2,14 +2,14 @@
     <a-form layout="vertical" class="max-w-3xl">
             <a-alert
                 type="info"
-                message="使用記分牌以及其他設備"
-                description="您可以將記分牌等設備與賽事系統相連接，以便自動更新比賽分數和比賽結果。"
+                :message="$t('integration.usage')"
+                :description="$t('integration.usage_help')"
                 show-icon
             />
         <div class="grid grid-cols-1 gap-4 mt-6 w-full">
             <div>
                 <a-form-item :label="$t('integration.secret')" class="form-group">
-                    <span class="font-mono">{{ contest.token }}</span>
+                    <span class="font-mono">{{ competition.token }}</span>
                     <a-button type="link" @click="copy">
                         <template #icon>
                             <CopyOutlined/>
@@ -25,10 +25,10 @@
                 <a-form-item :label="$t('device_list')" class="form-group">
                     <div>
                         <template
-                            v-if="contest.tokens?.length"
+                            v-if="competition.tokens?.length"
                         >
                         <div class="py-2 flex"
-                             v-for="device in contest.tokens"
+                             v-for="device in competition.tokens"
                              :key="device.id"
                         >
                             <div class="py-2 mr-4">
@@ -87,7 +87,12 @@ dayjs.extend(relativeTime)
 
 export default {
     name: "Integration",
-    inject: ['contest'],
+    props: {
+        competition: {
+            type: Object,
+            required: true,
+        },
+    },
     components: {
         CopyOutlined,
         OneToOneOutlined,
@@ -116,13 +121,13 @@ export default {
 
                 switch (type) {
                     case 0:
-                        return '記分牌'
+                        return this.$t('device.type.scoreboard')
                     case 1:
-                        return '場次顯示屏'
+                        return this.$t('device.type.display')
                     case 9:
-                        return 'API 測試'
+                        return this.$t('device.type.api_test')
                     default:
-                        return '未知'
+                        return this.$t('device.type.unknown')
                 }
             }
         }
@@ -130,18 +135,18 @@ export default {
     methods: {
         copy() {
             try {
-                navigator.clipboard.writeText(this.contest.token);
-                this.$message.success('已複製')
+                navigator.clipboard.writeText(this.competition.token);
+                this.$message.success(this.$t('copied'))
             } catch (e) {
-                this.$message.error('複製失敗')
+                this.$message.error(this.$t('copy_failed'))
             }
         },
         revoke (uuid) {
-            this.$inertia.delete(route('admin.contests.settings.remove-device', [this.contest.id, uuid]), {
+            this.$inertia.delete(route('manage.competition.setting.remove-device', [this.competition.id, uuid]), {
                 preserveState: false,
                 preserveScroll: true,
                 onSuccess: () => {
-                    this.$message.success('移除成功')
+                    this.$message.success(this.$t('action.remove') + ' ✓')
                 }
             })
         }

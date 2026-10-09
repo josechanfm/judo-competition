@@ -51,7 +51,7 @@ class CompetitionController extends Controller
         }else{
             $competitionBouts->where('queue', '!=', 0);
         }
-        $bouts=$competitionBouts->get();
+        $bouts = $competitionBouts->orderBy('queue')->orderBy('id')->get();
     // dd($request->all(), $bouts);
         // $bouts = $competition->bouts()
         //     ->where('mat', $request->mat)

@@ -127,9 +127,14 @@
                 :key="mat"
                 :title="`場地 ${mat}`"
                 :bordered="true"
-                class="shadow-sm hover:shadow-md transition-shadow compact-card"
+                :class="[
+                  'shadow-sm hover:shadow-md transition-shadow compact-card',
+                  { 'drop-zone-active': dragState.isDragging }
+                ]"
                 :headStyle="{ backgroundColor: '#f0f5ff', padding: '0 12px', minHeight: '40px' }"
                 :bodyStyle="{ padding: '12px' }"
+                @dragover.prevent
+                @drop.prevent="handleMatDrop($event, mat)"
               >
                 <!-- 當前比賽信息 -->
                 <div v-if="currentSection?.mats[mat]?.program" class="mb-2">
@@ -225,6 +230,14 @@
                           return;
                         }
                         selectBout(record, mat);
+                      },
+                      onDragover: (event) => {
+                        event.preventDefault();
+                      },
+                      onDrop: (event) => {
+                        const bouts = getBoutsForMat(mat);
+                        const index = bouts.findIndex(bout => bout.id === record.id);
+                        handleDrop(event, record, index, mat);
                       }
                     })"
                     :scroll="{ y: 500 }"
@@ -1122,59 +1135,127 @@ export default {
       this.dragState.isDragging = false;
     },
     
-    // 放置處理
-    async handleDrop(event, targetBout, targetIndex, targetMat) {
+    // 放置處理（支援同場地排序與跨場地移動）
+    handleDrop(event, targetBout, targetIndex, targetMat) {
+      event.preventDefault();
+      // 阻止冒泡，避免再次觸發場地卡片的 handleMatDrop
+      event.stopPropagation();
+      
+      const dragDataStr = event.dataTransfer.getData('text/plain');
+      if (!dragDataStr) return;
+      
+      let dragData;
+      try {
+        dragData = JSON.parse(dragDataStr);
+      } catch (error) {
+        console.error('拖拽資料解析失敗:', error);
+        return;
+      }
+      
+      if (!dragData.id || !targetBout) return;
+      
+      const draggedBout = this.findBoutById(dragData.id);
+      if (!draggedBout) return;
+      
+      // queue 以「日期 + 時段 + 場地」為單位，因此只能在同一時段內移動
+      if (draggedBout.section !== targetBout.section) {
+        message.warning('只能在同一時段內移動場次');
+        return;
+      }
+      
+      // 跨場地移動
+      if (dragData.mat !== targetMat) {
+        this.confirmMoveBout(draggedBout, dragData.mat, targetMat, targetIndex);
+        return;
+      }
+      
+      if (dragData.index === targetIndex) return;
+      
+      // 同場地內調整順序
+      const boutsInMat = this.getBoutsForMat(targetMat);
+      const newBouts = [...boutsInMat];
+      const [movedBout] = newBouts.splice(dragData.index, 1);
+      newBouts.splice(targetIndex, 0, movedBout);
+      
+      // 更新 queue 值
+      const updates = newBouts.map((bout, idx) => ({
+        id: bout.id,
+        queue: idx + 1,
+        mat: targetMat
+      }));
+      
+      Modal.confirm({
+        title: '確認調整順序',
+        content: '確定要調整這些場次的順序嗎？',
+        onOk: async () => {
+          await this.updateBoutsQueue(updates);
+        },
+        onCancel: () => {
+          this.checkForUpdates();
+        }
+      });
+    },
+    
+    // 放置到場地卡片空白處（跨場地時附加到最後）
+    handleMatDrop(event, targetMat) {
       event.preventDefault();
       
       const dragDataStr = event.dataTransfer.getData('text/plain');
       if (!dragDataStr) return;
       
+      let dragData;
       try {
-        const dragData = JSON.parse(dragDataStr);
-        
-        if (!dragData.id || !targetBout) return;
-        
-        if (dragData.mat !== targetMat) {
-          message.warning('只能在同一場地內調整順序');
-          return;
-        }
-        
-        const draggedBout = this.findBoutById(dragData.id);
-        if (!draggedBout || draggedBout.section !== targetBout.section) {
-          message.warning('只能在同一時段內調整順序');
-          return;
-        }
-        
-        if (dragData.index === targetIndex) return;
-        
-        const boutsInMat = this.getBoutsForMat(targetMat);
-        
-        // 重新排序
-        const newBouts = [...boutsInMat];
-        const [movedBout] = newBouts.splice(dragData.index, 1);
-        newBouts.splice(targetIndex, 0, movedBout);
-        
-        // 更新 queue 值
-        const updates = newBouts.map((bout, idx) => ({
-          id: bout.id,
-          queue: idx + 1
-        }));
-        
-        Modal.confirm({
-          title: '確認調整順序',
-          content: '確定要調整這些場次的順序嗎？',
-          onOk: async () => {
-            await this.updateBoutsQueue(updates);
-          },
-          onCancel: () => {
-            this.checkForUpdates();
-          }
-        });
-        
+        dragData = JSON.parse(dragDataStr);
       } catch (error) {
-        console.error('拖拽處理失敗:', error);
-        message.error('調整順序失敗');
+        return;
       }
+      
+      if (!dragData.id) return;
+      
+      const draggedBout = this.findBoutById(dragData.id);
+      if (!draggedBout) return;
+      
+      // 同場地交由列上的 handleDrop 處理
+      if (dragData.mat === targetMat) return;
+      
+      const targetBouts = this.getBoutsForMat(targetMat);
+      if (targetBouts.length > 0 && targetBouts[0].section !== draggedBout.section) {
+        message.warning('只能在同一時段內移動場次');
+        return;
+      }
+      
+      this.confirmMoveBout(draggedBout, dragData.mat, targetMat, targetBouts.length);
+    },
+    
+    // 確認並執行跨場地移動場次
+    confirmMoveBout(draggedBout, sourceMat, targetMat, insertIndex) {
+      const updates = this.buildMoveUpdates(draggedBout, sourceMat, targetMat, insertIndex);
+      
+      Modal.confirm({
+        title: '確認移動場次',
+        content: `確定要將「${draggedBout.bout_name || '此場次'}」從場地 ${sourceMat} 移動到場地 ${targetMat} 嗎？`,
+        onOk: async () => {
+          await this.updateBoutsQueue(updates);
+        },
+        onCancel: () => {
+          this.checkForUpdates();
+        }
+      });
+    },
+    
+    // 建立跨場地移動的更新資料（來源與目標場地皆重新編號）
+    buildMoveUpdates(draggedBout, sourceMat, targetMat, insertIndex) {
+      const sourceBouts = this.getBoutsForMat(sourceMat)
+        .filter(bout => bout.id !== draggedBout.id);
+      
+      const targetBouts = [...this.getBoutsForMat(targetMat)];
+      const index = Math.max(0, Math.min(insertIndex, targetBouts.length));
+      targetBouts.splice(index, 0, draggedBout);
+      
+      return [
+        ...sourceBouts.map((bout, idx) => ({ id: bout.id, queue: idx + 1, mat: Number(sourceMat) })),
+        ...targetBouts.map((bout, idx) => ({ id: bout.id, queue: idx + 1, mat: Number(targetMat) }))
+      ];
     },
     
     // 批量更新場次順序
@@ -1192,19 +1273,19 @@ export default {
           preserveState: true,
           preserveScroll: true,
           onSuccess: () => {
-            message.success('場次順序已更新');
+            message.success('場次已更新');
             this.clearCache();
             this.onMatChange();
           },
           onError: (errors) => {
-            console.error('更新順序失敗:', errors);
-            message.error('更新順序失敗，請稍後再試');
+            console.error('更新場次失敗:', errors);
+            message.error('更新場次失敗，請稍後再試');
             this.checkForUpdates();
           }
         });
       } catch (error) {
-        console.error('更新順序時出錯:', error);
-        message.error('更新順序失敗，請稍後再試');
+        console.error('更新場次時出錯:', error);
+        message.error('更新場次失敗，請稍後再試');
       } finally {
         this.isLoading = false;
         this.dragState.isDragging = false;
@@ -1508,6 +1589,12 @@ export default {
 .compact-card :deep(.ant-card-head) {
   padding: 0 12px;
   min-height: 36px;
+}
+
+/* 拖拽中可放置的場地卡片 */
+.compact-card.drop-zone-active {
+  outline: 2px dashed #1890ff;
+  outline-offset: 1px;
 }
 
 .compact-card :deep(.ant-card-head-title) {

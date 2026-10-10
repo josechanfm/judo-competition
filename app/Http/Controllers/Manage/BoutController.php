@@ -406,8 +406,18 @@ class BoutController extends Controller
         
         DB::transaction(function () use ($updates) {
             foreach ($updates as $update) {
-                Bout::where('id', $update['id'])
-                    ->update(['queue' => $update['queue']]);
+                if (empty($update['id'])) {
+                    continue;
+                }
+
+                $data = ['queue' => $update['queue']];
+
+                // 支援跨場地移動：前端可一併帶上目標場地
+                if (array_key_exists('mat', $update)) {
+                    $data['mat'] = $update['mat'];
+                }
+
+                Bout::where('id', $update['id'])->update($data);
             }
         });
         

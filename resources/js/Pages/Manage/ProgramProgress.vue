@@ -542,6 +542,11 @@
               🚫 藍方犯規輸 - 白方勝利 (41)
             </a-select-option>
             
+            <!-- 雙敗（雙方判負，無人晉級） -->
+            <a-select-option :value="12" class="text-gray-500">
+              ⚖️ 雙敗 - 雙方判負 (12)
+            </a-select-option>
+            
             <!-- 取消 -->
             <a-select-option :value="-1" class="text-gray-400">
               ❌ 比賽取消 (-1)
@@ -1268,6 +1273,7 @@ export default {
         '-1': '取消',
         '10': '白方勝',
         '11': '紅方勝',
+        '12': '雙敗',
         '20': '白退賽',
         '30': '白傷病',
         '40': '白犯規',
@@ -1406,7 +1412,7 @@ export default {
           },
           onError: (errors) => {
             console.error('保存失敗:', errors);
-            message.error('保存失敗，請稍後再試');
+            message.error(errors?.status || '保存失敗，請稍後再試');
           }
         });
       } catch (error) {

@@ -55,6 +55,36 @@ class BoutController extends Controller
             $winnerColor = 'blue';
             $winnerId = $bout->blue; // 藍方選手的 ID
         }
+
+        // 雙敗（12）：雙方判負，沒有勝方，也沒有選手晉級
+        $isBothLose = $status === BoutResult::STATUS_BOTH_LOSE;
+        $isCancelled = $status === BoutResult::STATUS_CANCELLED;
+        $hasWinner = $winnerColor !== null;
+
+        // 敗者（供敗部復活晉級使用）
+        $loserId = null;
+        if ($winnerColor === 'white') {
+            $loserId = $bout->blue;
+        } elseif ($winnerColor === 'blue') {
+            $loserId = $bout->white;
+        }
+
+        // 驗證所選結果與輸入比數一致，避免存成與事實不符的結果
+        $consistencyError = $this->resultConsistencyError($status, $winnerColor, [
+            'w_ippon' => $w_ippon,
+            'b_ippon' => $b_ippon,
+            'w_wazari' => $w_wazari,
+            'b_wazari' => $b_wazari,
+            'w_yuko' => $w_yuko,
+            'b_yuko' => $b_yuko,
+            'w_shido' => $w_shido,
+            'b_shido' => $b_shido,
+        ]);
+
+        if ($consistencyError) {
+            throw ValidationException::withMessages(['status' => $consistencyError]);
+        }
+
         // 初始化分數
         $w_score = 0;
         $b_score = 0;
@@ -105,12 +135,15 @@ class BoutController extends Controller
         }
         
         // 根據 shido 計算對手得分（只有當對手有3個shido時才得10分）
-        if ($b_shido >= 3) {
-            $w_score += 10; // 藍方有3個以上shido，白方得10分
-        }
-        
-        if ($w_shido >= 3) {
-            $b_score += 10; // 白方有3個以上shido，藍方得10分
+        // 雙敗／取消沒有勝方，不計分
+        if ($hasWinner) {
+            if ($b_shido >= 3) {
+                $w_score += 10; // 藍方有3個以上shido，白方得10分
+            }
+
+            if ($w_shido >= 3) {
+                $b_score += 10; // 白方有3個以上shido，藍方得10分
+            }
         }
         
         // 敗者分數為0
@@ -124,17 +157,22 @@ class BoutController extends Controller
         $w_score = min($w_score, 10);
         $b_score = min($b_score, 10);
         
-        // 更新比賽狀態為已完成，winner 存入選手ID
-        $bout->update([
-            'winner' => $winnerId, // 這裡存入選手的 ID，而不是 'white'/'blue'
-            'status' => 1  // 比賽完成狀態
-        ]);
+        if ($isCancelled) {
+            // 取消：沿用賽事模型的取消流程（佇列移除、狀態 -1、勝者 -1，並處理後續晉級與名次）
+            $bout->cancel();
+        } else {
+            // 更新比賽狀態為已完成，winner 存入選手ID（-1 代表雙方判負）
+            $bout->update([
+                'winner' => $winnerId ?? -1, // 這裡存入選手的 ID，而不是 'white'/'blue'
+                'status' => 1  // 比賽完成狀態
+            ]);
+        }
         
         // 創建或更新 bout_result
         $boutResult = BoutResult::updateOrCreate(
             ['bout_id' => $bout->id],
             [
-                'status' => $status, // 儲存原始的結果狀態 (10,11,20,21,30,31,40,41)
+                'status' => $status, // 儲存原始的結果狀態 (10,11,12,20,21,30,31,40,41,-1)
                 'w_ippon' => $w_ippon,
                 'w_wazari' => $w_wazari,
                 'w_yuko' => $w_yuko,
@@ -149,12 +187,19 @@ class BoutController extends Controller
             ]
         );
         
-        // 更新下一輪比賽的選手（這裡需要傳入選手ID）
-        if ($bout->winner_rise_to != 0 && $winnerId) {
-            $this->updateNextBoutFighter($bout, $winnerId);
+        if (! $isCancelled) {
+            // 更新下一輪比賽的選手（這裡需要傳入選手ID）
+            if ($bout->winner_rise_to != 0 && $winnerId) {
+                $this->updateNextBoutFighter($bout, $winnerId);
+            }
+
+            // 敗者晉級到敗部復活賽（rise_from 為負數）
+            if ($bout->loser_rise_to != 0 && $loserId) {
+                $this->updateLoserToNextBoutFighter($bout, $loserId);
+            }
         }
-        // KOS 賽制排名處理
-        if (($bout->competition_system === 'kos' || $bout->competition_system === 'erm')  && in_array($bout->turn, [1, 2])) {
+        // KOS 賽制排名處理（雙敗／取消沒有勝負，不設排名）
+        if ($hasWinner && ($bout->competition_system === 'kos' || $bout->competition_system === 'erm')  && in_array($bout->turn, [1, 2])) {
             
             $winnerFighterId = $winnerId; // 直接使用勝者ID
             $loserFighterId = $winnerColor === 'white' ? $bout->blue : $bout->white;
@@ -283,6 +328,78 @@ class BoutController extends Controller
             ->first();
     }
 
+    /**
+     * 檢查所選結果是否與輸入的比數一致；不一致時回傳錯誤訊息（一致則回傳 null）。
+     */
+    private function resultConsistencyError(int $status, ?string $winnerColor, array $s): ?string
+    {
+        // 退賽／傷病／犯規輸／雙敗／取消由所選結果決定勝負，不需比對比數
+        if (! in_array($status, [BoutResult::STATUS_WHITE_WIN, BoutResult::STATUS_BLUE_WIN])) {
+            return null;
+        }
+
+        // 依一本 > 半勝 > 有效判定比數領先的一方
+        $leader = null;
+        if ($s['w_ippon'] !== $s['b_ippon']) {
+            $leader = $s['w_ippon'] > $s['b_ippon'] ? 'white' : 'blue';
+        } elseif ($s['w_wazari'] !== $s['b_wazari']) {
+            $leader = $s['w_wazari'] > $s['b_wazari'] ? 'white' : 'blue';
+        } elseif ($s['w_yuko'] !== $s['b_yuko']) {
+            $leader = $s['w_yuko'] > $s['b_yuko'] ? 'white' : 'blue';
+        }
+
+        // 勝方自己已有 3 次指導（犯規輸）時，不可能判他獲勝
+        if ($winnerColor === 'white' && $s['w_shido'] >= 3) {
+            return '白方已有 3 次指導（犯規輸），不能判白方勝。';
+        }
+
+        if ($winnerColor === 'blue' && $s['b_shido'] >= 3) {
+            return '藍方已有 3 次指導（犯規輸），不能判藍方勝。';
+        }
+
+        if ($leader === null) {
+            return '比數無法判定勝負，請輸入得分，或改選退賽／傷病／犯規輸／雙敗。';
+        }
+
+        if ($leader !== $winnerColor) {
+            return '所選勝方與比數不符：依比數'.($leader === 'white' ? '白方' : '藍方').'領先。';
+        }
+
+        return null;
+    }
+
+    /**
+     * 將敗者晉級到敗部復活賽（loser_rise_to；目標場次的 rise_from 為負數）。
+     */
+    private function updateLoserToNextBoutFighter(Bout $currentBout, $loser)
+    {
+        $loserFighterId = $loser;
+
+        if (! $loserFighterId || ! $currentBout->loser_rise_to) {
+            return;
+        }
+
+        $nextBout = Bout::where('program_id', $currentBout->program_id)
+            ->where('in_program_sequence', $currentBout->loser_rise_to)
+            ->first();
+
+        if (! $nextBout) {
+            return;
+        }
+
+        $updateData = [];
+
+        if ($nextBout->white_rise_from < 0 && abs($nextBout->white_rise_from) == $currentBout->in_program_sequence) {
+            $updateData['white'] = $loserFighterId;
+        } elseif ($nextBout->blue_rise_from < 0 && abs($nextBout->blue_rise_from) == $currentBout->in_program_sequence) {
+            $updateData['blue'] = $loserFighterId;
+        }
+
+        if (! empty($updateData)) {
+            $nextBout->update($updateData);
+        }
+    }
+
     public function updateQueue(Request $request, Competition $competition)
     {
         $updates = $request->input('updates', []);
@@ -409,9 +526,9 @@ class BoutController extends Controller
         // 獲取該 program 下的所有比賽
         $bouts = Bout::where('program_id', $program->id)->get();
         
-        // 檢查是否所有比賽都已完成（status 1 或 2，見 Bout::isFinished()）
+        // 檢查是否所有比賽都已完成（status 1 或 2，見 Bout::isFinished()；已取消視為已處理）
         $allCompleted = $bouts->every(function ($bout) {
-            return $bout->isFinished();
+            return $bout->isFinished() || $bout->status === Bout::STATUS_CANCELLED;
         });
         
         // 如果所有比賽都已完成，將 program 的 status 設為 4

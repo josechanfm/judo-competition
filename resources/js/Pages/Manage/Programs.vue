@@ -40,9 +40,38 @@
       <div class="overflow-hidden flex flex-col gap-3">
         <div class="flex w-full gap-6">
           <div class="flex flex-1 flex-col">
-            <div class="flex justify-between">
-              <div class="text-xl font-bold mt-6 mb-2">
-                {{ $t("programs.total", { count: programs.length }) }}
+            <div class="flex justify-between items-center gap-3 flex-wrap mt-6 mb-2">
+              <div class="flex items-center gap-3 flex-wrap">
+                <div class="text-xl font-bold">
+                  {{ $t("programs.total", { count: filteredPrograms.length }) }}
+                </div>
+                <!-- 篩選：組別 / 公斤級 -->
+                <a-select
+                  v-model:value="filterCategory"
+                  :options="categoryOptions"
+                  allow-clear
+                  show-search
+                  option-filter-prop="label"
+                  :placeholder="$t('programs.filter_category')"
+                  style="min-width: 190px"
+                />
+                <a-select
+                  v-model:value="filterWeight"
+                  :options="weightOptions"
+                  allow-clear
+                  show-search
+                  option-filter-prop="label"
+                  :placeholder="$t('programs.filter_weight')"
+                  style="min-width: 150px"
+                />
+                <a-button
+                  v-if="filterCategory || filterWeight"
+                  type="link"
+                  @click="clearProgramFilters"
+                >
+                  <template #icon><CloseCircleOutlined /></template>
+                  {{ $t("programs.clear_filter") }}
+                </a-button>
               </div>
               <a-radio-group option-type="button" v-model:value="view">
                 <a-radio-button value="list">
@@ -82,7 +111,7 @@
                   >
                 </div>
               </div>
-              <a-table :dataSource="programs" :columns="columns">
+              <a-table :dataSource="filteredPrograms" :columns="columns">
                 <template #bodyCell="{ column, record }">
                   <template v-if="column.dataIndex === 'category_group'">
                     {{ record.competition_category.name }}
@@ -573,6 +602,7 @@ import {
   DownloadOutlined,
   ClockCircleOutlined,
   MoreOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons-vue";
 
 dayjs.extend(duration);
@@ -591,6 +621,7 @@ export default {
     SaveOutlined,
     ClockCircleOutlined,
     MoreOutlined,
+    CloseCircleOutlined,
     draggable: VueDraggableNext,
   },
   props: ["competition", "programs", "athletes"],
@@ -598,6 +629,9 @@ export default {
     return {
       view: "list",
       programsEdit: false,
+      // 篩選：組別（competition_category_id）／公斤級（weight_code）
+      filterCategory: null,
+      filterWeight: null,
       dateFormat: "YYYY-MM-DD",
       editDraggable: false,
       multipleMove: false,
@@ -643,6 +677,28 @@ export default {
     };
   },
   computed: {
+    // 依「組別」（competition_category_id）與「公斤級」（weight_code）篩選後的項目（清單與上線表共用）
+    filteredPrograms() {
+      return this.programs.filter((program) => {
+        const matchesCategory =
+          !this.filterCategory ||
+          program.competition_category_id === this.filterCategory;
+        const matchesWeight =
+          !this.filterWeight || program.weight_code === this.filterWeight;
+
+        return matchesCategory && matchesWeight;
+      });
+    },
+    // 公斤級選項（依目前語系的顯示名稱排序）
+    weightOptions() {
+      const codes = [
+        ...new Set(this.programs.map((program) => program.weight_code).filter(Boolean)),
+      ];
+
+      return codes
+        .map((code) => ({ value: code, label: this.weightGroupLabel(code) }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+    },
     // 表格欄位標題要跟隨語系，所以放 computed（放 data() 會被凍結在初始化時的語言）
     columns() {
       return [
@@ -769,6 +825,17 @@ export default {
     },
   },
   watch: {
+    // 篩選條件變更時，重新計算上線表分區
+    filterCategory() {
+      if (this.view === "grid") {
+        this.getPartitionedPrograms();
+      }
+    },
+    filterWeight() {
+      if (this.view === "grid") {
+        this.getPartitionedPrograms();
+      }
+    },
     view(val) {
       if (val === "grid") {
         this.getPartitionedPrograms();
@@ -997,12 +1064,17 @@ export default {
     },
     getProgramByDSM(date, section, mat) {
       return (
-        this.programs.filter((program) => {
+        this.filteredPrograms.filter((program) => {
           return (
             program.date === date && program.section === section && program.mat === mat
           );
         }) ?? []
       );
+    },
+    // 清除組別／公斤級篩選
+    clearProgramFilters() {
+      this.filterCategory = null;
+      this.filterWeight = null;
     },
     lockAthletes() {
       this.$inertia.post(

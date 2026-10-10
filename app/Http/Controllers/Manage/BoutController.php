@@ -9,6 +9,7 @@ use App\Models\Program;
 use App\Models\ProgramAthlete;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class BoutController extends Controller
 {
@@ -225,6 +226,63 @@ class BoutController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * 重置單一場次的比賽結果。
+     *
+     * 清空比分／結果、狀態改回未開始，並撤回已晉級到下一場的選手。
+     */
+    public function resetResult(Competition $competition, Bout $bout)
+    {
+        $nextBout = $this->nextBoutOfWinner($bout);
+
+        // 下一場已有結果時不能重置，否則晉級名單會不一致
+        if ($nextBout && $nextBout->isFinished()) {
+            throw ValidationException::withMessages([
+                'bout' => '下一場比賽已有結果，請先重置下一場。',
+            ]);
+        }
+
+        DB::transaction(function () use ($bout, $nextBout) {
+            // 撤回已晉級到下一場的選手（未產生的席位是 0）
+            if ($nextBout) {
+                if ($nextBout->white_rise_from == $bout->in_program_sequence) {
+                    $nextBout->update(['white' => 0]);
+                } elseif ($nextBout->blue_rise_from == $bout->in_program_sequence) {
+                    $nextBout->update(['blue' => 0]);
+                }
+            }
+
+            $bout->result()->delete();
+
+            $bout->update([
+                'winner' => 0,
+                'status' => Bout::STATUS_PENDING,
+            ]);
+        });
+
+        // 場次已回到未完成，若 program 先前被標記為完成則改回進行中
+        $program = $bout->program;
+        if ($program && $program->status == Program::STATUS_FINISHED) {
+            $program->update(['status' => Program::STATUS_STARTED]);
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * 依 winner_rise_to 找出勝者會晉級的下一場。
+     */
+    private function nextBoutOfWinner(Bout $bout): ?Bout
+    {
+        if (! $bout->winner_rise_to) {
+            return null;
+        }
+
+        return Bout::where('program_id', $bout->program_id)
+            ->where('in_program_sequence', $bout->winner_rise_to)
+            ->first();
+    }
+
     public function updateQueue(Request $request, Competition $competition)
     {
         $updates = $request->input('updates', []);
@@ -351,9 +409,9 @@ class BoutController extends Controller
         // 獲取該 program 下的所有比賽
         $bouts = Bout::where('program_id', $program->id)->get();
         
-        // 檢查是否所有比賽的 status 都等於 1（已完成）
+        // 檢查是否所有比賽都已完成（status 1 或 2，見 Bout::isFinished()）
         $allCompleted = $bouts->every(function ($bout) {
-            return $bout->status == 1;
+            return $bout->isFinished();
         });
         
         // 如果所有比賽都已完成，將 program 的 status 設為 4

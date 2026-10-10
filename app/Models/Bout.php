@@ -153,10 +153,24 @@ class Bout extends Model
         return match ($this->status) {
             self::STATUS_CANCELLED => '已取消',
             self::STATUS_PENDING => '未開始',
-            self::STATUS_STARTED => '進行中',
+            self::STATUS_STARTED => $this->isFinished() ? '已完成' : '進行中',
             self::STATUS_FINISHED => '已完成',
             default => '未知',
         };
+    }
+
+    /**
+     * 這場比賽是否已分出結果（完賽）。
+     *
+     * 舊端點（Api\BoutController）與管理端（Manage\BoutController）都是以
+     * status = STATUS_STARTED (1) 代表「已完成」，而 V2 端點使用
+     * STATUS_FINISHED (2)，兩種慣例在資料中共存。
+     * 因此以 winner 是否有值輔助判斷：未開賽的場次 winner 仍是預設值 0。
+     */
+    public function isFinished(): bool
+    {
+        return $this->status === self::STATUS_FINISHED
+            || ($this->status === self::STATUS_STARTED && (int) $this->winner !== 0);
     }
     public function program()
     {

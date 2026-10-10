@@ -215,6 +215,8 @@ export default {
   },
   methods: {
     async changeLang(locale) {
+      // 先記住選擇，F5 後才能由 app.js 讀回，不受後端 session 是否保存影響
+      localStorage.setItem("app-locale", locale);
       await window.axios.get(route("app.locale.update", { locale: locale }));
       await loadLanguageAsync(locale);
       console.log(getActiveLanguage());

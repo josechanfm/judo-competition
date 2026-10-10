@@ -23,6 +23,17 @@
             <span class="text-gray-400">/{{ competition?.mat_number || 1 }}</span>
           </div>
 
+          <!-- 自動刷新開關 -->
+          <div class="flex items-center gap-2 border rounded-lg px-3 py-1">
+            <span class="text-gray-500">自動刷新</span>
+            <a-switch
+              v-model:checked="autoRefresh"
+              checked-children="開"
+              un-checked-children="關"
+              @change="handleAutoRefreshChange"
+            />
+          </div>
+
           <!-- 已選場次信息 -->
           <a-badge :count="selectedBouts?.length || 0" show-zero>
             <span class="text-gray-600 mr-2">已選場次</span>
@@ -281,6 +292,16 @@
                           >
                             {{ getResultShort(record.result) }}
                           </a-tag>
+                          <a-button
+                            v-if="record?.result"
+                            size="small"
+                            type="link"
+                            danger
+                            @click.stop="resetBoutResult(record)"
+                            class="text-md px-1"
+                          >
+                            重置
+                          </a-button>
                         </div>
                       </template>
                     </template>
@@ -565,6 +586,15 @@ import { debounce } from 'lodash-es';
 
 dayjs.extend(customParseFormat);
 
+// 自動刷新（輪詢）偏好；預設開啟，使用者關閉後記在 localStorage
+const prefersAutoRefresh = () => {
+  try {
+    return localStorage.getItem('autoRefresh') !== '0';
+  } catch (e) {
+    return true;
+  }
+};
+
 export default {
   components: {
     ProgramLayout,
@@ -653,6 +683,7 @@ export default {
       pollingInterval: null,
       lastUpdateTime: null,
       isLoading: false,
+      autoRefresh: prefersAutoRefresh(),
       
       // 結果修改相關
       resultModalVisible: false,
@@ -727,7 +758,9 @@ export default {
   created() {
     this.$nextTick(() => {
       this.initializeComponent();
-      this.startPolling();
+      if (this.autoRefresh) {
+        this.startPolling();
+      }
     });
   },
   mounted() {
@@ -790,6 +823,9 @@ export default {
     
     // 啟動輪詢
     startPolling() {
+      // 避免重複啟動造成多個計時器
+      this.stopPolling();
+
       this.pollingInterval = setInterval(() => {
         this.checkForUpdates();
       }, 30000);
@@ -922,6 +958,23 @@ export default {
         localStorage.setItem('preferredMatCount', this.visibleMatsCount);
       } catch (e) {
         console.warn('Failed to save preference:', e);
+      }
+    },
+
+    // 自動刷新開關：即時啟停輪詢並記住偏好
+    handleAutoRefreshChange(checked) {
+      try {
+        localStorage.setItem('autoRefresh', checked ? '1' : '0');
+      } catch (e) {
+        console.warn('Failed to save auto refresh preference:', e);
+      }
+
+      if (checked) {
+        this.startPolling();
+        message.success('已開啟自動刷新');
+      } else {
+        this.stopPolling();
+        message.info('已關閉自動刷新');
       }
     },
     
@@ -1362,6 +1415,43 @@ export default {
       } finally {
         this.savingResult = false;
       }
+    },
+
+    // 重置場次結果（清空結果並撤回已晉級到下一場的選手）
+    resetBoutResult(bout) {
+      Modal.confirm({
+        title: '確認重置場次',
+        content: `確定要重置「${bout.bout_name || ''}」的比賽結果嗎？已晉級到下一場的選手會被撤回。`,
+        okText: '重置',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk: () => {
+          return new Promise((resolve, reject) => {
+            this.$inertia.post(
+              route('manage.competition.bout.reset', {
+                competition: this.competition.id,
+                bout: bout.id,
+              }),
+              {},
+              {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess: () => {
+                  message.success('場次已重置');
+                  this.clearCache();
+                  this.onMatChange();
+                  resolve();
+                },
+                onError: (errors) => {
+                  console.error('重置失敗:', errors);
+                  message.error(errors?.bout || '重置失敗，請稍後再試');
+                  reject();
+                },
+              }
+            );
+          });
+        },
+      });
     }
   },
   watch: {

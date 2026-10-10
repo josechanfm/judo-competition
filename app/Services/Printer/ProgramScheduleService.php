@@ -146,7 +146,8 @@ class ProgramScheduleService
                 $ellipseData = [
                     "title" => "場地{$mat}-時段{$section}", 
                     "title_sub" => $date ? $date : "",
-                    "count" => '共' . $bouts->count() . '場',
+                    // 「共N場」預設為本組場次數；只列印部分場次時可用 total 帶入該場地/時段的總場次
+                    "count" => '共' . ($schedule['total'] ?? $bouts->count()) . '場',
                 ];
                 
                 $helper->header2(12, 5, $this->title, $this->title_sub, $this->logo_primary, $this->logo_secondary, 'mingliu', $ellipseData);

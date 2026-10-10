@@ -9,6 +9,9 @@ use App\Models\BoutResult;
 use App\Models\Program;
 use App\Models\ProgramAthlete;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class BoutController extends Controller
 {
@@ -94,7 +97,7 @@ class BoutController extends Controller
 
     public function postBoutResult($token, Bout $bout, Request $request)
     {
-        // 1. 驗證賽事 token
+        // 1. 驗證賽事 token，並確認該場次確實屬於這個賽事
         $competition = Competition::where('token', $token)->first();
         
         if (!$competition) {
@@ -104,22 +107,69 @@ class BoutController extends Controller
             ], 404);
         }
         
+        if (!$competition->programs->pluck('id')->contains($bout->program_id)) {
+            return response()->json([
+                'success' => false,
+                'message' => '比賽場次不屬於此賽事'
+            ], 404);
+        }
+        
+        // 2. 驗證輸入。欄位缺失或超出資料庫欄位範圍（例如負數分數）時回傳 422，
+        // 而不是等到寫入資料庫才失敗而留下半寫入的資料
+        $validator = Validator::make($request->all(), [
+            'winner' => 'nullable|integer',
+            'result' => 'nullable|string|max:255',
+            'time' => 'nullable|integer|min:0',
+            'w_ippon' => 'nullable|integer|min:0|max:255',
+            'b_ippon' => 'nullable|integer|min:0|max:255',
+            'w_wazari' => 'nullable|integer|min:0|max:255',
+            'b_wazari' => 'nullable|integer|min:0|max:255',
+            'w_yuko' => 'nullable|integer|min:0|max:255',
+            'b_yuko' => 'nullable|integer|min:0|max:255',
+            'w_penalty' => 'nullable|array',
+            'w_penalty.shido' => 'nullable|integer|min:0|max:255',
+            'w_penalty.hansokumake' => 'nullable|boolean',
+            'w_penalty.abstain' => 'nullable|boolean',
+            'b_penalty' => 'nullable|array',
+            'b_penalty.shido' => 'nullable|integer|min:0|max:255',
+            'b_penalty.hansokumake' => 'nullable|boolean',
+            'b_penalty.abstain' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => '比賽資料格式錯誤：' . $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
         // 獲取各項得分數量
-        $w_ippon = (int)$request['w_ippon'];
-        $b_ippon = (int)$request['b_ippon'];
-        $w_wazari = (int)$request['w_wazari'];
-        $b_wazari = (int)$request['b_wazari'];
-        $w_yuko = (int)$request['w_yuko'];
-        $b_yuko = (int)$request['b_yuko'];
-        $w_shido = (int)$request['w_penalty']['shido'];
-        $b_shido = (int)$request['b_penalty']['shido'];
-        $w_hansokumake = $request['w_penalty']['hansokumake'];
-        $b_hansokumake = $request['b_penalty']['hansokumake'];
-        $w_abstain = $request['w_penalty']['abstain'];
-        $b_abstain = $request['b_penalty']['abstain'];
+        $w_ippon = (int)($validated['w_ippon'] ?? 0);
+        $b_ippon = (int)($validated['b_ippon'] ?? 0);
+        $w_wazari = (int)($validated['w_wazari'] ?? 0);
+        $b_wazari = (int)($validated['b_wazari'] ?? 0);
+        $w_yuko = (int)($validated['w_yuko'] ?? 0);
+        $b_yuko = (int)($validated['b_yuko'] ?? 0);
+        $w_shido = (int)($validated['w_penalty']['shido'] ?? 0);
+        $b_shido = (int)($validated['b_penalty']['shido'] ?? 0);
+        $time = $validated['time'] ?? null;
         // 根據 status 判斷勝者顏色
 
-        $status = $this->determineMatchStatus($request);
+        $status = $this->determineMatchStatus($validated);
+
+        // 無法由比分判定勝負（雙方 0 分、雙方各 3 次指導、雙方各 1 本）或前端標記雙敗
+        // （winner = -1）時，一律記錄為雙方判負，避免 winner 為 null 導致寫入失敗
+        $isBothLose = $status === null
+            || $status === BoutResult::STATUS_BOTH_LOSE
+            || (int)($validated['winner'] ?? 0) === -1;
+
+        if ($isBothLose) {
+            $status = BoutResult::STATUS_BOTH_LOSE;
+        }
+
         $winnerColor = null;
         $winnerId = null;
         $loserId = null;
@@ -212,112 +262,148 @@ class BoutController extends Controller
         // 確保分數不超過10分
         $w_score = min($w_score, 10);
         $b_score = min($b_score, 10);
-        
-        // 更新比賽狀態為已完成，winner 存入選手ID
-        $bout->update([
-            'winner' => $winnerId, // 這裡存入選手的 ID，而不是 'white'/'blue'
-            'status' => 1  // 比賽完成狀態
-        ]);
-        
-        // 創建或更新 bout_result
-        $boutResult = BoutResult::updateOrCreate(
-            ['bout_id' => $bout->id],
-            [
-                'status' => $status, // 儲存原始的結果狀態 (10,11,20,21,30,31,40,41)
-                'w_ippon' => $w_ippon,
-                'w_wazari' => $w_wazari,
-                'w_yuko' => $w_yuko,
-                'w_shido' => $w_shido,
-                'b_ippon' => $b_ippon,
-                'b_wazari' => $b_wazari,
-                'b_yuko' => $b_yuko,
-                'b_shido' => $b_shido,
-                'w_score' => $w_score,
-                'b_score' => $b_score,
-                'time' => $request['time'],
-            ]
-        );
-        
-        // 更新下一輪比賽的選手（這裡需要傳入選手ID）
-        if ($bout->winner_rise_to != 0 && $winnerId) {
-            $this->updateWinnerToNextBoutFighter($bout, $winnerId);
-        }
-        
-        if ($bout->loser_rise_to != 0 && $loserId){
-            $this->updateLoserToNextBoutFighter($bout,$loserId);
+
+        // 雙方判負時雙方皆不計分
+        if ($isBothLose) {
+            $w_score = 0;
+            $b_score = 0;
         }
 
-        // KOS 賽制排名處理
-        if (($bout->competition_system === 'kos' || $bout->competition_system === 'erm') && in_array($bout->turn, [1, 2])) {
-            
-            $winnerFighterId = $winnerId; // 直接使用勝者ID
-            $loserFighterId = $winnerColor === 'white' ? $bout->blue : $bout->white;
-            
-            // 確保有選手ID
-            if (!$winnerFighterId || !$loserFighterId) {
-                return response()->json([
-                    'success' => true,
-                    'message' => '比賽結果保存成功（但排名更新失敗：找不到選手）',
-                    'data' => [
-                        'bout_result' => $boutResult,
-                        'bout' => $bout
-                    ]
+        // 3. 所有寫入集中在同一個交易內，任何一步失敗都整批回滾，
+        // 避免比賽狀態已更新但成績未寫入（或反之）的不一致情況
+        try {
+            $result = DB::transaction(function () use (
+                $bout,
+                $status,
+                $winnerId,
+                $loserId,
+                $winnerColor,
+                $w_score,
+                $b_score,
+                $time,
+                $w_ippon,
+                $w_wazari,
+                $w_yuko,
+                $w_shido,
+                $b_ippon,
+                $b_wazari,
+                $b_yuko,
+                $b_shido
+            ) {
+                // 更新比賽狀態為已完成，winner 存入選手ID（-1 代表雙方判負）
+                $bout->update([
+                    'winner' => $winnerId ?? -1, // 這裡存入選手的 ID，而不是 'white'/'blue'
+                    'status' => 1  // 比賽完成狀態
                 ]);
-            }
-            
-            // 查找對應的 program_athlete 記錄
-            $winnerProgramAthlete = ProgramAthlete::where('id', $winnerFighterId)->first();
-            $loserProgramAthlete = ProgramAthlete::where('id', $loserFighterId)->first();
-            
-            if (!$winnerProgramAthlete || !$loserProgramAthlete) {
-                return response()->json([
-                    'success' => true,
-                    'message' => '比賽結果保存成功（但排名更新失敗：找不到運動員記錄）',
-                    'data' => [
-                        'bout_result' => $boutResult,
-                        'bout' => $bout
-                    ]
-                ]);
-            }
-            
-            // 根據 turn 設置排名
-            if ($bout->turn == 2) {
-                // 季軍賽：負方為第3名
-                $loserProgramAthlete->update(['rank' => 3]);
-                
-                \Log::info('KOS 季軍排名設置', [
-                    'bout_id' => $bout->id,
-                    'turn' => $bout->turn,
-                    'loser_athlete_id' => $loserFighterId,
-                    'rank' => 3
-                ]);
-                
-            } elseif ($bout->turn == 1) {
-                // 冠軍賽：勝方為第1名，負方為第2名
-                $winnerProgramAthlete->update(['rank' => 1]);
-                $loserProgramAthlete->update(['rank' => 2]);
-                
-                \Log::info('KOS 冠亞軍排名設置', [
-                    'bout_id' => $bout->id,
-                    'turn' => $bout->turn,
-                    'winner_athlete_id' => $winnerFighterId,
-                    'winner_rank' => 1,
-                    'loser_athlete_id' => $loserFighterId,
-                    'loser_rank' => 2
-                ]);
-            }
-        }else if ($bout->competition_system == 'rrb') {
-            $this->setRankForRRB($bout->program);
-        }
 
-        $this->checkProgramCompletion($bout->program);
+                // 創建或更新 bout_result
+                $boutResult = BoutResult::updateOrCreate(
+                    ['bout_id' => $bout->id],
+                    [
+                        'status' => $status, // 儲存原始的結果狀態 (10,11,20,21,30,31,40,41)
+                        'w_ippon' => $w_ippon,
+                        'w_wazari' => $w_wazari,
+                        'w_yuko' => $w_yuko,
+                        'w_shido' => $w_shido,
+                        'b_ippon' => $b_ippon,
+                        'b_wazari' => $b_wazari,
+                        'b_yuko' => $b_yuko,
+                        'b_shido' => $b_shido,
+                        'w_score' => $w_score,
+                        'b_score' => $b_score,
+                        'time' => $time,
+                    ]
+                );
+
+                // 更新下一輪比賽的選手（這裡需要傳入選手ID）
+                if ($bout->winner_rise_to != 0 && $winnerId) {
+                    $this->updateWinnerToNextBoutFighter($bout, $winnerId);
+                }
+
+                if ($bout->loser_rise_to != 0 && $loserId){
+                    $this->updateLoserToNextBoutFighter($bout,$loserId);
+                }
+
+                // KOS 賽制排名處理
+                if (($bout->competition_system === 'kos' || $bout->competition_system === 'erm') && in_array($bout->turn, [1, 2])) {
+
+                    $winnerFighterId = $winnerId; // 直接使用勝者ID
+                    $loserFighterId = $winnerColor === 'white' ? $bout->blue : $bout->white;
+
+                    // 確保有選手ID
+                    if (!$winnerFighterId || !$loserFighterId) {
+                        return [
+                            'message' => '比賽結果保存成功（但排名更新失敗：找不到選手）',
+                            'bout_result' => $boutResult,
+                        ];
+                    }
+
+                    // 查找對應的 program_athlete 記錄
+                    $winnerProgramAthlete = ProgramAthlete::where('id', $winnerFighterId)->first();
+                    $loserProgramAthlete = ProgramAthlete::where('id', $loserFighterId)->first();
+
+                    if (!$winnerProgramAthlete || !$loserProgramAthlete) {
+                        return [
+                            'message' => '比賽結果保存成功（但排名更新失敗：找不到運動員記錄）',
+                            'bout_result' => $boutResult,
+                        ];
+                    }
+
+                    // 根據 turn 設置排名
+                    if ($bout->turn == 2) {
+                        // 季軍賽：負方為第3名
+                        $loserProgramAthlete->update(['rank' => 3]);
+
+                        Log::info('KOS 季軍排名設置', [
+                            'bout_id' => $bout->id,
+                            'turn' => $bout->turn,
+                            'loser_athlete_id' => $loserFighterId,
+                            'rank' => 3
+                        ]);
+
+                    } elseif ($bout->turn == 1) {
+                        // 冠軍賽：勝方為第1名，負方為第2名
+                        $winnerProgramAthlete->update(['rank' => 1]);
+                        $loserProgramAthlete->update(['rank' => 2]);
+
+                        Log::info('KOS 冠亞軍排名設置', [
+                            'bout_id' => $bout->id,
+                            'turn' => $bout->turn,
+                            'winner_athlete_id' => $winnerFighterId,
+                            'winner_rank' => 1,
+                            'loser_athlete_id' => $loserFighterId,
+                            'loser_rank' => 2
+                        ]);
+                    }
+                }else if ($bout->competition_system == 'rrb') {
+                    $this->setRankForRRB($bout->program);
+                }
+
+                $this->checkProgramCompletion($bout->program);
+
+                return [
+                    'message' => '比賽結果保存成功',
+                    'bout_result' => $boutResult,
+                ];
+            });
+        } catch (\Throwable $e) {
+            Log::error('比賽結果儲存失敗', [
+                'bout_id' => $bout->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => '比賽結果儲存失敗，請重新提交',
+            ], 500);
+        }
 
         return response()->json([
             'success' => true,
-            'message' => '比賽結果保存成功',
+            'message' => $result['message'],
             'data' => [
-                'bout_result' => $boutResult,
-                'bout' => $bout
+                'bout_result' => $result['bout_result'],
+                'bout' => $bout->refresh()
             ]
         ]);
     }
@@ -558,31 +644,31 @@ class BoutController extends Controller
         }
     }
 
-    public function determineMatchStatus($request) {
+    public function determineMatchStatus($input) {
         // 獲取所有分數
-        $w_ippon = (int)$request['w_ippon'];
-        $b_ippon = (int)$request['b_ippon'];
-        $w_wazari = (int)$request['w_wazari'];
-        $b_wazari = (int)$request['b_wazari'];
-        $w_yuko = (int)$request['w_yuko'];
-        $b_yuko = (int)$request['b_yuko'];
-        $w_shido = (int)$request['w_penalty']['shido'];
-        $b_shido = (int)$request['b_penalty']['shido'];
+        $w_ippon = (int)($input['w_ippon'] ?? 0);
+        $b_ippon = (int)($input['b_ippon'] ?? 0);
+        $w_wazari = (int)($input['w_wazari'] ?? 0);
+        $b_wazari = (int)($input['b_wazari'] ?? 0);
+        $w_yuko = (int)($input['w_yuko'] ?? 0);
+        $b_yuko = (int)($input['b_yuko'] ?? 0);
+        $w_shido = (int)($input['w_penalty']['shido'] ?? 0);
+        $b_shido = (int)($input['b_penalty']['shido'] ?? 0);
         
         // 特殊狀態優先檢查（退賽、醫療、犯規輸）
         // 白方特殊狀態
-        if ($request['w_penalty']['hansokumake']) {
+        if ($input['w_penalty']['hansokumake'] ?? false) {
             return 40; // 白方犯規輸，藍方勝利
         }
-        if ($request['w_penalty']['abstain']) {
+        if ($input['w_penalty']['abstain'] ?? false) {
             return 20; // 白方棄權，藍方勝利
         }
         
         // 藍方特殊狀態
-        if ($request['b_penalty']['hansokumake']) {
+        if ($input['b_penalty']['hansokumake'] ?? false) {
             return 41; // 藍方犯規輸，白方勝利
         }
-        if ($request['b_penalty']['abstain']) {
+        if ($input['b_penalty']['abstain'] ?? false) {
             return 21; // 藍方棄權，白方勝利
         }
         

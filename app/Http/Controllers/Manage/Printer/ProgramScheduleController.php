@@ -18,29 +18,49 @@ class ProgramScheduleController extends Controller
     {
         $data = $request->all();
 
-        $bouts = Bout::whereIn('id', $data['bouts'])->orderBy('sequence')->get();
-        // dd($bouts);
-        $inputBouts = collect($bouts)->map(function ($bout) {
-            return [
-                'sequence' => $bout['sequence'],
-                'category' => $bout['program']->competitionCategory->name,
-                'weight' => $bout->program->convertWeight(),
-                'round' => $bout->bout_name,
-                'event_date' => $bout->date,
-                'status' => $bout->status,
-                'white_player' => $bout?->white_player->name ?? '',
-                'white_is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? '',
-                'white_team' => $bout?->white_player->team->name ?? '',
-                'blue_player' => $bout?->blue_player->name ?? '',
-                'blue_is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '',
-                'blue_team' => $bout?->blue_player->team->name ?? '',
-                'time' => $bout->duration_formatted,
-            ];
-        });
-        // dd($inputBouts);
+        $competition = Competition::find($data['competition_id'] ?? null);
 
-        $this->gameSheet = new ProgramScheduleService();
-        $this->schedule($inputBouts, $bouts[0]->mat ?? 1);
+        $bouts = Bout::whereIn('id', $data['bouts'] ?? [])->orderBy('sequence')->get();
+
+        if ($bouts->isEmpty()) {
+            return response()->json(['message' => 'No bouts found'], 404);
+        }
+
+        // 只列印被選取的場次，但沿用「全部賽程」的排版
+        // （賽事名稱、LOGO、場地/時段、真實日期與每頁標題列）
+        $allBouts = $bouts
+            ->groupBy(fn ($bout) => implode('-', [$bout->mat, $bout->section, $bout->date]))
+            ->map(function ($group) use ($competition) {
+                $first = $group->first();
+
+                // 標題的「共N場」是該場地/時段的總場次，不受勾選影響
+                $total = $competition
+                    ? $competition->bouts()
+                        ->where('mat', $first->mat)
+                        ->where('section', $first->section)
+                        ->where('date', $first->date)
+                        ->where('queue', '!=', 0)
+                        ->count()
+                    : $group->count();
+
+                return [
+                    'mat' => $first->mat,
+                    'section' => $first->section,
+                    'date' => $first->date,
+                    'total' => $total,
+                    'bouts' => $this->formatScheduleBouts($group, $first->mat, $first->section),
+                ];
+            })
+            ->values()
+            ->all();
+
+        $service = new ProgramScheduleService();
+        if ($competition) {
+            $service->setTitles($competition->name, $competition->name_secondary);
+            $service->setCompetitionLogo($competition);
+        }
+
+        return $service->allSchedulesPdf($allBouts);
     }
 
     public function printAllSchedule(Competition $competition, Request $request)
@@ -65,26 +85,7 @@ class ProgramScheduleController extends Controller
                         ->get();
                     
                     if ($bouts->isNotEmpty()) {
-                        $formattedBouts = $bouts->map(function ($bout) use ($mat, $section) {
-                            return [
-                                'sequence' => $bout['queue'],
-                                'category' => $bout->program->convertGender() . $bout['program']->competitionCategory->name,
-                                'weight' => $bout->program->convertWeight(),
-                                'round' => $bout->bout_name,
-                                'event_date' => $bout->date,
-                                'status' => $bout->status,
-                                'winner' => $bout->winner == $bout->white ? 'white' : ($bout->winner == $bout->blue ? 'blue' : '') ,
-                                'white_player' => ($this->smartTruncate($bout->white_player?->name ?? $bout->whiteRiseFromQueue($bout))) . $this->smartTruncate($bout->white_player?->name_secondary ?? ''),
-                                'white_is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? '',
-                                'white_team' => $bout->white_player->team->name ?? '',
-                                'blue_player' => ($this->smartTruncate($bout->blue_player?->name ?? $bout->blueRiseFromQueue($bout)))  . $this->smartTruncate($bout->blue_player?->name_secondary ?? ''),
-                                'blue_is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '',
-                                'blue_team' => $bout?->blue_player->team->name ?? '',
-                                'time' => $bout->duration_formatted,
-                                'mat' => $mat,
-                                'section' => $section,
-                            ];
-                        });
+                        $formattedBouts = $this->formatScheduleBouts($bouts, $mat, $section);
                         
                         $allBouts[] = [
                             'mat' => $mat,
@@ -173,6 +174,33 @@ class ProgramScheduleController extends Controller
         // $weight="-66Kg";
         // $category="-Cadet";
         $this->gameSheet->pdf($records, 'MAT' . $mat, '2024.12.31');
+    }
+
+    /**
+     * 將場次轉成賽程表要用的欄位（「全部賽程」與勾選場次的預覽共用）。
+     */
+    private function formatScheduleBouts($bouts, int $mat, int $section)
+    {
+        return collect($bouts)->map(function ($bout) use ($mat, $section) {
+            return [
+                'sequence' => $bout->queue,
+                'category' => $bout->program->convertGender() . $bout->program->competitionCategory->name,
+                'weight' => $bout->program->convertWeight(),
+                'round' => $bout->bout_name,
+                'event_date' => $bout->date,
+                'status' => $bout->status,
+                'winner' => $bout->winner == $bout->white ? 'white' : ($bout->winner == $bout->blue ? 'blue' : ''),
+                'white_player' => $this->smartTruncate($bout->white_player?->name ?? $bout->whiteRiseFromQueue($bout)) . $this->smartTruncate($bout->white_player?->name_secondary ?? ''),
+                'white_is_weight_passed' => $bout->whiteAthlete->is_weight_passed ?? '',
+                'white_team' => $bout->white_player->team->name ?? '',
+                'blue_player' => $this->smartTruncate($bout->blue_player?->name ?? $bout->blueRiseFromQueue($bout)) . $this->smartTruncate($bout->blue_player?->name_secondary ?? ''),
+                'blue_is_weight_passed' => $bout->blueAthlete->is_weight_passed ?? '',
+                'blue_team' => $bout?->blue_player->team->name ?? '',
+                'time' => $bout->duration_formatted,
+                'mat' => $mat,
+                'section' => $section,
+            ];
+        });
     }
 
     private function smartTruncate($name, $maxLength = 13)

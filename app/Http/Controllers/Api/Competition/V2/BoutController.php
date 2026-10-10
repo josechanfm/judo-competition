@@ -182,7 +182,7 @@ class BoutController extends Controller
         $prevBlueBout = $bout->getPrevBlueAttribute();
 
         if ($prevBlueBout instanceof LinkedBout) {
-            if ($prevBlueBout->status !== Bout::STATUS_FINISHED && $prevBlueBout->status !== Bout::STATUS_CANCELLED) {
+            if (! $prevBlueBout->isFinished() && $prevBlueBout->status !== Bout::STATUS_CANCELLED) {
                 return response()->json([
                     'message' => 'Previous blue bout have not finished yet'
                 ], 422);
@@ -192,7 +192,7 @@ class BoutController extends Controller
         $prevWhiteBout = $bout->getPrevWhiteAttribute();
 
         if ($prevWhiteBout instanceof LinkedBout) {
-            if ($prevWhiteBout->status !== Bout::STATUS_FINISHED && $prevWhiteBout->status !== Bout::STATUS_CANCELLED) {
+            if (! $prevWhiteBout->isFinished() && $prevWhiteBout->status !== Bout::STATUS_CANCELLED) {
                 return response()->json([
                     'message' => 'Previous white bout have not finished yet'
                 ], 422);

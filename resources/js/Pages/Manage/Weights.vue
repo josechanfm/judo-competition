@@ -39,6 +39,19 @@
             <template #icon><DownloadOutlined /></template>
             {{ $t("weights.download_table") }}
           </a-button>
+          <a-button
+            v-if="!allProgramsLocked"
+            type="primary"
+            class="bg-blue-500"
+            @click="lockAllWeighIn"
+          >
+            <template #icon><LockOutlined /></template>
+            {{ $t("weights.lock_all") }}
+          </a-button>
+          <a-button v-if="hasLockedProgram" @click="cancelLockAllWeighIn">
+            <template #icon><UnlockOutlined /></template>
+            {{ $t("weights.cancel_lock_all") }}
+          </a-button>
           <a-button danger @click="resetAllWeights">
             <template #icon><UndoOutlined /></template>
             {{ $t("weights.reset_all") }}
@@ -326,10 +339,24 @@ export default {
     },
     // 標題：公斤級 + 組別
     programTitle() {
-      if (!this.program?.id) return "";
-      const weightLabel = this.weightGroupLabel(this.program.weight_code);
-      const categoryName = this.program.competition_category?.name ?? "";
-      return `${weightLabel} ${categoryName}`.trim();
+      return this.program?.id ? this.programLabel(this.program) : "";
+    },
+    // 是否有任何項目已鎖定（決定「取消鎖定全部」是否顯示）
+    hasLockedProgram() {
+      return (this.programs ?? []).some((program) =>
+        this.isProgramLocked(program)
+      );
+    },
+    // 是否所有項目都已鎖定（決定「鎖定全部」是否顯示）
+    allProgramsLocked() {
+      const list = this.programs ?? [];
+      return list.length > 0 && list.every((p) => this.isProgramLocked(p));
+    },
+    // 尚未完成過磅的項目（與後端 weightsLockAll 的判斷一致）
+    incompletePrograms() {
+      return (this.programs ?? []).filter(
+        (program) => this.unweighedAthletes(program).length > 0
+      );
     },
     downloadWeighInTableUrl() {
       return route("generate.all.weighIn.table", this.competition.id);
@@ -500,6 +527,24 @@ export default {
     weightGroupLabel(weightCode) {
       return weightGroupLabelUtil(weightCode, this.$t);
     },
+    // 項目的顯示標籤（公斤級 + 組別），供標題與「未完成過磅」清單使用
+    programLabel(program) {
+      const weightLabel = this.weightGroupLabel(program?.weight_code);
+      const categoryName = program?.competition_category?.name ?? "";
+      return `${weightLabel} ${categoryName}`.trim();
+    },
+    // 與頁面上 isLocked 相同的判斷：只要有任一位選手的 confirm 為 1 就算已鎖定
+    isProgramLocked(program) {
+      return (program?.program_athletes ?? []).some(
+        (athlete) => athlete.confirm == 1
+      );
+    },
+    // 該項目尚未過磅的選手
+    unweighedAthletes(program) {
+      return (program?.program_athletes ?? []).filter(
+        (athlete) => athlete.is_weight_passed == null
+      );
+    },
     onChangeCategory(event) {
       this.select_programs = this.programs.filter(
         (p) => p.competition_category_id == event.target.value
@@ -602,6 +647,89 @@ export default {
                 this.$message.error(
                   error?.response?.data?.message ?? this.$t("weights.action_failed")
                 );
+              },
+            }
+          );
+        },
+      });
+    },
+    // 鎖定整場賽事的過磅（全部項目）
+    lockAllWeighIn() {
+      const incomplete = this.incompletePrograms;
+
+      // 與後端 weightsLockAll 一致：有任何項目未完成過磅就完全不鎖
+      if (incomplete.length > 0) {
+        Modal.error({
+          title: this.$t("weights.lock_all_incomplete_title"),
+          content: this.$t("weights.lock_all_incomplete", {
+            programs: incomplete.map((p) => this.programLabel(p)).join("、"),
+          }),
+          okText: this.$t("ok"),
+        });
+        return;
+      }
+
+      Modal.confirm({
+        title: this.$t("weights.confirm_lock_all_title"),
+        content: this.$t("weights.confirm_lock_all_content"),
+        okText: this.$t("ok"),
+        cancelText: this.$t("action.cancel"),
+        onOk: () => {
+          this.$inertia.post(
+            route(
+              "manage.competition.athletes.weights.lockAll",
+              this.competition.id
+            ),
+            null,
+            {
+              preserveScroll: true,
+              preserveState: true,
+              onSuccess: (page) => {
+                // 後端若回報「有項目未完成」，就不能顯示鎖定成功
+                if (Object.keys(page?.props?.errors ?? {}).length > 0) return;
+
+                this.$message.success(this.$t("weights.lock_all_success"));
+                this.syncAfterReload();
+              },
+              onError: (errors) => {
+                this.$message.error(
+                  errors?.weights_lock_all
+                    ? this.$t("weights.lock_all_incomplete", {
+                        programs: errors.weights_lock_all,
+                      })
+                    : this.$t("weights.action_failed")
+                );
+              },
+            }
+          );
+        },
+      });
+    },
+    // 取消鎖定整場賽事的過磅（全部項目）
+    cancelLockAllWeighIn() {
+      Modal.confirm({
+        title: this.$t("weights.confirm_cancel_lock_all_title"),
+        content: this.$t("weights.confirm_cancel_lock_all_content"),
+        okText: this.$t("ok"),
+        cancelText: this.$t("action.cancel"),
+        onOk: () => {
+          this.$inertia.post(
+            route(
+              "manage.competition.athletes.weights.cancelLockAll",
+              this.competition.id
+            ),
+            null,
+            {
+              preserveScroll: true,
+              preserveState: true,
+              onSuccess: () => {
+                this.$message.success(
+                  this.$t("weights.cancel_lock_all_success")
+                );
+                this.syncAfterReload();
+              },
+              onError: () => {
+                this.$message.error(this.$t("weights.action_failed"));
               },
             }
           );

@@ -87,6 +87,9 @@ Route::middleware('auth')->group(function () {
     Route::post('manage/competition/{competition}/program/lock', [App\Http\Controllers\Manage\ProgramController::class, 'lock'])->name('manage.competition.program.lock');
     Route::post('manage/competition/{competition}/program/lock-seat', [App\Http\Controllers\Manage\ProgramController::class, 'lockSeat'])->name('manage.competition.program.lock-seat');
     Route::post('manage/competition/{competition}/athletes/weights-lock', [App\Http\Controllers\Manage\AthleteController::class, 'weightsLock'])->name('manage.competition.athletes.weights.lock');
+    // 鎖定／取消鎖定「整場賽事」的過磅（全部項目，全部或全不）
+    Route::post('manage/competition/{competition}/athletes/weights-lock-all', [App\Http\Controllers\Manage\AthleteController::class, 'weightsLockAll'])->name('manage.competition.athletes.weights.lockAll');
+    Route::post('manage/competition/{competition}/athletes/weights-lock-all-cancel', [App\Http\Controllers\Manage\AthleteController::class, 'weightsCancelLockAll'])->name('manage.competition.athletes.weights.cancelLockAll');
     // 重置過磅資料（單人 / 單一項目 / 整場賽事）
     Route::post('manage/competition/{competition}/athletes/weights-reset-all', [App\Http\Controllers\Manage\AthleteController::class, 'resetAllWeights'])->name('manage.competition.athletes.weights.resetAll');
     Route::post('manage/competition/{competition}/program/{program}/weights-reset', [App\Http\Controllers\Manage\AthleteController::class, 'resetProgramWeights'])->name('manage.competition.program.weights.reset');

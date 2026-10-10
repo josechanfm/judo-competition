@@ -26,6 +26,7 @@ use App\Services\Printer\AthleteCheckInService;
 use App\Services\Printer\AthletePdfService;
 use App\Services\Printer\AthleteWeighInService;
 use App\Services\Printer\TeamAthletesService;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -330,6 +331,92 @@ class AthleteController extends Controller
         $service->weightByeBouts($program->bouts);
         $service->resequence();
         
+        return redirect()->back();
+    }
+
+    /**
+     * 項目在訊息中的顯示標籤（公斤級 + 組別名稱）。
+     */
+    private function programLabel(Program $program): string
+    {
+        $category = $program->competitionCategory?->name;
+
+        return trim(($program->weight_code ?? '') . ($category ? " {$category}" : ''));
+    }
+
+    /**
+     * 尚未完成過磅的項目（有任何選手的 is_weight_passed 還是 null）。
+     *
+     * @param  \Illuminate\Support\Collection<int, \App\Models\Program>  $programs
+     */
+    private function incompleteWeighInPrograms($programs)
+    {
+        return $programs
+            ->filter(fn (Program $program) => $program->athletes()->where('is_weight_passed', null)->exists())
+            ->values();
+    }
+
+    /**
+     * 鎖定整場賽事的過磅（所有項目），等同逐項按「鎖定過磅」。
+     *
+     * 採「全部或全不」：只要有任何一個項目還有選手未過磅，就完全不鎖，
+     * 並把未完成的項目清單以 errors 回傳給前端顯示，避免發生「一半鎖定」。
+     */
+    public function weightsLockAll(Competition $competition)
+    {
+        $programs = $competition->programs()->orderByCategoryAndWeightGroup()->get();
+
+        $incomplete = $this->incompleteWeighInPrograms($programs);
+
+        if ($incomplete->isNotEmpty()) {
+            return redirect()->back()->withErrors([
+                'weights_lock_all' => $incomplete
+                    ->map(fn (Program $program) => $this->programLabel($program))
+                    ->implode('、'),
+            ]);
+        }
+
+        DB::transaction(function () use ($competition, $programs) {
+            // invalidateWeightBouts / weightByeBouts 只處理傳入的 bouts，
+            // resequence() 則是整場賽事範圍且無狀態，所以可以共用一個 service、最後重排一次。
+            $service = new BoutGenerationService($competition);
+
+            foreach ($programs as $program) {
+                $program->athletes()->update(['confirm' => 1]);
+
+                $service->invalidateWeightBouts($program->bouts);
+                $service->weightByeBouts($program->bouts);
+            }
+
+            $service->resequence();
+
+            $competition->update(['status' => Competition::STATUS_PROGRAM_STARTED]);
+        });
+
+        return redirect()->back();
+    }
+
+    /**
+     * 取消鎖定整場賽事的過磅（所有項目）。
+     */
+    public function weightsCancelLockAll(Competition $competition)
+    {
+        $programs = $competition->programs()->get();
+
+        DB::transaction(function () use ($competition, $programs) {
+            $service = new BoutGenerationService($competition);
+
+            foreach ($programs as $program) {
+                $program->athletes()->update(['confirm' => 0]);
+
+                $program->bouts()->update(['status' => 0, 'winner' => 0, 'queue' => 1]);
+
+                $service->weightByeBouts($program->bouts);
+            }
+
+            $service->resequence();
+        });
+
         return redirect()->back();
     }
 
